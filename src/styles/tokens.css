@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* Colour — klientova paleta, prakticky nezmenená */
+  --color-bg: #ffffff;
+  --color-surface: #f4f5f6;
+  --color-surface-2: #26292c;
+  --color-text: #26292c;
+  --color-muted: #5c6166;
+  --color-accent: #f03314;
+  --color-accent-2: #1b1e20;
+  --color-on-accent: #ffffff;
+  --color-border: #e1e3e5;
+
+  /* Typography */
+  --font-display: 'Archivo', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.125rem;
+  --text-4xl: clamp(2.25rem, 4vw, 3.25rem);
+  --text-5xl: clamp(2.75rem, 5.25vw, 4.25rem);
+  --text-6xl: clamp(3rem, 6.5vw, 5.25rem);
+
+  --leading-tight: 1.04;
+  --leading-normal: 1.6;
+  --tracking-tight: -0.03em;
+
+  /* Spacing */
+  --space-unit: 0.25rem;
+  --section-padding-y: clamp(5rem, 9vw, 8.5rem);
+  --section-padding-y-sm: clamp(3rem, 5.5vw, 5rem);
+  --container-max: 78rem;
+  --container-padding-x: clamp(1.25rem, 4vw, 2.5rem);
+
+  /* Radius — ostrý základ */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  /* Motion */
+  --ease-house: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 0.4s;
+  --duration-base: 0.6s;
+  --duration-slow: 0.9s;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

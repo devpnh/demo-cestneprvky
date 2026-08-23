@@ -1,0 +1,54 @@
+{
+  "brand": {
+    "name": "Cestné prvky s.r.o.",
+    "tagline": "Dopravné stavby a bezpečnostné prvky pozemných komunikácií",
+    "logo": "assets/90-logo-cestne-prvky.png"
+  },
+  "nap": {
+    "businessName": "Cestné prvky s.r.o.",
+    "street": "Borová 3295/36",
+    "city": "Žilina",
+    "postalCode": "010 01",
+    "country": "Slovensko",
+    "phone": "+421 911 87 87 89",
+    "email": "info@cestneprvky.sk"
+  },
+  "contact": {
+    "phone": "+421 911 87 87 89",
+    "email": "info@cestneprvky.sk",
+    "ctaLabel": "Dohodnúť obhliadku a cenu"
+  },
+  "nav": [
+    {
+      "label": "Služby",
+      "href": "#sluzby"
+    },
+    {
+      "label": "Debarierizácia",
+      "href": "#debarierizacia"
+    },
+    {
+      "label": "Technológie",
+      "href": "#technologie"
+    },
+    {
+      "label": "Realizácie",
+      "href": "#realizacie"
+    },
+    {
+      "label": "Kontakt",
+      "href": "#kontakt"
+    }
+  ],
+  "social": {
+    "instagram": "",
+    "facebook": "",
+    "linkedin": ""
+  },
+  "seo": {
+    "title": "Cestné prvky s.r.o. — vodorovné dopravné značenie a debarierizácia, Žilina",
+    "description": "Značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie studeným plastom, lepené obrubníky, spomaľovače dopravy a protišmykové nátery. Cestné prvky s.r.o., Borová 3295/36, 010 01 Žilina.",
+    "ogImage": "assets/10-titulka_o_firme.jpg",
+    "noindex": true
+  }
+}

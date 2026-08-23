@@ -1,0 +1,113 @@
+/* tokens.css FIRST: it may start with an external @import (Google Fonts), and
+   an @import that isn't at the very top of the final bundle gets silently
+   dropped by the CSS bundler — the display font then falls back unnoticed. */
+@import "./tokens.css";
+@import "tailwindcss";
+
+/* Tailwind 4 is used utility-first with arbitrary values reading tokens
+   directly, e.g. bg-[var(--color-bg)] — there is no @theme mapping here on
+   purpose: tokens.css is the single file the generator rewrites, and a
+   duplicated theme block would be a second place brand values could drift. */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Lenis (src/lib/useLenis.js) drives smooth scroll; native smooth-scroll
+       would fight its manual rAF loop. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    margin: 0;
+  }
+
+  /* Tailwind's preflight (node_modules/tailwindcss/preflight.css) resets
+     every heading to `font-size: inherit; font-weight: inherit;` on
+     purpose, so it never fights a component's own text-size utility. But
+     that also means a plain <h2>Text</h2> with no explicit utility class
+     renders identical to surrounding body copy — the type scale in
+     tokens.css goes unused unless every single heading remembers to opt
+     back in. Give each level a real default off the scale here so a
+     forgotten utility degrades to "sized like its tag" instead of
+     "invisible into the paragraph"; an explicit text-[var(--text-*)]
+     utility on a given heading still wins — Tailwind v4 puts @layer
+     utilities after @layer base regardless of source order. */
+  h1 {
+    font-size: var(--text-5xl);
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: var(--text-4xl);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+  }
+
+  h5 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  h6 {
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+}
+
+/* Belt-and-suspenders: primitives already gate their own animation on
+   useReducedMotion.js, but this catches any CSS animation/transition that
+   isn't otherwise guarded. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
