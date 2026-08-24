@@ -16,6 +16,8 @@ export function useLenis() {
     const lenis = new Lenis({
       autoRaf: false,
     })
+    // Dialóg „Dohodnúť obhliadku“ potrebuje stop()/start() pri otvorení.
+    window.__lenis = lenis
 
     let frameId
     function raf(time) {
@@ -26,6 +28,7 @@ export function useLenis() {
 
     return () => {
       cancelAnimationFrame(frameId)
+      if (window.__lenis === lenis) window.__lenis = undefined
       lenis.destroy()
     }
   }, [reduced])

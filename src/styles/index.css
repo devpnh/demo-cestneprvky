@@ -111,3 +111,40 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Dialóg „Dohodnúť obhliadku“: fade + jemný scale na vnútornom wrapperi,
+   aby sa animácia nebila s pozicovaním obsahu. Reduced-motion blok vyššie
+   animáciu zastaví globálne. */
+@keyframes dialog-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.dialog-pop {
+  animation: dialog-pop var(--duration-fast) var(--ease-house);
+}
+
+/* Kruhový objazd v sekcii Služby: pomalá orbita + protismerná kompenzácia,
+   aby fotky ostali vzpriamené. Pauza cez .orbit-paused na rodičovi.
+   Pri prefers-reduced-motion animácie globálne stoja (blok vyššie). */
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-spin-rev {
+  to { transform: rotate(-360deg); }
+}
+.orbit-anim {
+  animation: orbit-spin 80s linear infinite;
+}
+.orbit-anim-rev {
+  animation: orbit-spin-rev 80s linear infinite;
+}
+.orbit-paused .orbit-anim,
+.orbit-paused .orbit-anim-rev {
+  animation-play-state: paused;
+}

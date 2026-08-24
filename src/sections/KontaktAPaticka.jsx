@@ -1,10 +1,10 @@
 import { Phone, Mail, MapPin, ArrowRight, ArrowUp } from 'lucide-react'
 import { Reveal, Stagger, StaggerItem, GradientMesh } from '../components/primitives/index.js'
+import { openObhliadka } from '../lib/obhliadka.js'
 
 const NAV = [
   { label: 'Služby', href: '#sluzby' },
   { label: 'Debarierizácia', href: '#debarierizacia' },
-  { label: 'Technológie', href: '#technologie' },
   { label: 'Realizácie', href: '#realizacie' },
   { label: 'Kontakt', href: '#kontakt' },
 ]
@@ -32,7 +32,7 @@ export default function KontaktAPaticka() {
 
       <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] pt-[var(--section-padding-y)]">
         <Reveal>
-          <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-accent)]">
+          <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] flex items-center gap-3 text-[rgba(255,255,255,0.72)] before:h-[2px] before:w-6 before:bg-[var(--color-accent)] before:content-['']">
             Kontakt
           </p>
           <h2 className="mt-5 max-w-[20ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)]">
@@ -95,14 +95,15 @@ export default function KontaktAPaticka() {
         </Stagger>
 
         <Reveal className="mt-12">
-          <a
-            href="mailto:info@cestneprvky.sk"
-            className="inline-flex min-h-[52px] items-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-semibold text-[var(--color-on-accent)] transition-transform duration-[var(--duration-fast)] hover:translate-x-[2px]"
+          <button
+            type="button"
+            onClick={() => openObhliadka()}
+            className="inline-flex min-h-[52px] items-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-transform duration-[var(--duration-fast)] hover:translate-x-[2px]"
             style={{ borderRadius: 'var(--radius-sm)' }}
           >
             Dohodnúť obhliadku a cenu
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </a>
+          </button>
         </Reveal>
       </div>
 
@@ -111,12 +112,12 @@ export default function KontaktAPaticka() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5">
               <img
-                src={`${import.meta.env.BASE_URL}assets/90-logo-cestne-prvky.png`}
+                src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
                 width={145}
                 height={86}
                 alt={'Cestné prvky s.r.o.'}
                 loading="lazy"
-                className="h-12 w-auto bg-[var(--color-bg)] p-1"
+                className="h-12 w-auto"
                 style={{ borderRadius: 'var(--radius-sm)' }}
               />
               <p className="mt-5 max-w-[44ch] font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-70">

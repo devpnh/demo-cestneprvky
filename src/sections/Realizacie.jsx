@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { Reveal, Stagger, StaggerItem } from '../components/primitives/index.js'
+
+/** Naraz viditeľné realizácie; zvyšok odkryje tlačidlo (fotky sa dovtedy nenačítavajú). */
+const VIDITELNYCH = 6
 
 const REALIZACIE = [
   {
@@ -6,8 +10,8 @@ const REALIZACIE = [
     width: 1440,
     height: 800,
     typ: 'Značenie pre nevidiacich a slabozrakých',
-    miesto: 'Zubáčka',
-    alt: 'Značenie pre nevidiacich a slabozrakých na priechode pre chodcov, Zubáčka',
+    miesto: 'Zubačka',
+    alt: 'Značenie pre nevidiacich a slabozrakých na priechode pre chodcov, Zubačka',
   },
   {
     src: '01-Medeny_Hamor_1-600x390.jpg',
@@ -61,8 +65,8 @@ const REALIZACIE = [
     src: '07-Braill-600x390.jpg',
     width: 600,
     height: 390,
-    typ: 'Štítky – Braillovo písmo, gravírovanie, hmatové mapy',
-    miesto: '[DOPLNIŤ]',
+    typ: 'Štítky: Braillovo písmo, gravírovanie, hmatové mapy',
+    miesto: 'Produktová fotografia',
     alt: 'Orientačný štítok s Braillovým písmom',
   },
   {
@@ -76,6 +80,8 @@ const REALIZACIE = [
 ]
 
 export default function Realizacie() {
+  const [vsetky, setVsetky] = useState(false)
+  const zobrazene = vsetky ? REALIZACIE : REALIZACIE.slice(0, VIDITELNYCH)
   return (
     <section
       id="realizacie"
@@ -106,7 +112,7 @@ export default function Realizacie() {
           staggerChildren={0.06}
           className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3"
         >
-          {REALIZACIE.map((polozka) => (
+          {zobrazene.map((polozka) => (
             <StaggerItem key={polozka.src}>
               <figure>
                 <img
@@ -122,14 +128,29 @@ export default function Realizacie() {
                   <span className="block max-w-[30ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium leading-[var(--leading-normal)] text-[var(--color-text)]">
                     {polozka.typ}
                   </span>
-                  <span className="mt-1 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                    {polozka.miesto}
-                  </span>
+                  {polozka.miesto && (
+                    <span className="mt-1 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
+                      {polozka.miesto}
+                    </span>
+                  )}
                 </figcaption>
               </figure>
             </StaggerItem>
           ))}
         </Stagger>
+
+        {!vsetky && REALIZACIE.length > VIDITELNYCH && (
+          <Reveal className="mt-14 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVsetky(true)}
+              className="inline-flex min-h-[52px] items-center gap-3 border border-[var(--color-text)] px-7 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              style={{ borderRadius: 'var(--radius-sm)' }}
+            >
+              {`Zobraziť všetky realizácie (${REALIZACIE.length})`}
+            </button>
+          </Reveal>
+        )}
       </div>
     </section>
   )

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { motion, useTransform } from 'motion/react'
 import { StickySection } from '../components/primitives/index.js'
 
@@ -36,14 +37,25 @@ const PRVKY = [
   },
 ]
 
+/**
+ * Vstupný rozsah musí byť prísne rastúci a ležať v [0, 1]: motion viaže
+ * scroll-linked MotionValue na WAAPI animáciu so ScrollTimeline a rozsah
+ * použije ako keyframe offsety. Hodnota mimo [0, 1] alebo neklesajúca
+ * dvojica zhodí celý React strom (prázdna stránka).
+ */
 function useFaza(progress, index, total, min) {
   const start = index / total
   const end = (index + 1) / total
-  const p0 = index === 0 ? start - 0.001 : start - 0.06
-  const p1 = index === 0 ? start : start + 0.05
-  const p2 = index === total - 1 ? end : end - 0.05
-  const p3 = index === total - 1 ? end + 0.001 : end + 0.06
-  return useTransform(progress, [p0, p1, p2, p3], [min, 1, 1, min])
+  const fade = Math.min(0.05, 0.5 / total)
+  const p0 = index === 0 ? 0 : start - fade
+  const p1 = index === 0 ? 0.001 : start + fade
+  const p2 = index === total - 1 ? 0.999 : end - fade
+  const p3 = index === total - 1 ? 1 : end + fade
+  // Prvý záber je viditeľný už keď sekcia prichádza zdola (progress 0),
+  // posledný ostáva viditeľný pri odchode (progress 1): box nikdy nie je prázdny.
+  const vstup = index === 0 ? 1 : min
+  const vystup = index === total - 1 ? 1 : min
+  return useTransform(progress, [p0, p1, p2, p3], [vstup, 1, 1, vystup])
 }
 
 function FotoVrstva({ progress, index, total, prvok }) {
@@ -85,7 +97,7 @@ function Panel({ progress }) {
       <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)]">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-6">
-            <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-accent)]">
+            <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] flex items-center gap-3 text-[rgba(255,255,255,0.72)] before:h-[2px] before:w-6 before:bg-[var(--color-accent)] before:content-['']">
               Debarierizácia
             </p>
 
@@ -170,14 +182,108 @@ function Panel({ progress }) {
   )
 }
 
+/**
+ * Pod 1024 px sa scroll-scrub nemontuje vôbec: 220vh pin s overflow hidden
+ * orezával obsah (H2 nebolo vidieť). Mobil = obyčajná tečúca sekcia so
+ * statickou fotkou a plnym zoznamom prvkov; desktop presne ako doteraz.
+ */
+function useJeDesktop() {
+  const [desktop, setDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const on = (e) => setDesktop(e.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return desktop
+}
+
+function MobilnyPanel() {
+  const prvy = PRVKY[0]
+  return (
+    <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y)]">
+      <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] flex items-center gap-3 text-[rgba(255,255,255,0.72)] before:h-[2px] before:w-6 before:bg-[var(--color-accent)] before:content-['']">
+        Debarierizácia
+      </p>
+
+      <h2 className="mt-5 max-w-[22ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)]">
+        Bezbariérové prvky bez zásahu do pôvodných konštrukcií
+      </h2>
+
+      <p className="mt-7 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
+        {
+          'Štruktúrované vodorovné značenie a piktogramy realizujeme metódou stierkovania studeným plastom Kaltplastik na rôzne povrchy. Schéma, vzor, farebný odtieň a rozloženie prvkov prispôsobíme požiadavke objednávateľa. Druhou metódou je inštalácia odolných mosadzných a nerezových indikátorov, ktoré nevidiacich a slabozrakých informujú a varujú pred prekážkou alebo nebezpečenstvom.'
+        }
+      </p>
+
+      <p className="mt-7 border-l-2 border-[var(--color-accent)] pl-5 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-90">
+        {
+          'Technológia spĺňa metodiku navrhovania debarierizačných opatrení pre osoby s obmedzenou schopnosťou pohybu a orientácie na pozemných komunikáciách v zmysle vyhlášky MŽP SR č. 532/2002 Z. z. a vyhlášky MV SR č. 9/2009 Z. z.'
+        }
+      </p>
+
+      <p className="mt-7 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-70">
+        {
+          'Konzultácie k architektonickej prístupnosti, stanoviská k projektovej dokumentácii a posúdenie prvkov na mieste realizácie poskytuje '
+        }
+        <a
+          href="https://architektonickebariery.sk/"
+          target="_blank"
+          rel="noreferrer"
+          className="font-medium text-[var(--color-bg)] underline decoration-[var(--color-accent)] decoration-2 underline-offset-4 opacity-100"
+        >
+          {'Únia nevidiacich a slabozrakých Slovenska'}
+        </a>
+        {'.'}
+      </p>
+
+      <div
+        className="relative mt-10 aspect-[4/3] w-full overflow-hidden bg-[var(--color-accent-2)]"
+        style={{ borderRadius: 'var(--radius-sm)' }}
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}assets/${prvy.src}`}
+          width={prvy.width}
+          height={prvy.height}
+          alt={prvy.alt}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </div>
+
+      <ul className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+        {PRVKY.map((prvok) => (
+          <li
+            key={prvok.label}
+            className="flex items-baseline gap-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] text-[var(--color-bg)]"
+          >
+            <span
+              aria-hidden="true"
+              className="inline-block h-[6px] w-[6px] shrink-0 translate-y-[-2px] bg-[var(--color-accent)]"
+            />
+            <span>{prvok.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export default function Debarierizacia() {
+  const desktop = useJeDesktop()
   return (
     <section id="debarierizacia" className="bg-[var(--color-surface-2)]">
-      <StickySection
-        heightVh={220}
-        className="bg-[var(--color-surface-2)]"
-        render={(scrollYProgress) => <Panel progress={scrollYProgress} />}
-      />
+      {desktop ? (
+        <StickySection
+          heightVh={220}
+          className="bg-[var(--color-surface-2)]"
+          render={(scrollYProgress) => <Panel progress={scrollYProgress} />}
+        />
+      ) : (
+        <MobilnyPanel />
+      )}
     </section>
   )
 }

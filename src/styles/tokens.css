@@ -53,7 +53,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Lenis rieši scroll; smooth sa s ním bije */
 }
 
 body {
