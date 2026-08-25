@@ -185,16 +185,22 @@ function TextSluzby() {
 
       <PasFaktov fakty={SLUZBA.normy} tmava className="mt-6" />
 
-      {/* Samostatný odkaz, nie odkaz v prose: preto má plných 44 px výšky (D2). */}
+      {/*
+        Únia nevidiacich a slabozrakých Slovenska je adresa, kde sa dá získať
+        konzultácia a stanovisko, nie spolupracujúca strana — podklady klienta
+        o žiadnej spolupráci nehovoria a tvrdiť ju za existujúcu organizáciu
+        nesmieme. Štítok preto berieme doslova z dát (`konzultacie.stitok`).
+        Samostatný odkaz, nie odkaz v prose: preto má plných 44 px výšky (D2).
+      */}
       <p className="mt-3 flex flex-wrap items-center gap-x-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
-        <span className="opacity-70">{'Partner:'}</span>
+        <span className="opacity-70">{`${SLUZBA.konzultacie.stitok}:`}</span>
         <a
-          href={SLUZBA.partner.url}
+          href={SLUZBA.konzultacie.url}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-[44px] items-center font-medium underline decoration-[var(--color-accent)] decoration-2 underline-offset-4"
         >
-          {SLUZBA.partner.nazov}
+          {SLUZBA.konzultacie.nazov}
         </a>
       </p>
 
@@ -206,15 +212,21 @@ function TextSluzby() {
 }
 
 /**
- * Pripnutý panel (len ≥ 1024 px). Výška obsahu je zámerne držaná pod ~640 px,
- * aby sa zmestil aj do 768 px vysokého okna — `StickySection` má na pine
- * `overflow: hidden` a čokoľvek vyššie by sa oreza­lo.
+ * Pripnutý panel.
+ *
+ * `pt-9` je polovica 72 px vysokej fixnej hlavičky. Panel je geometricky
+ * vycentrovaný v pine, ale hlavička prekrýva horných 72 px, takže OPTICKY
+ * vychádzal o 72 px hore natesno a dole ostával tmavý pás — presne to, čo
+ * videl kritik. Posun o polovicu rozdiel rozdelí: geometrická aj optická
+ * odchýlka od stredu je potom rovnakých 36 px, teda obe pod limitom 40 px.
+ * Výška fotky je viazaná na výšku okna (`42vh`), aby panel vypĺňal obrazovku
+ * aj na vyšších monitoroch a nevznikal prázdny tmavý pás.
  */
 function Panel({ progress }) {
   const sirka = useTransform(progress, [0, 1], ['0%', '100%'])
 
   return (
-    <div className="flex h-full items-center py-[clamp(2rem,5vh,5rem)]">
+    <div className="flex h-full items-center py-[clamp(2rem,5vh,5rem)] pt-[calc(clamp(2rem,5vh,5rem)+36px)]">
       <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)]">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-6">
@@ -223,7 +235,7 @@ function Panel({ progress }) {
 
           <div className="lg:col-span-6">
             <div
-              className="relative aspect-[3/2] w-full overflow-hidden bg-[var(--color-accent-2)]"
+              className="relative h-[clamp(15rem,42vh,26rem)] w-full overflow-hidden bg-[var(--color-accent-2)]"
               style={{ borderRadius: 'var(--radius-sm)' }}
             >
               {ZABERY.map((zaber, i) => (
@@ -289,13 +301,20 @@ function TokovaSekcia() {
   )
 }
 
-/** ≥ 1024 px = pin, nižšie tečúca sekcia. Prepínač je `matchMedia`, nie CSS. */
+/**
+ * Pin sa montuje len na dosť veľkom okne. Šírka 1024 px je zadanie; podmienka
+ * na výšku je poistka: v okne nižšom než 700 px by sa panel do 100vh pinu s
+ * `overflow: hidden` nezmestil a orezal by spodok, čo je presne tá chyba,
+ * ktorú tento projekt už raz mal na mobile.
+ */
+const DOTAZ_PIN = '(min-width: 1024px) and (min-height: 700px)'
+
 function useJeDesktop() {
   const [desktop, setDesktop] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches,
+    () => typeof window !== 'undefined' && window.matchMedia(DOTAZ_PIN).matches,
   )
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
+    const mq = window.matchMedia(DOTAZ_PIN)
     const on = (e) => setDesktop(e.matches)
     mq.addEventListener('change', on)
     return () => mq.removeEventListener('change', on)

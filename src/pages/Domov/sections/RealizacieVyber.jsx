@@ -1,13 +1,13 @@
 import { Sekcia, SekciaHlavicka, Fotka, Tlacidlo } from '../../../components/kit/index.js'
 import { Stagger, StaggerItem, Reveal } from '../../../components/primitives/index.js'
 import { GALERIA } from '../../../content/realizacie.js'
+import { castiPopisu } from '../../Realizacie/skupiny.js'
 
 /**
  * Šesť záberov na Domov. Vyberáme podľa `id`, nie podľa poradia v poli, aby
  * doplnenie fotky do `realizacie.js` výber nepremiešalo. Kritérium: šesť
  * rôznych typov prvkov na šiestich rôznych miestach a všetky s
- * `isteMiesto: true`, takže pod každou fotkou stojí overiteľné miesto a nie
- * náhrada „Realizácia klienta“.
+ * `isteMiesto: true`, takže pod každou fotkou stojí overiteľné miesto.
  */
 const VYBER_ID = [
   'zubacka-nastupiste', // Vodiaca línia · Zubačka
@@ -20,8 +20,14 @@ const VYBER_ID = [
 
 const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Boolean)
 
-/** Popis fotky je fakt: typ prvku a miesto len tam, kde ho vieme doložiť. */
-const popis = (r) => (r.isteMiesto ? `${r.prvok} · ${r.miesto}` : r.prvok)
+/**
+ * Popis fotky je fakt. Pravidlo, čo sa smie napísať pod ktorú fotku, je jedno
+ * pre celý web a býva v `Realizacie/skupiny.js`; teaser z neho berie prvú časť
+ * (doložené miesto, inak prostredie, pri produktovej fotke jej pomenovanie),
+ * aby sa popisky Domova a galérie nikdy nerozišli. Vo výbere pre Domov sú
+ * beztak všetky miesta doložené.
+ */
+const popis = (r) => `${r.prvok} · ${castiPopisu(r)[0]}`
 
 export default function RealizacieVyber() {
   return (
@@ -29,7 +35,7 @@ export default function RealizacieVyber() {
       <SekciaHlavicka
         stitok="Realizácie"
         nadpis="Osadené prvky na konkrétnych miestach"
-        perex="Fotografie sú z vlastných realizácií. Ku každej uvádzame typ prvku a miesto, aby sa dala porovnať s vaším zadaním."
+        perex="Ku každej fotografii uvádzame typ prvku a miesto, aby sa dala porovnať s vaším zadaním."
       />
 
       <Stagger

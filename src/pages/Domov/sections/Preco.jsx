@@ -23,7 +23,7 @@ import { FIRMA } from '../../../content/firma.js'
 export default function Preco() {
   return (
     <Sekcia id="preco" pasmo="siva">
-      <SekciaHlavicka stitok="Prečo Cestné prvky" nadpis={FIRMA.claim} perex={FIRMA.uvod[2]} />
+      <SekciaHlavicka stitok="Prečo Cestné prvky" nadpis={FIRMA.claim} perex={FIRMA.technologie.uvod} />
 
       <Stagger
         staggerChildren={0.07}

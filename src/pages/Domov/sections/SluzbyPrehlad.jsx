@@ -7,6 +7,7 @@ import { Reveal } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { SKUPINY, SLUZBY, sluzbyPodlaSkupiny, skupinaPodlaId } from '../../../content/sluzby.js'
 import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
+import { altFotky } from '../../Sluzby/fotky.js'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -55,10 +56,14 @@ export default function SluzbyPrehlad() {
 
   return (
     <Sekcia id="sluzby" pasmo="biela">
+      {/* Perex má na `lg` vlastné miesto v ľavom stĺpci pod nadpisom: ľavý
+          stĺpec bol o 193 px kratší než objazd a nad detailom aktívnej služby
+          zívala prázdna plocha. Na užších obrazovkách ľavý stĺpec neexistuje,
+          tam ostáva perex v hlavičke sekcie. */}
       <SekciaHlavicka
         stitok="Služby"
         nadpis="Čo realizujeme na pozemných komunikáciách"
-        perex={PEREX}
+        perex={siroke ? null : PEREX}
         akcia={
           <Tlacidlo variant="tichy" to="/sluzby">
             Všetkých deväť služieb
@@ -67,9 +72,13 @@ export default function SluzbyPrehlad() {
       />
 
       {siroke ? (
-        <div className="mt-10 grid grid-cols-12 items-start gap-16">
-          <Reveal className="col-span-5 self-center">
-            <div aria-hidden="true" className="h-[2px] w-full bg-[var(--color-border)]">
+        <div className="mt-12 grid grid-cols-12 items-start gap-16">
+          <Reveal className="col-span-5">
+            <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+              {PEREX}
+            </p>
+
+            <div aria-hidden="true" className="mt-10 h-[2px] w-full bg-[var(--color-border)]">
               <div
                 className={`h-full bg-[var(--color-accent)] ${
                   reduced ? '' : 'transition-[width] duration-[var(--duration-fast)]'
@@ -86,7 +95,7 @@ export default function SluzbyPrehlad() {
               // Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
               // názve tak nevznikne diera medzi titulom a textom, a poloha
               // objazdu ostáva pri prepínaní služieb rovnaká (nález z behu v4).
-              className="mt-5 min-h-[15rem]"
+              className="mt-5 min-h-[13rem]"
             >
               <MonoStitok sCiarkou={false}>{skupinaAktivnej?.nazov}</MonoStitok>
               <h3 className="mt-3 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
@@ -117,8 +126,8 @@ export default function SluzbyPrehlad() {
               active={active}
               onActive={vyber}
               reduced={reduced}
-              velkost={600}
-              uzol={56}
+              velkost={520}
+              uzol={50}
             />
           </Reveal>
         </div>
@@ -138,10 +147,10 @@ export default function SluzbyPrehlad() {
                         src={`${BASE}assets/${s.dlazdica.src}`}
                         width={s.dlazdica.w}
                         height={s.dlazdica.h}
-                        alt={s.dlazdica.alt}
+                        alt={altFotky(s.dlazdica)}
                         loading="lazy"
                         decoding="async"
-                        className="h-[72px] w-[72px] shrink-0 object-cover"
+                        className="h-[64px] w-[96px] shrink-0 object-cover"
                         style={{ borderRadius: 'var(--radius-sm)' }}
                       />
                       <div className="min-w-0 flex-1">

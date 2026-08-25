@@ -7,7 +7,9 @@
  * vyžiadame v handoveri) a prázdna fráza o technológiách (nahradená konkrétnymi
  * postupmi: stierkovanie, lepenie obrubníkov, osádzanie retardérov).
  */
-export const FIRMA = {
+
+import { sadzbaHlboko } from '../lib/sadzba.js'
+export const FIRMA = sadzbaHlboko({
   nazov: 'Cestné prvky s.r.o.',
   sidlo: 'Žilina',
   rokZalozenia: 2012,
@@ -16,8 +18,23 @@ export const FIRMA = {
   uvod: [
     'Firma Cestné prvky s.r.o. bola založená v roku 2012. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku.',
     'Osádzame značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a spomaľovače dopravy. Pracujeme na cestách, chodníkoch, priechodoch, parkoviskách aj vo vnútorných priestoroch.',
-    'V dopravných stavbách používame technológie, ktoré nevyžadujú zásah do pôvodných konštrukcií: stierkovanie studeným plastom, lepenie nízkych obrubníkov akrylovým tmelom a osádzanie retardérov DEBUZ® na dvojzložkové lepidlo. Materiály a technológie odoberáme od európskych výrobcov.',
   ],
+
+  /**
+   * Tá istá veta ako predtým v `uvod[2]`, len rozobraná na časti.
+   * Dôvod je čisto sadzobný: je to výpočet troch technológií a ako súvislý
+   * odsek sa vysádzal do štvorriadkovej sivej steny s rozstrapkaným pravým
+   * okrajom. Výpočet patrí do zoznamu, nie do vety s dvojbodkou.
+   */
+  technologie: {
+    uvod: 'V dopravných stavbách používame technológie, ktoré nevyžadujú zásah do pôvodných konštrukcií.',
+    polozky: [
+      'Stierkovanie studeným plastom',
+      'Lepenie nízkych obrubníkov akrylovým tmelom',
+      'Osádzanie retardérov DEBUZ® na dvojzložkové lepidlo',
+    ],
+    zaver: 'Materiály a technológie odoberáme od európskych výrobcov.',
+  },
 
   pristup: [
     {
@@ -111,7 +128,7 @@ export const FIRMA = {
       poznamka: '[DOPLNÍ KLIENT: odkaz na pôvodný článok a názov média, ktoré ho vydalo.]',
     },
   ],
-}
+})
 
 // Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.
 // Odstrániť pri záverečnej integrácii kola 3.
@@ -125,7 +142,7 @@ FIRMA.partner = FIRMA.konzultacie
  * naozaj tvrdí (lepené obrubníky, stierkovanie, retardéry na lepidlo).
  * Celý blok je v `poznamky/HANDOVER.md` na potvrdenie klientom.
  */
-export const PROCES = [
+export const PROCES = sadzbaHlboko([
   {
     id: 'dopyt',
     nazov: 'Dopyt a obhliadka',
@@ -150,6 +167,6 @@ export const PROCES = [
     popis:
       'Úsek odovzdáme do užívania. Lepené obrubníky majú po 30 minútach 100 % pevnosti, takže sa dá hneď pokračovať v ďalších stavebných prácach.',
   },
-]
+])
 
 /** Kontaktné údaje sú v `src/content/global.json` (NAP), tu ich neduplikujeme. */

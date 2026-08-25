@@ -44,10 +44,6 @@ function rozoberZastupnyText(text) {
  * „Šetríme váš čas aj peniaze“, ale na webe smie zaznieť práve raz a to na
  * Domove v sekcii Prečo.
  */
-function rozdelPrvuVetu(odsek) {
-  const koniec = odsek.indexOf('. ')
-  return koniec < 0 ? [odsek, ''] : [odsek.slice(0, koniec + 1), odsek.slice(koniec + 2)]
-}
 
 /**
  * O firme.
@@ -67,8 +63,6 @@ function rozdelPrvuVetu(odsek) {
  */
 export default function OFirme() {
   const [uvodPerex, ...uvodOdseky] = FIRMA.uvod
-  const [vyhlasenie, zvysokPrvehoOdseku] = rozdelPrvuVetu(uvodOdseky[0] || '')
-  const odsekyTela = [zvysokPrvehoOdseku, ...uvodOdseky.slice(1)].filter(Boolean)
 
   return (
     <>
@@ -83,40 +77,66 @@ export default function OFirme() {
 
       {/* Firma — úvodné odseky a claim ako výrazné vyhlásenie, vpravo fotka. */}
       <Sekcia id="firma" pasmo="siva">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
-          <div className="lg:col-span-7">
+        {/* Text vľavo, fotka vpravo, obe centrované na spoločnú os: bloky majú
+            rôznu výšku a zarovnanie hore nechávalo pod fotkou 180 px prázdna.
+            Textový stĺpec je zúžený na 46ch, aby mal riadok čitateľnú dĺžku a
+            pravý okraj netrhalo do strapcov. */}
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <div className="lg:col-span-6">
             <Reveal>
               <MonoStitok>Firma</MonoStitok>
-              {/* Vyhlásenie je od kola 3 dlhšie (119 znakov), preto o stupeň
-                  menší rez a širší blok: v `--text-3xl` na 24ch by malo päť
-                  riadkov a preválcovalo by odseky pod sebou. */}
-              <p className="mt-5 max-w-[34ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.25] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                {vyhlasenie}
-              </p>
+              <h2 className="mt-5 max-w-[14ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                Čo osádzame
+              </h2>
             </Reveal>
 
-            <Reveal className="mt-9">
-              {odsekyTela.map((odsek, i) => (
+            <Reveal className="mt-8">
+              {uvodOdseky.map((odsek, i) => (
                 <p
                   key={odsek}
-                  className={`max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)] ${
-                    i > 0 ? 'mt-6' : ''
+                  className={`max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)] ${
+                    i > 0 ? 'mt-5' : ''
                   }`}
                 >
                   {odsek}
                 </p>
               ))}
             </Reveal>
+
+            {/* Výpočet technológií je zoznam, nie veta s dvojbodkou. Ako súvislý
+                odsek to bola štvorriadková stena s rozstrapkaným okrajom. */}
+            <Reveal className="mt-9">
+              <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                {FIRMA.technologie.uvod}
+              </p>
+              <ul className="mt-5 max-w-[46ch]">
+                {FIRMA.technologie.polozky.map((polozka, i) => (
+                  <li
+                    key={polozka}
+                    // Posledná položka má aj spodnú linku, inak blok zoznamu
+                    // opticky nekončí a záverečná veta z neho visí.
+                    className={`border-t border-[var(--color-border)] py-3 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-text)] ${
+                      i === FIRMA.technologie.polozky.length - 1 ? 'border-b' : ''
+                    }`}
+                  >
+                    {polozka}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+                {FIRMA.technologie.zaver}
+              </p>
+            </Reveal>
           </div>
 
-          <Reveal className="lg:col-span-5">
+          <Reveal className="lg:col-span-5 lg:col-start-8">
             <Fotka
               src="10-titulka_o_firme.jpg"
               w={1000}
               h={600}
-              pomer="5/3"
+              pomer="4/5"
               alt="Mosadzné hmatové indikátory osadené v dlažbe chodníka"
-              popis="Hmatové indikátory · značenie pre nevidiacich a slabozrakých"
+              popis="Hmatové indikátory v dlažbe chodníka"
             />
           </Reveal>
         </div>

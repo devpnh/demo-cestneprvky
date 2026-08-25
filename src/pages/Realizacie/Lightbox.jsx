@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { X, ArrowLeft, ArrowRight } from 'lucide-react'
 import { sluzbaPodlaSlugu } from '../../content/sluzby.js'
+import { castiPopisu } from './skupiny.js'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -98,7 +99,7 @@ export default function Lightbox({ polozky, index, onZavri, onPrepni }) {
       data-lightbox
       role="dialog"
       aria-modal="true"
-      aria-label={`Realizácia: ${polozka.prvok}`}
+      aria-label={`Fotografia: ${polozka.prvok}`}
       className="fixed inset-0 z-[80] flex flex-col bg-[var(--color-surface-2)] text-[var(--color-bg)]"
     >
       <div className="flex items-center justify-between gap-4 px-[var(--container-padding-x)] py-4">
@@ -160,12 +161,18 @@ export default function Lightbox({ polozky, index, onZavri, onPrepni }) {
           <p className="font-[family-name:var(--font-body)] text-[length:var(--text-lg)] font-medium leading-[var(--leading-normal)] text-[var(--color-bg)]">
             {polozka.prvok}
           </p>
+          {/* Pravidlo popisku je v `skupiny.js`, spoločné s mriežkou aj s Domovom. */}
           <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.72)]">
-            {polozka.miesto}
-            <span aria-hidden="true" className="mx-3 text-[rgba(255,255,255,0.72)]">
-              ·
-            </span>
-            {polozka.prostredie}
+            {castiPopisu(polozka).map((cast, j) => (
+              <span key={cast}>
+                {j > 0 ? (
+                  <span aria-hidden="true" className="mx-3 text-[rgba(255,255,255,0.72)]">
+                    ·
+                  </span>
+                ) : null}
+                {cast}
+              </span>
+            ))}
           </p>
           {/* Typ prvku a názov služby sú pri niektorých fotkách tá istá veta
               (napr. „Vodorovné dopravné značenie“), preto má odkaz mono štítok

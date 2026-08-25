@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { altFotky } from './fotky.js'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -80,7 +81,7 @@ export default function KruhovyObjazd({
             src={`${BASE}assets/${s.dlazdica.src}`}
             width={s.dlazdica.w}
             height={s.dlazdica.h}
-            alt={i === active ? s.dlazdica.alt : ''}
+            alt={i === active ? altFotky(s.dlazdica) : ''}
             aria-hidden={i === active ? undefined : 'true'}
             loading="lazy"
             decoding="async"
@@ -127,7 +128,7 @@ export default function KruhovyObjazd({
                       src={`${BASE}assets/${s.dlazdica.src}`}
                       width={s.dlazdica.w}
                       height={s.dlazdica.h}
-                      alt={s.dlazdica.alt}
+                      alt={altFotky(s.dlazdica)}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover"

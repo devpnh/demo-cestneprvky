@@ -20,7 +20,9 @@
  * ako dlaždicu služby. Do galérie ide `GALERIA` (bez duplikátov), `REALIZACIE`
  * ostáva úplným inventárom fotiek.
  */
-export const REALIZACIE = [
+
+import { sadzbaHlboko } from '../lib/sadzba.js'
+export const REALIZACIE = sadzbaHlboko([
   {
     id: 'zubacka-nastupiste-dlazdica',
     src: '00-ZubaC48Dka-600x390.jpg',
@@ -450,7 +452,7 @@ export const REALIZACIE = [
     prostredie: 'Interiér',
     sluzba: 'znacenie-pre-nevidiacich',
   },
-]
+])
 
 /** Galéria bez malých orezov, ktoré duplikujú väčšiu fotku tej istej scény. */
 /**
@@ -460,12 +462,12 @@ export const REALIZACIE = [
  * → `references`. Skratky, pri ktorých si nie sme istí plným názvom mesta
  * (MT, TN, BB, PD, TT), tu zámerne nie sú.
  */
-export const MIESTA_REALIZACII = [
+export const MIESTA_REALIZACII = sadzbaHlboko([
   'Bratislava', 'Bratislava Nivy', 'Bratislava Bosákova', 'Devínska Nová Ves',
   'Podunajské Biskupice', 'Most pri Bratislave', 'Blatná na Ostrove', 'Svederník',
   'Milochov', 'Zubačka', 'Slanická osada', 'Kysucké Nové Mesto', 'Medený Hámor',
   'Fiľakovo', 'Tornaľa',
-]
+])
 
 export const GALERIA = REALIZACIE.filter((r) => !r.duplikatOf)
 

@@ -6,10 +6,12 @@
  * `title` je do 70 znakov, `description` do 160 znakov (STANDARDY F4).
  * Stránky služieb dedia SEO z `SLUZBY[].seo`, aby texty žili na jednom mieste.
  */
+
+import { sadzbaHlboko } from '../lib/sadzba.js'
 import { SLUZBY } from './sluzby.js'
 
 /** Statické routy. Stránky služieb sa dopĺňajú nižšie zo `SLUZBY`. */
-export const ROUTY = [
+export const ROUTY = sadzbaHlboko([
   {
     path: '/',
     id: 'domov',
@@ -55,7 +57,7 @@ export const ROUTY = [
     description:
       'Napíšte nám typ prvku, miesto a rozsah. Telefón +421 911 87 87 89, info@cestneprvky.sk, Borová 3295/36, 010 01 Žilina.',
   },
-]
+])
 
 /** Stránky služieb: `/sluzby/<slug>`, poradie z navigácie pôvodného webu. */
 export const ROUTY_SLUZIEB = SLUZBY.map((s) => ({

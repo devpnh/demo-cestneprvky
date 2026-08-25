@@ -17,6 +17,8 @@ import { REALIZACIE, realizaciePodlaSluzby } from '../../content/realizacie.js'
 import { FIRMA, PROCES } from '../../content/firma.js'
 import KartaSluzby from './KartaSluzby.jsx'
 import TabulkaDebuz from './TabulkaDebuz.jsx'
+import ZoznamPodkladov, { HlavickaPodkladov } from './Podklady.jsx'
+import { altFotky, maxSirka, uvodnaFotkaSluzby } from './fotky.js'
 
 /**
  * Malý orez a veľká fotka tej istej scény sú v dátach previazané cez
@@ -27,8 +29,7 @@ const KLUC_SCENY = new Map(REALIZACIE.map((r) => [r.src, r.duplikatOf || r.src])
 const scena = (src) => KLUC_SCENY.get(src) || src
 
 /** Fotky služby a jej realizácie bez duplicít a bez tej, ktorá je už v úvode. */
-function galeriaSluzby(sluzba, maxPocet = 6) {
-  const uvodna = sluzba.fotky?.[0]
+function galeriaSluzby(sluzba, uvodna, maxPocet = 6) {
   const videne = new Set(uvodna ? [scena(uvodna.src)] : [])
   const vysledok = []
   const pridaj = (f) => {
@@ -37,7 +38,7 @@ function galeriaSluzby(sluzba, maxPocet = 6) {
     videne.add(kluc)
     vysledok.push(f)
   }
-  ;(sluzba.fotky || []).slice(1).forEach(pridaj)
+  ;(sluzba.fotky || []).forEach(pridaj)
   realizaciePodlaSluzby(sluzba.slug).forEach(pridaj)
   return vysledok.slice(0, maxPocet)
 }
@@ -46,41 +47,17 @@ function galeriaSluzby(sluzba, maxPocet = 6) {
 const popisFotky = (f) => (f.prvok ? `${f.prvok} · ${f.miesto}` : f.miesto)
 
 /**
- * Fotku nikdy neroztiahneme viac ako 1,4× nad jej skutočnú šírku. Podklady od
- * klienta majú od 416 do 1600 px a mäkká, prefúknutá fotka na celý stĺpec
- * vyzerá lacno; radšej ostane menšia (STANDARDY F2: rozlíšenie sa neznižuje
- * a ani nepredstiera).
- */
-const maxSirka = (f) => `${Math.round(f.w * 1.4)}px`
-
-/** Rámovaná mono poznámka o tom, čo od klienta ešte potrebujeme. */
-function DoplniKlient({ polozky, className = '' }) {
-  return (
-    <div
-      className={`border border-[var(--color-border)] p-5 sm:p-6 ${className}`}
-      style={{ borderRadius: 'var(--radius-md)' }}
-    >
-      <MonoStitok>Doplní klient</MonoStitok>
-      <ul className="mt-4">
-        {polozky.map((c) => (
-          <li
-            key={c.slice(0, 40)}
-            className="border-t border-[var(--color-border)] py-3 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] leading-[var(--leading-normal)] text-[var(--color-muted)] first:border-t-0 first:pt-1"
-          >
-            {c}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-/**
  * Šablóna deviatich stránok služieb. Bohatosť stránky určujú dáta, nie
  * šablóna: služby s plným textom z pôvodného webu majú odseky, zoznamy,
- * výhody, technickú tabuľku aj návod, ostatné majú hlavičku, fotku, blok
- * „Doplní klient“, súvisiace služby a CTA. Prázdne miesto sa nevypĺňa vatou
- * a nedopĺňa sa žiadny parameter, materiál ani norma, ktoré v dátach nie sú.
+ * výhody, technickú tabuľku aj návod. Nedopĺňa sa žiadny parameter, materiál
+ * ani norma, ktoré v dátach nie sú.
+ *
+ * Služby bez plného textu majú vlastnú kompozíciu úvodného pásma. Kým mali tú
+ * istú ako bohaté (text vľavo, fotka vpravo), ostal z pásma na `/sluzby/
+ * cyklotrasy` prázdny stĺpec vysoký 398 px a celá stránka pôsobila ako
+ * nedorobená šablóna. Teraz je úvod jeden riadok: široký záber 21:9 vľavo,
+ * zoznam „Čo k tejto službe dopĺňa klient“ vpravo. Prázdne miesto sa
+ * nevypĺňa vatou, mení sa rozloženie tých istých prvkov.
  *
  * Rytmus pásiem drží KOMPOZICIA.md; dve tmavé za sebou sú zakázané, preto
  * galéria ustúpi na bielu tam, kde pred ňou stojí tmavé pásmo s vyhláškami.
@@ -93,16 +70,21 @@ export default function SluzbaDetail() {
   // presne jeden H1 a používateľ dostane rovnaké východiská.
   if (!sluzba) return <NotFound />
 
-  const uvodnaFotka = sluzba.fotky?.[0]
+  const uvodnaFotka = uvodnaFotkaSluzby(sluzba)
   const maOdseky = Array.isArray(sluzba.odseky) && sluzba.odseky.length > 0
-  const galeria = galeriaSluzby(sluzba)
-  const maPartner = Boolean(sluzba.partner || (sluzba.normy && sluzba.normy.length))
-  const pasmoGalerie = maPartner ? 'biela' : 'tmava'
+  const galeria = galeriaSluzby(sluzba, uvodnaFotka)
+  // Únia nevidiacich a slabozrakých Slovenska je miesto, kam sa chodí po
+  // konzultáciu a stanovisko. Pôvodný web na ňu len odkazuje a nič spoločné
+  // s ňou netvrdí; dáta preto pole volajú `konzultacie` a nesú aj jeho
+  // vlastný štítok, ktorý stránka preberá namiesto vlastného nadpisu.
+  const konzultacie = sluzba.konzultacie
+  const maKonzultacie = Boolean(konzultacie || (sluzba.normy && sluzba.normy.length))
+  const pasmoGalerie = maKonzultacie ? 'biela' : 'tmava'
   const suvisiace = (sluzba.suvisiace || []).map(sluzbaPodlaSlugu).filter(Boolean)
-  // Služby bez plného textu majú v úvodnom pásme voľný stĺpec vedľa fotky.
-  // Poznámka „Doplní klient“ ide rovno doň: inak by za fotkou nasledovalo
-  // takmer prázdne pásmo a stránka by pôsobila ako nedorobená šablóna.
-  const chybaVUvode = !maOdseky && Boolean(sluzba.chyba?.length)
+  const maPodklady = Boolean(sluzba.chyba?.length)
+  // Pri chudobných službách stojí zoznam podkladov rovno v úvodnom pásme.
+  // Samostatné sivé pásmo len s ním by bolo takmer prázdne.
+  const podkladyVUvode = !maOdseky && maPodklady
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -143,23 +125,71 @@ export default function SluzbaDetail() {
         perex={sluzba.perex}
       />
 
-      {/* 1. Úvod: text z originálu a hlavná fotka. Bez odsekov ostáva fotka
-          sama, perex sa neopakuje, stojí o pár centimetrov vyššie v hlavičke. */}
-      <Sekcia pasmo="biela">
-        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
-          {maOdseky ? (
-            <>
-              <Reveal className="lg:col-span-7">
-                {sluzba.odseky.map((o, i) => (
-                  <p
-                    key={o.slice(0, 40)}
-                    className={`max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)] ${
-                      i === 0 ? '' : 'mt-6'
-                    }`}
-                  >
-                    {o}
+      {/* 1. Úvod. Dve kompozície podľa toho, čo je v dátach. */}
+      {maOdseky ? (
+        <Sekcia pasmo="biela">
+          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-7">
+              {sluzba.odseky.map((o, i) => (
+                <p
+                  key={o.slice(0, 40)}
+                  className={`max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)] ${
+                    i === 0 ? '' : 'mt-6'
+                  }`}
+                >
+                  {o}
+                </p>
+              ))}
+              {sluzba.znacky?.length ? (
+                <div className="mt-10 border-t border-[var(--color-border)] pt-5">
+                  <MonoStitok>Materiály</MonoStitok>
+                  <p className="mt-3 font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                    {sluzba.znacky.join(' · ')}
                   </p>
-                ))}
+                </div>
+              ) : null}
+            </Reveal>
+
+            {uvodnaFotka ? (
+              <Reveal className="lg:col-span-5">
+                {/* Zvislý záber v polovičnom stĺpci narástol na 1072 px vedľa
+                    textu vysokého 400 px a pásmo malo 1292 px, z toho väčšinu
+                    prázdnych. Portrét preto dostane orez 3:4; na šírku
+                    orientovaný záber ostáva v pôvodnom pomere. */}
+                <div style={{ maxWidth: maxSirka(uvodnaFotka) }}>
+                  <Fotka
+                    src={uvodnaFotka.src}
+                    w={uvodnaFotka.w}
+                    h={uvodnaFotka.h}
+                    alt={altFotky(uvodnaFotka)}
+                    popis={uvodnaFotka.miesto}
+                    pomer={uvodnaFotka.h > uvodnaFotka.w * 1.34 ? '3/4' : null}
+                    priorita
+                  />
+                </div>
+              </Reveal>
+            ) : null}
+          </div>
+        </Sekcia>
+      ) : (
+        <Sekcia pasmo="biela" padding="male">
+          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
+            {uvodnaFotka ? (
+              <Reveal className="lg:col-span-7">
+                {/* Široký orez namiesto celého záberu: úvodné pásmo tak drží
+                    výšku pod 620 px aj na stránke, ktorá má okrem fotky a
+                    zoznamu podkladov už len hlavičku. */}
+                <div style={{ maxWidth: maxSirka(uvodnaFotka) }}>
+                  <Fotka
+                    src={uvodnaFotka.src}
+                    w={uvodnaFotka.w}
+                    h={uvodnaFotka.h}
+                    alt={altFotky(uvodnaFotka)}
+                    popis={uvodnaFotka.miesto}
+                    pomer="21/9"
+                    priorita
+                  />
+                </div>
                 {sluzba.znacky?.length ? (
                   <div className="mt-10 border-t border-[var(--color-border)] pt-5">
                     <MonoStitok>Materiály</MonoStitok>
@@ -169,57 +199,17 @@ export default function SluzbaDetail() {
                   </div>
                 ) : null}
               </Reveal>
+            ) : null}
 
-              {uvodnaFotka ? (
-                <Reveal className="lg:col-span-5">
-                  <div style={{ maxWidth: maxSirka(uvodnaFotka) }}>
-                    <Fotka
-                      src={uvodnaFotka.src}
-                      w={uvodnaFotka.w}
-                      h={uvodnaFotka.h}
-                      alt={uvodnaFotka.alt}
-                      popis={uvodnaFotka.miesto}
-                      priorita
-                    />
-                  </div>
-                </Reveal>
-              ) : null}
-            </>
-          ) : (
-            <>
-              {uvodnaFotka ? (
-                <Reveal className="lg:col-span-7">
-                  <div style={{ maxWidth: maxSirka(uvodnaFotka) }}>
-                    <Fotka
-                      src={uvodnaFotka.src}
-                      w={uvodnaFotka.w}
-                      h={uvodnaFotka.h}
-                      alt={uvodnaFotka.alt}
-                      popis={uvodnaFotka.miesto}
-                      priorita
-                    />
-                  </div>
-                </Reveal>
-              ) : null}
-              {sluzba.znacky?.length || chybaVUvode ? (
-                <Reveal className="lg:col-span-5">
-                  {sluzba.znacky?.length ? (
-                    <div className="border-t border-[var(--color-border)] pt-5">
-                      <MonoStitok>Materiály</MonoStitok>
-                      <p className="mt-3 font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-text)]">
-                        {sluzba.znacky.join(' · ')}
-                      </p>
-                    </div>
-                  ) : null}
-                  {chybaVUvode ? (
-                    <DoplniKlient polozky={sluzba.chyba} className={sluzba.znacky?.length ? 'mt-8' : ''} />
-                  ) : null}
-                </Reveal>
-              ) : null}
-            </>
-          )}
-        </div>
-      </Sekcia>
+            {podkladyVUvode ? (
+              <Reveal className="lg:col-span-5">
+                <HlavickaPodkladov />
+                <ZoznamPodkladov polozky={sluzba.chyba} className="mt-6" />
+              </Reveal>
+            ) : null}
+          </div>
+        </Sekcia>
+      )}
 
       {/* 2. Zoznamy podkategórií: stĺpce s vlasovou linkou, položky pod sebou. */}
       {sluzba.zoznamy?.length ? (
@@ -271,20 +261,30 @@ export default function SluzbaDetail() {
         </Sekcia>
       ) : null}
 
-      {/* 4. Technický list: tabuľka a návod na inštaláciu (len retardéry). */}
+      {/* 4. Technický list: tabuľka a návod na inštaláciu (len retardéry).
+          Tabuľka drží osem stĺpcov mriežky a vysvetlivka k hviezdičke stojí
+          ako marginálie vo voľnom stĺpci — pod tabuľkou visela a pravá
+          polovica pásma ostávala prázdna. */}
       {sluzba.tabulka || sluzba.navod ? (
         <Sekcia pasmo="biela">
           {sluzba.tabulka ? (
             <>
-              <SekciaHlavicka stitok="Technický popis" nadpis={sluzba.tabulka.titulok} sirkaNadpisu="max-w-[24ch]" />
-              <Reveal className="mt-12">
-                <div
-                  className="max-w-[46rem] border border-[var(--color-border)] p-5 sm:p-8"
-                  style={{ borderRadius: 'var(--radius-md)' }}
-                >
-                  <TabulkaDebuz tabulka={sluzba.tabulka} />
-                </div>
-              </Reveal>
+              <SekciaHlavicka stitok="Parametre" nadpis={sluzba.tabulka.titulok} sirkaNadpisu="max-w-[24ch]" />
+              <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+                <Reveal className="lg:col-span-8">
+                  <TabulkaDebuz tabulka={sluzba.tabulka} bezPoznamky />
+                </Reveal>
+                {sluzba.tabulka.poznamka ? (
+                  <Reveal className="lg:col-span-4">
+                    <div className="border-t border-[var(--color-text)] pt-5">
+                      <MonoStitok>Poznámka k tabuľke</MonoStitok>
+                      <p className="mt-4 max-w-[34ch] font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                        {sluzba.tabulka.poznamka}
+                      </p>
+                    </div>
+                  </Reveal>
+                ) : null}
+              </div>
             </>
           ) : null}
 
@@ -313,30 +313,32 @@ export default function SluzbaDetail() {
         </Sekcia>
       ) : null}
 
-      {/* 5. Vyhlášky a partner: tmavé pásmo, mono na predpisy. */}
-      {maPartner ? (
+      {/* 5. Vyhlášky a kam po konzultáciu: tmavé pásmo, mono na predpisy.
+          Nadpis bloku je z dát — Únia nevidiacich a slabozrakých Slovenska
+          konzultácie poskytuje, nespolupracuje s nami. */}
+      {maKonzultacie ? (
         <Sekcia pasmo="tmava">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-7">
-              <MonoStitok tmava>Konzultácie a predpisy</MonoStitok>
-              {sluzba.partner ? (
+              <MonoStitok tmava>{konzultacie?.stitok || 'Predpisy'}</MonoStitok>
+              {konzultacie ? (
                 <>
                   <h2 className="mt-5 max-w-[20ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)]">
-                    {sluzba.partner.nazov}
+                    {konzultacie.nazov}
                   </h2>
                   <p className="mt-6 max-w-[58ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
-                    {sluzba.partner.popis}
+                    {konzultacie.popis}
                   </p>
                   <Tlacidlo
                     variant="sekundar"
                     tmava
-                    href={sluzba.partner.url}
+                    href={konzultacie.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Otvoriť architektonickebariery.sk v novom okne"
                     className="mt-9"
                   >
-                    architektonickebariery.sk
+                    {konzultacie.odkazText || 'architektonickebariery.sk'}
                   </Tlacidlo>
                 </>
               ) : null}
@@ -388,7 +390,7 @@ export default function SluzbaDetail() {
                   src={f.src}
                   w={f.w}
                   h={f.h}
-                  alt={f.alt}
+                  alt={altFotky(f)}
                   popis={popisFotky(f)}
                   pomer="4/3"
                   tmava={pasmoGalerie === 'tmava'}
@@ -401,15 +403,21 @@ export default function SluzbaDetail() {
 
       {/* 7. Čo od klienta potrebujeme. Zámerne nenápadné: je to demo a klient
           má vidieť, ktoré miesta čakajú na jeho podklady. Nič sa nepredstiera. */}
-      {sluzba.chyba?.length && !chybaVUvode ? (
+      {maPodklady && !podkladyVUvode ? (
         <Sekcia pasmo="siva" padding="male">
-          <Reveal>
-            <DoplniKlient polozky={sluzba.chyba} className="max-w-[72ch] bg-[var(--color-bg)]" />
-          </Reveal>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <HlavickaPodkladov velky />
+            </Reveal>
+            <Reveal className="lg:col-span-8">
+              <ZoznamPodkladov polozky={sluzba.chyba} />
+            </Reveal>
+          </div>
         </Sekcia>
       ) : null}
 
-      {/* 8. Súvisiace služby: tie isté karty ako v prehľade. */}
+      {/* 8. Súvisiace služby: karty bez rámu, aby na stránke nestáli tri
+          rovnaké orámované boxy vedľa seba (STANDARDY B6). */}
       {suvisiace.length ? (
         <Sekcia pasmo="biela">
           <SekciaHlavicka
@@ -421,23 +429,25 @@ export default function SluzbaDetail() {
               </Tlacidlo>
             }
           />
-          <Stagger className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3" staggerChildren={0.07}>
+          <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" staggerChildren={0.07}>
             {suvisiace.map((s) => (
               <StaggerItem key={s.slug} className="h-full">
-                <KartaSluzby sluzba={s} />
+                <KartaSluzby sluzba={s} variant="holy" />
               </StaggerItem>
             ))}
           </Stagger>
         </Sekcia>
       ) : null}
 
-      {/* 9. CTA: dialóg si predvyplní typ prvku názvom tejto služby. */}
+      {/* 9. CTA. Nadpis pomenúva túto službu, nie claim firmy: ten istý claim
+          nad každou stránkou zoslabol na výplň. Dialóg si predvyplní typ
+          prvku názvom služby. */}
       <Sekcia pasmo="tmava">
         <SekciaHlavicka
           tmava
           stitok="Obhliadka"
-          nadpis={FIRMA.claim}
-          perex={PROCES[0].popis}
+          nadpis={`Dohodneme obhliadku na ${(sluzba.nazovKratky || sluzba.nazov).toLowerCase()}`}
+          perex={PROCES[1].popis}
           akcia={
             <div className="flex flex-wrap items-center gap-6">
               <Tlacidlo variant="primar" onClick={() => openObhliadka(sluzba.nazov)}>

@@ -19,8 +19,10 @@
  * odhady sú v `poznamky/MAPA-OBSAHU.md` v zozname pre handover.
  */
 
+import { sadzbaHlboko } from '../lib/sadzba.js'
+
 /** Tri celky, do ktorých sa deväť služieb delí na `/sluzby`. Zdôvodnenie zaradenia je v MAPE. */
-export const SKUPINY = [
+export const SKUPINY = sadzbaHlboko([
   {
     id: 'debarierizacia-a-znacenie',
     nazov: 'Debarierizácia a značenie',
@@ -39,9 +41,9 @@ export const SKUPINY = [
     popis:
       'Zásahy do povrchu vozovky a chodníka: zálievky škár a výtlkov, protišmykové nátery a odstránenie prekonaného značenia.',
   },
-]
+])
 
-export const SLUZBY = [
+export const SLUZBY = sadzbaHlboko([
   {
     slug: 'znacenie-pre-nevidiacich',
     nazov: 'Značenie pre nevidiacich a slabozrakých',
@@ -550,7 +552,7 @@ export const SLUZBY = [
         'Odstránenie prekonaného vodorovného dopravného značenia pred obnovou úseku alebo zmenou organizácie dopravy.',
     },
   },
-]
+])
 
 /** Služba podľa slugu; vracia `undefined`, ak slug neexistuje (route 404). */
 // Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.

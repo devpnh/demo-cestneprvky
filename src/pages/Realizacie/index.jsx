@@ -2,36 +2,53 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
+import { MonoStitok, Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
-import { GALERIA, MIESTA, TYPY_PRVKOV } from '../../content/realizacie.js'
+import { GALERIA, MIESTA_REALIZACII } from '../../content/realizacie.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
+import {
+  castiPopisu,
+  GALERIA_ZORADENA,
+  MIESTA_DOLOZENE,
+  NAZVY_SKUPIN,
+  SKUPINY_PRVKOV,
+  skupinaPreTyp,
+  typySkupiny,
+} from './skupiny.js'
 import Filtre from './Filtre.jsx'
 import Lightbox from './Lightbox.jsx'
 
 const META = routaPodlaCesty('/realizacie')
 const BASE = import.meta.env.BASE_URL
 
-/** Hodnota z URL sa berie, len keď existuje v dátach — cudzí odkaz nesmie vyrobiť prázdnu galériu. */
-const platna = (hodnota, zoznam) => (hodnota && zoznam.includes(hodnota) ? hodnota : '')
+/** Koľko služieb má v galérii aspoň jednu fotku (fakt do hlavičky, počítaný z dát). */
+const POCET_SLUZIEB = new Set(GALERIA.map((r) => r.sluzba)).size
 
 export default function Realizacie() {
   const [params, setParams] = useSearchParams()
-  const prvok = platna(params.get('prvok'), TYPY_PRVKOV)
-  const miesto = platna(params.get('miesto'), MIESTA)
+
+  // Hodnota z URL platí, len keď existuje v dátach; navyše prijmeme aj starý
+  // odkaz na konkrétny typ prvku a preložíme ho na jeho celok, aby raz poslaný
+  // link neskončil na prázdnej galérii.
+  const surovyPrvok = params.get('prvok') ?? ''
+  const prvok = NAZVY_SKUPIN.includes(surovyPrvok) ? surovyPrvok : skupinaPreTyp(surovyPrvok)
+  const suroveMiesto = params.get('miesto') ?? ''
+  const miesto = MIESTA_DOLOZENE.includes(suroveMiesto) ? suroveMiesto : ''
 
   const [aktivny, setAktivny] = useState(null)
   const dlazdice = useRef(new Map())
   const vratFokus = useRef(null)
 
-  const filtrovane = useMemo(
-    () => GALERIA.filter((r) => (!prvok || r.prvok === prvok) && (!miesto || r.miesto === miesto)),
-    [prvok, miesto],
-  )
+  const filtrovane = useMemo(() => {
+    const typy = typySkupiny(prvok)
+    return GALERIA_ZORADENA.filter(
+      (r) => (!typy || typy.includes(r.prvok)) && (!miesto || r.miesto === miesto),
+    )
+  }, [prvok, miesto])
 
   // Filter je stav v URL, aby sa výber dal poslať odkazom. `replace` preto, aby
-  // sa história nezaplnila každým kliknutím na čip a tlačidlo Späť viedlo preč
-  // zo stránky, nie cez desať medzistavov filtra.
+  // sa história nezaplnila každým kliknutím a tlačidlo Späť viedlo preč zo
+  // stránky, nie cez desať medzistavov filtra.
   const nastav = useCallback(
     (kluc, hodnota) => {
       const dalsie = new URLSearchParams(params)
@@ -77,45 +94,34 @@ export default function Realizacie() {
 
       <StranHlavicka
         stitok="Realizácie"
-        nadpis="Fotografie z vlastných realizácií"
+        nadpis="Fotografie realizovaných prvkov"
         perex={META?.description}
-        fakty={[`${TYPY_PRVKOV.length} typov prvkov`, 'Exteriér a interiér']}
+        fakty={[`${GALERIA.length} fotografií`, `${POCET_SLUZIEB} služieb`, 'Exteriér a interiér']}
       />
 
-      <Sekcia pasmo="biela" padding="male">
+      {/*
+        `padding="ziadne"` + vlastný spodný padding z toho istého tokenu: medzi
+        lajnou `StranHlavicka` a filtračnou lištou inak stáli dva spodné/horné
+        paddingy nad sebou (2 × 79 px) a prvá fotka spadla pod ohyb. Rytmus
+        drží spodná hrana pásma, ktorá ostáva na `--section-padding-y`.
+      */}
+      <Sekcia pasmo="biela" padding="ziadne" className="pb-[var(--section-padding-y)]">
         <Reveal>
           <Filtre
-            typy={TYPY_PRVKOV}
-            miesta={MIESTA}
+            skupiny={SKUPINY_PRVKOV}
+            miesta={MIESTA_DOLOZENE}
             prvok={prvok}
             miesto={miesto}
             onPrvok={(v) => nastav('prvok', v)}
             onMiesto={(v) => nastav('miesto', v)}
+            pocet={filtrovane.length}
+            celkom={GALERIA.length}
+            onZrusit={zrus}
           />
         </Reveal>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-border)] pt-5">
-          <p
-            aria-live="polite"
-            data-pocet
-            className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]"
-          >
-            {`${filtrovane.length} z ${GALERIA.length}`}
-          </p>
-          {prvok || miesto ? (
-            <button
-              type="button"
-              onClick={zrus}
-              data-zrusit
-              className="inline-flex min-h-[44px] items-center font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-medium text-[var(--color-text)] underline decoration-[var(--color-accent)] decoration-2 underline-offset-4"
-            >
-              Zrušiť filtre
-            </button>
-          ) : null}
-        </div>
-
         {filtrovane.length === 0 ? (
-          <div className="mt-14 border-t border-[var(--color-border)] pt-10">
+          <div className="mt-12 border-t border-[var(--color-border)] pt-10">
             <p className="max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
               {'Pre túto kombináciu prvku a miesta nemáme fotografiu. Skúste iný typ prvku alebo iné miesto.'}
             </p>
@@ -127,12 +133,12 @@ export default function Realizacie() {
           /*
            * Skutočná masonry cez CSS `columns`, nie jednotný pomer s orezom.
            * Zábery majú pomery od 0,45 (721×1600) po 1,54 (600×390) a námetom
-           * je vodiaca čiara bežiaca do diaľky — pri jednotnom 4:3 oreze by z
+           * je vodiaca čiara bežiaca do diaľky; pri jednotnom 4:3 oreze by z
            * portrétových fotiek zostal stred bez začiatku aj konca línie.
-           * `columns` necháva každý záber celý; `width`/`height` na `<img>`
+           * `columns` necháva každý záber celý, `width`/`height` na `<img>`
            * držia pomer, takže rozloženie stĺpcov nepreskakuje pri lazy-loade.
            */
-          <div className="mt-14 columns-1 gap-x-8 sm:columns-2 lg:columns-3">
+          <div className="mt-10 columns-1 gap-x-8 sm:columns-2 lg:columns-3">
             {filtrovane.map((r, i) => (
               <figure key={r.id} className="mb-12 break-inside-avoid">
                 <button
@@ -161,18 +167,51 @@ export default function Realizacie() {
                   <span className="block max-w-[30ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium leading-[var(--leading-normal)] text-[var(--color-text)]">
                     {r.prvok}
                   </span>
+                  {/* Pravidlo popisku je v `skupiny.js` — rovnaké tu, v lightboxe aj vo výbere na Domove. */}
                   <span className="mt-1 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                    {r.miesto}
-                    <span aria-hidden="true" className="mx-2 text-[var(--color-accent-deep)]">
-                      ·
-                    </span>
-                    {r.prostredie}
+                    {castiPopisu(r).map((cast, j) => (
+                      <span key={cast}>
+                        {j > 0 ? (
+                          <span aria-hidden="true" className="mx-2 text-[var(--color-accent-deep)]">
+                            ·
+                          </span>
+                        ) : null}
+                        {cast}
+                      </span>
+                    ))}
                   </span>
                 </figcaption>
               </figure>
             ))}
           </div>
         )}
+
+        {/*
+          Miesta z názvov fotografií klienta, vrátane ôsmich, ku ktorým fotku
+          nemáme. Stojí až za mriežkou zámerne: je to doklad o rozsahu, nie
+          filter, a nad mriežkou by odtlačil prvú fotku pod ohyb.
+
+          Mená miest sú v prirodzenom písme, nie v mono verzálkach ako
+          `PasFaktov`: sú to vlastné mená, teda obsah, nie technický štítok
+          (STANDARDY B4), a pätnásť verzálkových názvov za sebou sa číta ako
+          krik. Oddeľovač je prilepený nezlomiteľnou medzerou, aby nikdy
+          nezačínal riadok, a `--color-accent-deep` má na bielej 5,76:1.
+        */}
+        <div className="mt-16 border-t border-[var(--color-border)] pt-8">
+          <MonoStitok>Miesta realizácií</MonoStitok>
+          <ul className="mt-5 flex max-w-[70ch] flex-wrap gap-x-3 gap-y-1 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+            {MIESTA_REALIZACII.map((m, i) => (
+              <li key={m} className="max-w-full">
+                {m}
+                {i < MIESTA_REALIZACII.length - 1 ? (
+                  <span aria-hidden="true" className="text-[var(--color-accent-deep)]">
+                    {'\u00a0·'}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
       </Sekcia>
 
       <Sekcia pasmo="tmava">

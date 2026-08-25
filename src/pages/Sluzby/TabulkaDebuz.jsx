@@ -8,8 +8,11 @@
  * takže polovica parametrov na telefóne zmizla. Preto `min-w-0` a šírka sa
  * púšťa až od `sm`; na 390 px sa všetky tri stĺpce zmestia a text sa zalomí.
  * `table-fixed` s pevným pomerom stĺpcov drží zalomenie predvídateľné.
+ *
+ * `bezPoznamky` odovzdá vysvetlivku k hviezdičke volajúcemu: na detaile
+ * retardérov stojí ako marginálie vo voľnom stĺpci vedľa tabuľky, nie pod ňou.
  */
-export default function TabulkaDebuz({ tabulka }) {
+export default function TabulkaDebuz({ tabulka, bezPoznamky = false }) {
   if (!tabulka) return null
   const { hlavicka = [], riadky = [], poznamka } = tabulka
 
@@ -57,7 +60,7 @@ export default function TabulkaDebuz({ tabulka }) {
         </table>
       </div>
 
-      {poznamka ? (
+      {poznamka && !bezPoznamky ? (
         <p className="mt-4 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
           {poznamka}
         </p>
