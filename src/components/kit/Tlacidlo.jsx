@@ -8,8 +8,12 @@ import { ArrowRight } from 'lucide-react'
  * v komponente a nedá sa prebiť utilitou zvonku.
  * Bez tieňov (STANDARDY B2), hover = posun o 2 px alebo prekreslenie rámu.
  */
+// Padding NIE JE v základe zámerne: `px-0` vo variante by ho neprebilo.
+// Tailwind v4 nerozhoduje podľa poradia tried v reťazci, ale podľa poradia
+// pravidiel v CSS, takže `px-7` zo základu vyhralo nad `px-0` a tichý odkaz
+// začínal o 28 px vpravo od mriežky (nález Staviteľa Domov).
 const ZAKLAD =
-  'inline-flex min-h-[52px] items-center gap-3 px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold transition-[transform,background-color,border-color] duration-[var(--duration-fast)]'
+  'inline-flex min-h-[52px] items-center gap-3 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold transition-[transform,background-color,border-color] duration-[var(--duration-fast)]'
 
 export default function Tlacidlo({
   variant = 'primar',
@@ -24,11 +28,11 @@ export default function Tlacidlo({
 }) {
   const styl =
     variant === 'primar'
-      ? 'bg-[var(--color-accent)] text-[var(--color-on-accent)] hover:translate-x-[2px] hover:bg-[var(--color-accent-deep)]'
+      ? 'px-7 bg-[var(--color-accent)] text-[var(--color-on-accent)] hover:translate-x-[2px] hover:bg-[var(--color-accent-deep)]'
       : variant === 'sekundar'
         ? tmava
-          ? 'border border-[rgba(255,255,255,0.35)] text-[var(--color-bg)] hover:border-[var(--color-bg)]'
-          : 'border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-text)]'
+          ? 'px-7 border border-[rgba(255,255,255,0.35)] text-[var(--color-bg)] hover:border-[var(--color-bg)]'
+          : 'px-7 border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-text)]'
         : tmava
           ? 'px-0 text-[var(--color-bg)] hover:translate-x-[2px]'
           : 'px-0 text-[var(--color-text)] hover:translate-x-[2px]'
