@@ -1233,6 +1233,11 @@ if (maCestu('/realizacie')) {
 // --- OBSAHv5
 skontroluj('OBSAHv5', '/sluzby', () => {
   if (!OBSAH) return { ok: false, text: 'obsahové pokrytie sa nedá overiť', detail: `src/content sa nenaimportoval: ${obsahChyba}` }
+  // Dáta prechádzajú slovenskou sadzbou (`src/lib/sadzba.js`), takže názvy
+  // obsahujú nezlomiteľné medzery. Text stránky sa tu normalizuje cez
+  // `\s+`, čo NBSP zmaže, preto sa musí normalizovať aj očakávaná strana —
+  // inak by sa porovnávala sadzba, nie obsah.
+  const norm = (t) => String(t || '').replace(/\s+/g, ' ').trim()
   const chyby = []
   let overene = 0
   if (maCestu('/sluzby')) {
@@ -1241,7 +1246,9 @@ skontroluj('OBSAHv5', '/sluzby', () => {
     else {
       overene += 1
       const text = z.m.hlavnyText || ''
-      for (const s of SLUZBY) if (!text.includes(s.nazov) && !text.includes(s.nazovKratky || s.nazov)) chyby.push(`/sluzby neobsahuje názov „${s.nazov}“`)
+      for (const s of SLUZBY)
+        if (!norm(text).includes(norm(s.nazov)) && !norm(text).includes(norm(s.nazovKratky || s.nazov)))
+          chyby.push(`/sluzby neobsahuje názov „${s.nazov}“`)
     }
   }
   let detailov = 0
@@ -1256,7 +1263,7 @@ skontroluj('OBSAHv5', '/sluzby', () => {
     detailov += 1
     overene += 1
     const h1 = z.m.seo.h1Texty
-    if (h1.length !== 1 || h1[0] !== s.nazov) chyby.push(`${cesta}: H1 = ${JSON.stringify(h1)}, má byť „${s.nazov}“`)
+    if (h1.length !== 1 || norm(h1[0]) !== norm(s.nazov)) chyby.push(`${cesta}: H1 = ${JSON.stringify(h1)}, má byť „${s.nazov}“`)
   }
   if (overene === 0) return { ok: false, text: 'obsahové pokrytie sa neoverilo', detail: 'v --routes nie je /sluzby ani žiadny detail služby' }
   return {

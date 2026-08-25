@@ -11,8 +11,9 @@ import { altFotky } from './fotky.js'
  *
  * - `nosna` — karta cez dva stĺpce s fotkou 16:9 a druhým odstavcom textu;
  *   dostáva ju prvá služba prvého celku, ktorá je nosnou službou firmy.
- * - `strucna` — úzka karta vedľa nosnej: fotka, názov, odkaz. Bez perexu,
- *   inak by dvojica v treťom stĺpci prerástla nosnú kartu o tretinu.
+ * - `strucna` — úzka karta vedľa nosnej: fotka, názov, odkaz. Perex sa na
+ *   `lg` skrýva, inak by dvojica v treťom stĺpci prerástla nosnú kartu o
+ *   tretinu; na užších obrazovkách karty nikoho netlačia a perex ostáva.
  * - `holy` — bez rámu: fotka, vlasová linka, text. Druhý a tretí celok a
  *   „Súvisiace služby“ na detailoch, aby orámované boxy neboli na stránke
  *   trikrát po sebe.
@@ -56,15 +57,16 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
           {sluzba.nazov}
         </h3>
 
-        {strucna ? null : (
-          <p
-            className={`mt-3 max-w-[52ch] font-[family-name:var(--font-body)] ${
-              nosna ? 'text-[length:var(--text-lg)]' : 'text-[length:var(--text-base)]'
-            } leading-[var(--leading-normal)] text-[var(--color-muted)]`}
-          >
-            {sluzba.perex}
-          </p>
-        )}
+        {/* Úzka karta perex na `lg` nemá: dvojica v treťom stĺpci by s ním
+            prerástla nosnú kartu o tretinu. Nižšie, kde karty stoja pod sebou
+            alebo v dvojici, výška nikoho neobmedzuje a perex tam ostáva. */}
+        <p
+          className={`mt-3 max-w-[52ch] font-[family-name:var(--font-body)] ${
+            nosna ? 'text-[length:var(--text-lg)]' : 'text-[length:var(--text-base)]'
+          } leading-[var(--leading-normal)] text-[var(--color-muted)] ${strucna ? 'lg:hidden' : ''}`}
+        >
+          {sluzba.perex}
+        </p>
 
         {/* Nosná karta má miesto navyše, tak dostane aj prvý odstavec textu
             služby. Žiadna nová veta nevzniká, je to text z dát. */}
