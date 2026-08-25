@@ -6,18 +6,23 @@ import { Tlacidlo } from '../../../components/kit/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { openObhliadka } from '../../../lib/obhliadka.js'
 import { FIRMA } from '../../../content/firma.js'
+import { castiPopisu } from '../../Realizacie/skupiny.js'
 
 /**
  * Segmenty hero slučky (`public/hero/hero.mp4`, 14,4 s). Časy sú stredy
  * prelínačiek vo videu, popisky sú fakty z názvov fotografií klienta.
  * Tretí záber nemá v názve plný názov miesta, preto stojí bez miesta.
  * (Prenesené z pôvodnej jednostránky `src/sections/HlavickaAHero.jsx`.)
+ *
+ * `isteMiesto` je tu preto, aby sa záber dal poslať do `castiPopisu` z
+ * `Realizacie/skupiny.js` — pravidlo popisku má na celom webe žiť na jednom
+ * mieste (galéria, lightbox, sticky-scrub, táto karta).
  */
 const ZABERY = [
-  { od: 0, prvok: 'Značenie pre nevidiacich a slabozrakých', miesto: 'Zubačka' },
-  { od: 3.8, prvok: 'Vodiaca línia', miesto: 'Tornaľa' },
-  { od: 7.2, prvok: 'Varovný pás a protišmykový náter schodiskového stupňa', miesto: null },
-  { od: 10.6, prvok: 'Značenie pre nevidiacich a slabozrakých', miesto: 'Zubačka' },
+  { od: 0, prvok: 'Značenie pre nevidiacich a slabozrakých', miesto: 'Zubačka', isteMiesto: true },
+  { od: 3.8, prvok: 'Vodiaca línia', miesto: 'Tornaľa', isteMiesto: true },
+  { od: 7.2, prvok: 'Varovný pás a protišmykový náter schodiskového stupňa', miesto: null, isteMiesto: false },
+  { od: 10.6, prvok: 'Značenie pre nevidiacich a slabozrakých', miesto: 'Zubačka', isteMiesto: true },
 ]
 
 /**
@@ -124,26 +129,29 @@ function HeroPozadie({ onSegment }) {
  * Sklená karta s popiskom práve bežiaceho záberu. Je viazaná na video, preto
  * žije len tam, kde video existuje (≥ 1024 px). Na 390 px sa nerenderuje —
  * plávajúca karta nad textom hero bola stará chyba z QUALITY-LOG.
+ *
+ * Karta nemá mono nadpis „Vlastná realizácia“: bola to tretia veta, ktorou web
+ * hovoril o tých istých fotkách (galéria mala „Realizácia klienta“, sticky
+ * ďalšiu). Ostal typ prvku a pod ním miesto — a to len tam, kde ho vieme
+ * doložiť, presne podľa `castiPopisu`. Kde miesto nevieme, nič sa nedopĺňa.
  */
 function PopisokZaberu({ idx }) {
   const z = ZABERY[idx] ?? ZABERY[0]
+  const casti = castiPopisu(z)
   return (
     <div
       data-hero-karta
       className="hidden w-[21rem] border border-[rgba(255,255,255,0.24)] bg-[rgba(38,41,44,0.42)] p-5 backdrop-blur-md lg:block"
       style={{ borderRadius: 'var(--radius-md)' }}
     >
-      <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.86)]">
-        Vlastná realizácia
-      </p>
-      <p className="mt-3 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)]">
+      <p className="font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)]">
         {z.prvok}
-        {z.miesto && (
-          <span className="mt-1 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.86)]">
-            {z.miesto}
-          </span>
-        )}
       </p>
+      {casti.length > 0 ? (
+        <p className="mt-2 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.86)]">
+          {casti.join(' · ')}
+        </p>
+      ) : null}
       <div className="mt-4 flex gap-1.5" aria-hidden="true">
         {ZABERY.slice(0, 3).map((s, i) => (
           <span

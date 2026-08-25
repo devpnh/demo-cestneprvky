@@ -24,6 +24,44 @@ const BASE = import.meta.env.BASE_URL
 /** Koľko služieb má v galérii aspoň jednu fotku (fakt do hlavičky, počítaný z dát). */
 const POCET_SLUZIEB = new Set(GALERIA.map((r) => r.sluzba)).size
 
+/**
+ * Koľko dlaždíc má mriežka pod 640 px pred rozkliknutím.
+ *
+ * Pod 640 px je mriežka jednostĺpcová a 32 fotiek v nej meria 17 666 px, teda
+ * 21 obrazoviek jedného nepretržitého stĺpca. Vybrali sme dávkovanie, nie dva
+ * užšie stĺpce: pri dvoch stĺpcoch má fotka na 390 px šírku 179 px a práve
+ * fotografia je na tejto stránke celý dôkaz — vodiaca línia bežiaca do diaľky
+ * sa v 179 px nedá prečítať. Dávkovanie necháva fotku cez celú šírku a skráti
+ * prvý pohľad na 12 dlaždíc; zvyšok sa do DOM vôbec nevloží, takže sa
+ * nesťahujú ani ich súbory.
+ */
+const PRVA_DAVKA = 12
+
+/** Skloňovanie mikro-labelu tlačidla; v slovenčine sa mení aj „ďalší“, nielen podstatné meno. */
+const dalsieFotografie = (n) => {
+  if (n === 1) return 'ďalšiu fotografiu'
+  if (n < 5) return `ďalšie ${n} fotografie`
+  return `ďalších ${n} fotografií`
+}
+
+/**
+ * Pravda o tom, či mriežka beží v jednom stĺpci (`columns-1` do 639 px).
+ * Dlaždice sa pod týmto bodom naozaj nemontujú, nie sú len skryté — inak by
+ * sa fotky stiahli a stránka by ostala rovnako vysoká.
+ */
+function useJedenStlpec() {
+  const [jeden, setJeden] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const on = (e) => setJeden(e.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return jeden
+}
+
 export default function Realizacie() {
   const [params, setParams] = useSearchParams()
 
@@ -38,6 +76,10 @@ export default function Realizacie() {
   const [aktivny, setAktivny] = useState(null)
   const dlazdice = useRef(new Map())
   const vratFokus = useRef(null)
+
+  const jedenStlpec = useJedenStlpec()
+  const [rozbalene, setRozbalene] = useState(false)
+  const fokusPoRozbaleni = useRef(null)
 
   const filtrovane = useMemo(() => {
     const typy = typySkupiny(prvok)
@@ -59,11 +101,37 @@ export default function Realizacie() {
     [params, setParams],
   )
 
+  // Skrátený je len jednostĺpcový pohľad a len dovtedy, kým ho návštevník
+  // nerozbalí. `viditelne` je vždy PREFIX `filtrovane`, takže index dlaždice
+  // je zároveň indexom do plného zoznamu — lightbox aj šípky v ňom prechádzajú
+  // celú filtrovanú sadu, nielen prvú dávku.
+  const skratene = jedenStlpec && !rozbalene && filtrovane.length > PRVA_DAVKA
+  const viditelne = skratene ? filtrovane.slice(0, PRVA_DAVKA) : filtrovane
+
   // Zmena filtra mení poradie aj obsah zoznamu, takže index otvoreného náhľadu
-  // by ukazoval na inú fotku. Náhľad sa preto zatvorí.
+  // by ukazoval na inú fotku. Náhľad sa preto zatvorí a mriežka sa vráti na
+  // prvú dávku — po novom filtri je zoznam iný a kratší.
   useEffect(() => {
     setAktivny(null)
+    setRozbalene(false)
   }, [prvok, miesto])
+
+  // Tlačidlo po kliknutí zmizne, takže by fokus spadol na `<body>` a klávesnica
+  // by začala odznova. Presunieme ho na prvú odkrytú dlaždicu; `preventScroll`
+  // preto, aby sa pohľad neposunul preč od miesta, kde tlačidlo stálo.
+  useEffect(() => {
+    if (!rozbalene) return
+    const id = fokusPoRozbaleni.current
+    fokusPoRozbaleni.current = null
+    if (!id) return
+    const el = dlazdice.current.get(id)
+    if (el && typeof el.focus === 'function') el.focus({ preventScroll: true })
+  }, [rozbalene])
+
+  const rozbal = () => {
+    fokusPoRozbaleni.current = filtrovane[PRVA_DAVKA] ? filtrovane[PRVA_DAVKA].id : null
+    setRozbalene(true)
+  }
 
   // Fokus sa po zatvorení vracia na dlaždicu, ktorá náhľad otvorila. Beží až po
   // odmontovaní `Lightbox`u, teda po tom, ako z `#root` zmizne `inert`.
@@ -139,7 +207,7 @@ export default function Realizacie() {
            * držia pomer, takže rozloženie stĺpcov nepreskakuje pri lazy-loade.
            */
           <div className="mt-10 columns-1 gap-x-8 sm:columns-2 lg:columns-3">
-            {filtrovane.map((r, i) => (
+            {viditelne.map((r, i) => (
               <figure key={r.id} className="mb-12 break-inside-avoid">
                 <button
                   type="button"
@@ -187,6 +255,21 @@ export default function Realizacie() {
         )}
 
         {/*
+          Odkrytie zvyšku mriežky. Tlačidlo existuje len v jednostĺpcovom
+          pohľade a len kým je čo odkrývať; na 640 px a vyššie sa nemontuje,
+          tam je mriežka dvoj- a trojstĺpcová a celá naraz. Nemá `aria-pressed`
+          ani `data-filter` zámerne — nie je to filter a nesmie sa doňho
+          zamiešať ani pri automatickom meraní.
+        */}
+        {skratene ? (
+          <div className="mt-2">
+            <Tlacidlo variant="sekundar" onClick={rozbal} data-rozbalit className="w-full justify-center">
+              {`Zobraziť ${dalsieFotografie(filtrovane.length - PRVA_DAVKA)}`}
+            </Tlacidlo>
+          </div>
+        ) : null}
+
+        {/*
           Miesta z názvov fotografií klienta, vrátane ôsmich, ku ktorým fotku
           nemáme. Stojí až za mriežkou zámerne: je to doklad o rozsahu, nie
           filter, a nad mriežkou by odtlačil prvú fotku pod ohyb.
@@ -218,8 +301,8 @@ export default function Realizacie() {
         <SekciaHlavicka
           tmava
           stitok="Zadanie"
-          nadpis="Pošlite zadanie, vrátime sa s termínom obhliadky"
-          perex="Napíšte nám typ prvku, miesto a rozsah. Ozveme sa s termínom obhliadky a návrhom riešenia na mieru."
+          nadpis="Pošlite zadanie k prvku z galérie"
+          perex="Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup."
           akcia={
             <div className="flex flex-wrap gap-4">
               <Tlacidlo variant="primar" onClick={() => openObhliadka()}>

@@ -68,9 +68,18 @@ export const GALERIA_ZORADENA = [...GALERIA].sort((a, b) => Number(b.isteMiesto)
  *  • nedoložené miesto sa nevypisuje vôbec — náhrada „Realizácia klienta“
  *    stála pod 17 z 32 fotiek a galéria tým pôsobila, akoby o vlastných
  *    stavbách nič nevedela. Ostáva prostredie, ktoré vieme z fotky.
+ *
+ * Toto je JEDINÉ miesto, kde pravidlo žije: volá ho mriežka galérie,
+ * lightbox, sticky-scrub Debarierizácia aj sklená karta hero. Predtým mal
+ * každý z nich vlastnú vetu („Realizácia klienta“, „Vlastná realizácia“) a
+ * web hovoril o tých istých fotkách tromi rôznymi spôsobmi.
+ *
+ * `filter(Boolean)` je kvôli volajúcim mimo galérie: zábery hero majú miesto,
+ * ale nemajú pole `prostredie`, a prázdna časť by sa vypísala ako holý
+ * oddeľovač. Pre záznamy galérie sa výstup nemení — tie majú obe polia.
  */
 export const castiPopisu = (r) => {
   if (r.produktovaFoto) return ['Produktová fotografia']
-  if (r.isteMiesto) return [r.miesto, r.prostredie]
-  return [r.prostredie]
+  if (r.isteMiesto) return [r.miesto, r.prostredie].filter(Boolean)
+  return [r.prostredie].filter(Boolean)
 }

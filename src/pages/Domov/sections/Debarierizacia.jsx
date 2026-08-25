@@ -5,6 +5,7 @@ import { MonoStitok, PasFaktov, Tlacidlo } from '../../../components/kit/index.j
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { sluzbaPodlaSlugu } from '../../../content/sluzby.js'
 import { GALERIA } from '../../../content/realizacie.js'
+import { castiPopisu } from '../../Realizacie/skupiny.js'
 
 const SLUZBA = sluzbaPodlaSlugu('znacenie-pre-nevidiacich')
 const BASE = import.meta.env.BASE_URL
@@ -32,43 +33,99 @@ const indexZaberu = (skupina, polozka) =>
   ZABERY.findIndex((z) => z.skupina === skupina && z.polozka === polozka)
 
 /**
+ * Šírka prelínačky ako podiel celého rozsahu scrubu.
+ *
+ * Pred opravou to bolo 0,05 na KAŽDÚ stranu hranice, teda 10 % rozsahu na
+ * jeden prechod a 40 % celého scrubu strávených v prelínačke. Namerané pri 21
+ * vzorkách: v štyroch z nich ležali dva mono popisky na tej istej súradnici,
+ * oba na opacity ~0,5 — nečitateľná šmuha a fotka ako červený duch jednej
+ * scény cez druhú. 0,02 znamená, že prelínačka trvá 2 % dráhy a ustálený stav
+ * (jedna fotka, jeden popisok) drží zvyšných 98 %.
+ *
+ * Okno prelínačky KONČÍ na hranici fázy, nie je okolo nej vycentrované.
+ * Hranice piatich záberov sú 0,2 / 0,4 / 0,6 / 0,8, teda presne body, v
+ * ktorých padne vzorka pri kroku 0,05; symetrické okno by v každej z nich
+ * trafilo stav 50/50. Takto je v každej vzorke práve jedna fotka na 1.
+ */
+const PRELIN = 0.02
+
+/**
  * Vstupný rozsah musí byť prísne rastúci a ležať v [0, 1]: `motion` viaže
  * scroll-linked MotionValue na WAAPI animáciu so ScrollTimeline a rozsah
  * použije ako keyframe offsety. Hodnota mimo [0, 1] alebo neklesajúca dvojica
  * zhodí celý React strom — prázdna stránka (nález z iterácie 1 tohto projektu).
+ *
+ * Rozsah MUSÍ okrem toho explicitne obsahovať 0 aj 1. Nameraný dôvod: keď
+ * posledný bod rozsahu nie je 1, WAAPI si k nemu domyslí implicitný keyframe
+ * s pôvodnou hodnotou štýlu (opacity 1) a vrstva sa od konca svojej fázy
+ * lineárne vracia späť do plnej viditeľnosti — prvý záber tak ghostoval popod
+ * celý zvyšok scrubu (namerané: 0,07 → 0,27 → 0,47 → 1,0).
  */
 function useFaza(progress, index, total, min) {
   const start = index / total
   const end = (index + 1) / total
-  const fade = Math.min(0.05, 0.5 / total)
-  const prvy = index === 0
-  const posledny = index === total - 1
+  const w = Math.min(PRELIN, 0.5 / total)
 
-  // Rozsah MUSÍ začínať na 0 a končiť na 1. Nameraný dôvod: keď posledný bod
-  // rozsahu nie je 1, WAAPI si k nemu domyslí implicitný keyframe s pôvodnou
-  // hodnotou štýlu (opacity 1) a vrstva sa od konca svojej fázy lineárne
-  // vracia späť do plnej viditeľnosti — prvý záber tak ghostoval popod celý
-  // zvyšok scrubu (namerané: 0,07 → 0,27 → 0,47 → 1,0).
   const body = [0]
-  const hodnoty = [prvy ? 1 : min]
+  const hodnoty = [index === 0 ? 1 : min]
 
-  if (prvy) {
-    // Prvý záber je viditeľný už pri progress 0, keď sekcia prichádza zdola:
-    // pásmo nikdy nezačína ako prázdny tmavý obdĺžnik.
-    body.push(0.001)
-    hodnoty.push(1)
-  } else {
-    body.push(start - fade, start + fade)
+  // Prvý záber je na 1 už pri progress 0, keď sekcia prichádza zdola: pásmo
+  // nikdy nezačína ako prázdny tmavý obdĺžnik.
+  if (index > 0) {
+    body.push(start - w, start)
     hodnoty.push(min, 1)
   }
 
-  if (posledny) {
-    // Posledný záber ostáva viditeľný až do odchodu sekcie.
-    body.push(0.999, 1)
-    hodnoty.push(1, 1)
-  } else {
-    body.push(end - fade, end + fade, 1)
+  if (index < total - 1) {
+    body.push(end - w, end, 1)
     hodnoty.push(1, min, min)
+  } else {
+    // Posledný záber ostáva viditeľný až do odchodu sekcie.
+    body.push(1)
+    hodnoty.push(1)
+  }
+
+  return useTransform(progress, body, hodnoty)
+}
+
+/**
+ * Fáza mono popisku pod fotkou. Fotky sa prelínať smú, text nie: dva popisky
+ * na tej istej súradnici sú vždy šmuha, nikdy prelínačka.
+ *
+ * Rozsahy susedných popiskov sú preto DISJUNKTNÉ. Prepis je v poslednej
+ * štvrtine okna prelínačky fotiek: starý popisok dobehne na 0 v jej prvej
+ * polovici, nový nabehne v druhej. Existuje presne jeden bod (stred prepisu),
+ * kde sú oba na nule — nikdy ani jeden bod, kde by boli oba nad ňou. Preto je
+ * počet dvojíc „oba nad 0,08“ nulový pri ĽUBOVOĽNEJ hustote vzorkovania, nie
+ * len pri tých 21 vzorkách, ktoré meral kritik.
+ *
+ * Prepis je až na konci prelínačky, nie v jej strede, zámerne: v strede je
+ * fotka 50/50 a práve tam sa robí dôkazový výrez. Keby prepis padol tam,
+ * výrez by ukázal prelínačku fotiek bez akéhokoľvek popisku. Takto tam stojí
+ * starý popisok v plnej sile a preskočí na nový vtedy, keď nová fotka dosadá.
+ */
+const PREPIS = PRELIN / 4
+
+function useFazaPopisu(progress, index, total) {
+  const start = index / total
+  const end = (index + 1) / total
+  const p = Math.min(PREPIS, 0.125 / total)
+  const pol = p / 2
+
+  const body = [0]
+  const hodnoty = [index === 0 ? 1 : 0]
+
+  if (index > 0) {
+    body.push(start - pol, start)
+    hodnoty.push(0, 1)
+  }
+
+  if (index < total - 1) {
+    body.push(end - p, end - pol, 1)
+    hodnoty.push(1, 0, 0)
+  } else {
+    body.push(1)
+    hodnoty.push(1)
   }
 
   return useTransform(progress, body, hodnoty)
@@ -91,15 +148,36 @@ function FotoVrstva({ progress, index, zaber }) {
   )
 }
 
-/** Miesto realizácie pod fotkou; „Realizácia klienta“ tam, kde miesto nevieme doložiť. */
+const TRIEDA_POPISU =
+  'font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[rgba(255,255,255,0.72)]'
+
+/**
+ * Popisok pod fotkou: typ prvku a za ním časti z `Realizacie/skupiny.js`
+ * (`castiPopisu`) — to isté pravidlo, aké má mriežka galérie, lightbox aj
+ * sklená karta hero. Poradie je rovnaké ako v galérii, kde typ prvku stojí
+ * nad mono riadkom; tu je na jednom riadku, lebo popisok je vrstva s pevnou
+ * výškou a dva riadky by sa pod ňou prekrývali.
+ *
+ * Pri štvrtom zábere miesto doložené nemáme, takže sa nevypíše a ničím sa
+ * nenahrádza — ostáva typ prvku a prostredie, ktoré z fotky vieme.
+ *
+ * Časti sa spájajú do JEDNÉHO textového uzla, nie do vnorených `<span>`ov ako
+ * v mriežke galérie. Vrstva popisku má `opacity: 0`, keď nie je na rade, a
+ * meranie kontrastu preskakuje prvok s nulovou opacitou, nie však jeho deti —
+ * vnorené spany by sa merali ako tmavý text na tmavom podklade (1,00:1) a
+ * kontrola B7 by na nich spadla 18×. Namerané, nie odhadnuté.
+ */
+const popisZaberu = (zaber) => [zaber.foto.prvok, ...castiPopisu(zaber.foto)].join(' · ')
+
 function PopisVrstva({ progress, index, zaber }) {
-  const opacity = useFaza(progress, index, POCET, 0)
+  const opacity = useFazaPopisu(progress, index, POCET)
   return (
     <motion.span
       style={{ opacity }}
-      className="absolute inset-x-0 top-0 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[rgba(255,255,255,0.72)]"
+      data-popis={index}
+      className={`absolute inset-x-0 top-0 block ${TRIEDA_POPISU}`}
     >
-      {zaber.foto.miesto}
+      {popisZaberu(zaber)}
     </motion.span>
   )
 }
@@ -291,8 +369,8 @@ function TokovaSekcia() {
             className="absolute inset-0 h-full w-full object-cover"
           />
         </div>
-        <figcaption className="mt-4 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[rgba(255,255,255,0.72)]">
-          {prvy.foto.miesto}
+        <figcaption className={`mt-4 ${TRIEDA_POPISU}`}>
+          {popisZaberu(prvy)}
         </figcaption>
       </figure>
 
