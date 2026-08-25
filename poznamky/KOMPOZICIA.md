@@ -48,6 +48,12 @@ Sekcia 8 a footer tvoria zámerne jeden súvislý tmavý blok oddelený vlasovou
 CTA pásmo (tmavá).
 
 ### `/sluzby/:slug`
+> **Odchýlka schválená v kole 3:** farby pásiem na detailoch sa nepriraďujú napevno, ale
+> počítajú sa z poradia pásiem, ktoré na danej službe naozaj vznikli (`rytmusPasiem`
+> v `Detail.jsx`). Chudobné služby majú menej pásiem, takže pevné priradenie im dávalo
+> tri biele za sebou a 264 px prázdnej plochy. Pravidlo „nikdy dve tmavé za sebou“ platí
+> ďalej, pribudlo „nikdy tri rovnaké za sebou“.
+
 `StranHlavicka` s drobkami `Služby · <názov>` (biela) → úvod + fotka (biela) →
 zoznamy podkategórií (sivá) → technická tabuľka a návod, kde existujú (biela) →
 galéria služby (tmavá) → súvisiace služby (biela) → CTA (tmavá).

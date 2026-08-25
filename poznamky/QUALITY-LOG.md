@@ -165,3 +165,41 @@ Tri príčiny a opravy:
 3. **LCP 5,3 s / 222 kB navyše** — poster hero sa na telefón sťahoval v 1920 px a začal až po vykreslení Reactom. Pribudli `poster-960.jpg` (90 kB) a `poster-1440.jpg` (182 kB), `srcSet` + `sizes="100vw"` v `Hero.jsx` a `<link rel="preload" imagesrcset>` v `index.html`.
 
 **Otvorené rozhodnutie pre Petra:** Lighthouse Accessibility je 96, jediný nález je primárne CTA — biela na `#F03314` = 4,04:1 pri 19 px. `STANDARDY` B7 to povoľuje (veľký text ≥ 19 px pri reze 600+ má limit 3:1) a je to vedomé rozhodnutie z iterácie 3 v auguste. `axe` však počíta „bold“ až od rezu 700, ktorý dizajnový systém zakazuje (B4). Cesty von sú tri: nechať tak (dnešný stav), dať tlačidlu výplň `--color-accent-deep` (biela na `#c5250d` = 5,76:1, ale mení sa firemná červená na hlavnom prvku), alebo zväčšiť text CTA na 24 px. Bez pokynu neurobím ani jedno.
+
+## Kolo 2 a 3 — kontrola obsahu, vkusu a sadzby
+
+### Obsahový kontrolór našiel to, čo audit ani kritik nevideli
+Pokrytie pôvodného obsahu 88,3 % (text stránok kompletný, tabuľka DEBUZ 7/7 riadkov, návod 6/6 krokov, 7 výhod 7/7). Podstatný bol ale **opačný smer: 13 skupín tvrdení bez opory v podkladoch.** Najzávažnejšie:
+- **ÚNSS ako „Partner“ a „Spolupráca“** — pôvodný web na Úniu nevidiacich a slabozrakých len odkazuje ako na miesto, kde sa dajú získať konzultácie a stanoviská. Web tvrdil vzťah s existujúcou organizáciou bez jej vedomia, aj v meta description. Chyba vznikla v zadaní (`PROMPT-v5` §2.1 to napísal ako „Partner“). Opravené: blok sa volá „Kam po konzultáciu“ a hovorí o tom, čo robí Únia.
+- **Celý blok `PROCES`** vkladal klientovi do úst obhliadku na mieste, cenovú ponuku, spoločnú preberačku a odovzdanie diela, a zovšeobecňoval „bez búracích prác“ na všetkých 9 služieb vrátane frézovania značenia.
+- **„Pracujeme pre mestá, župy, správcov ciest, stavebné firmy a developerov“** stálo ako perex hero — vymyslená klientela.
+- **Fotka `08-BA_Bosakova`** bola označená „Odstránené značenie“, hoci na nej sú pásy priechodu kompletné; `07-Braill` je produktová fotografia, nie záber z osadenia.
+- Deväť perexov služieb vymenúvalo cieľové skupiny, ktoré v podkladoch nie sú, a pri chudobných službách odpovedalo na to, na čo sa `[DOPLNÍ KLIENT]` na tej istej stránke pýta.
+- **8 miest realizácií** (Milochov, Svederník, Blatná na Ostrove, Podunajské Biskupice, Slanická osada, Kysucké Nové Mesto, Devínska Nová Ves, Most pri Bratislave) z webu vypadlo, hoci sú doložené rovnako ako tie s fotkou. Vrátené ako `MIESTA_REALIZACII` — zároveň je to konečne dôkaz pod tvrdením „realizácie po celom Slovensku“.
+
+### Vizuálny kritik, dve kolá
+Priemer rubriky **7,9 → 8,6**. Kolo 1: dva blockery (`[DOPLNÍ KLIENT: …]` sa vypisoval surový aj so zátvorkami; chudobné stránky služieb mali prázdne pásma) a 8 vkusových nálezov — `/sluzby` boli trikrát ten istý riadok orámovaných kariet, claim klienta bol nadpisom CTA na 12 stránkach zo 14, 17 z 32 dlaždíc galérie malo popisok „Realizácia klienta“, 24 filtrových čipov pred prvou fotkou.
+Kolo 2: jeden nový blocker — **v sticky sekcii ležali pri prelínačkách dva mono popisky na tej istej súradnici, oba na opacite ~0,5** (nečitateľná šmuha v štvrtine rozsahu scrubu). Opravené disjunktnými rozsahmi popiskov, takže kolízia neexistuje pri žiadnej hustote vzorkovania; prelínačka fotiek zúžená z 10 % na 2 %.
+
+### Sadzba (pokyn Petra: „pozri si, ako je to opticky“)
+Odsek o technológiách mal všetky merania v poriadku a pritom vyzeral zle — **výpočet troch technológií bol vysádzaný ako veta s dvojbodkou**. Prerobené na zoznam, stĺpce opticky vyvážené (text 46 ch, fotka na výšku, spoločná spodná linka namiesto 180 px prázdna pod fotkou).
+Pri pohľade na render sa ukázalo, že riadok končí spojkou „a“. Vznikol `src/lib/sadzba.js`: nezlomiteľné medzery po jednopísmenových predložkách a spojkách a medzi číslom a jednotkou. Najprv bežal len nad `src/content/*`, takže nadpis dialógu sa lámal „vrátime sa **s** / termínom obhliadky“ — teraz prechádzajú sadzbou aj texty v kite, dialógu a formulári. **Pravidlo je odvtedy merateľné: kontrola `SADZBA` v audite skladá riadky z rámčekov jednotlivých slov a hlási každý riadok končiaci jednopísmenovým slovom.**
+
+### Ďalšie opravy kola 3
+Jedno pravidlo popisku fotiek pre celý web (tá istá trieda fotiek mala tri rôzne vety: „Vlastná realizácia“, „Realizácia klienta“, nič) · sľub „vrátime sa s termínom obhliadky“ odstránený aj z dialógu a z CTA na `/realizacie` · galéria na mobile 17 666 → 8 592 px (12 dlaždíc + tlačidlo, zvyšok sa nevkladá do DOM) · rytmus pásiem na detailoch sa počíta z pásiem, ktoré naozaj vznikli (tri biele za sebou na 4 cestách → 0) · 7 výhod DEBUZ v jednom stĺpci (sedem je prvočíslo, v dvoch stĺpcoch vždy osirie posledná) · perex Služieb späť do pravého stĺpca hlavičky · kroky Procesu skrátené na rovnakú dĺžku.
+
+### Pasce, ktoré stoja za zapamätanie
+1. **Tailwind v4 nerozhoduje podľa poradia tried v reťazci, ale podľa poradia pravidiel v CSS** — `px-0` vo variante neprebilo `px-7` v základe tlačidla. Rovnaká rodina: trieda zložená za behu (`aspect-[${pomer}]`) sa nikdy nevygeneruje, lebo Tailwind skenuje zdroj staticky.
+2. **`useTransform` s rozsahom, ktorý nekončí na 1**, dostane od WAAPI implicitný záverečný keyframe s pôvodnou hodnotou — vrstva sa nenápadne vráti do plnej viditeľnosti.
+3. **Meranie kontrastu preskakuje prvok s `opacity: 0`, ale nie jeho deti** — popisok skladaný z vnorených `<span>`ov spôsobil 18 falošných pádov B7.
+4. **NBSP je sadzba, nie obsah** — porovnávanie reťazcov v audite musí normalizovať obe strany.
+5. **Lazy-loading stránok v SPA = veľký CLS**, ak Suspense fallback nemá výšku obsahu (0,404 na pätičke).
+
+### Stav na konci behu
+| | |
+|---|---|
+| Audit | **254/254 ✅** (43 kontrol, 15 ciest × 1440/768/390), zelený štyrikrát po sebe |
+| Lighthouse mobile | perf **94** · a11y 96 · best practices 96 · LCP 2,9 s · CLS 0,002 |
+| Lighthouse desktop | perf **99** · LCP 0,9 s |
+| SEO | 63 zámerne — demo má `noindex`, vyššie sa dostať nedá |
+| Rubrika kritika | 8,6 z 10; výstupná podmienka §6.3 (každý bod ≥ 9) nesplnená, zvyšné nálezy sú vkus a kozmetika |

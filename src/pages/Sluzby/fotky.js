@@ -1,4 +1,5 @@
 import { REALIZACIE } from '../../content/realizacie.js'
+import { castiPopisu } from '../Realizacie/skupiny.js'
 
 /**
  * Popis fotky patrí ku konkrétnemu súboru, nie ku kontextu, v ktorom sa
@@ -15,10 +16,35 @@ import { REALIZACIE } from '../../content/realizacie.js'
  * jeho `alt` vyhráva. Keď sa `sluzby.js` s katalógom zrovná, helper zmizne
  * bez ďalšej zmeny v stránkach.
  */
-const ALT_PODLA_SUBORU = new Map(REALIZACIE.map((r) => [r.src, r.alt]))
+const ZAZNAM_PODLA_SUBORU = new Map(REALIZACIE.map((r) => [r.src, r]))
 
 /** `alt` fotky alebo dlaždice: z katalógu realizácií, inak z dát služby. */
-export const altFotky = (fotka) => ALT_PODLA_SUBORU.get(fotka.src) || fotka.alt
+export const altFotky = (fotka) => ZAZNAM_PODLA_SUBORU.get(fotka.src)?.alt || fotka.alt
+
+/**
+ * Popisok fotky na stránke služby.
+ *
+ * Pravidlo, čo sa smie napísať pod fotku, žije na jednom mieste pre celý web —
+ * v `Realizacie/skupiny.js` (`castiPopisu`). Stránky služieb mali doteraz
+ * vlastné: v úvode sa vypisovalo holé `miesto`, v galérii `prvok · miesto`, a
+ * keď miesto nebolo doložené, na oboch miestach stálo „Realizácia klienta“.
+ * Na `/realizacie` sa pritom tá istá fotka opísala inak. Návštevník tak pri
+ * rovnakej triede fotiek čítal na každej stránke niečo iné.
+ *
+ * Teraz platí pravidlo galérie doslova: keď miesto nevieme, miesto sa
+ * nevypisuje a ničím sa nenahrádza. Zostáva prostredie, ktoré z fotky vieme,
+ * a pri produktovej fotografii len jej pomenovanie. Typ prvku stojí vpredu —
+ * v mriežke galérie ho nesie samostatný riadok popisku, tu sa spája
+ * oddeľovačom rovnako ako vo výbere realizácií na Domove.
+ *
+ * Fotky služieb sú tie isté súbory ako v katalógu, takže sa polia `isteMiesto`,
+ * `prostredie` a `produktovaFoto` čítajú z katalógu; dáta služby sú len
+ * poistka, keby do nich pribudol súbor, ktorý katalóg nepozná.
+ */
+export const popisFotky = (fotka) => {
+  const zaznam = ZAZNAM_PODLA_SUBORU.get(fotka.src) || fotka
+  return [zaznam.prvok, ...castiPopisu(zaznam)].filter(Boolean).join(' · ')
+}
 
 /**
  * Úvodná fotka služby. Berie sa najširší dostupný záber, nie prvý v poli:

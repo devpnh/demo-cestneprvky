@@ -18,7 +18,7 @@ import { FIRMA, PROCES } from '../../content/firma.js'
 import KartaSluzby from './KartaSluzby.jsx'
 import TabulkaDebuz from './TabulkaDebuz.jsx'
 import ZoznamPodkladov, { HlavickaPodkladov } from './Podklady.jsx'
-import { altFotky, maxSirka, uvodnaFotkaSluzby } from './fotky.js'
+import { altFotky, maxSirka, popisFotky, uvodnaFotkaSluzby } from './fotky.js'
 
 /**
  * Malý orez a veľká fotka tej istej scény sú v dátach previazané cez
@@ -43,8 +43,72 @@ function galeriaSluzby(sluzba, uvodna, maxPocet = 6) {
   return vysledok.slice(0, maxPocet)
 }
 
-/** Popisok fotky: typ prvku, kde ho poznáme, a miesto (neisté miesto už dáta prepísali). */
-const popisFotky = (f) => (f.prvok ? `${f.prvok} · ${f.miesto}` : f.miesto)
+// ---------------------------------------------------------------- rytmus pásiem
+
+/** Dve svetlé pásma sa striedajú; tmavé je akcent, nie tretia farba v rade. */
+const OPACNA_SVETLA = { biela: 'siva', siva: 'biela' }
+
+/** Farba, ktorú by pásmo malo, keby stálo na stránke samo. */
+const ZAKLADNE_PASMO = {
+  hlavicka: 'biela',
+  uvod: 'biela',
+  rozsah: 'siva',
+  vyhody: 'biela',
+  technicky: 'biela',
+  konzultacie: 'tmava',
+  galeria: 'tmava',
+  podklady: 'siva',
+  suvisiace: 'biela',
+  cta: 'tmava',
+}
+
+/** Pásma, ktorých farbu drží kompozícia a striedaniu neustupujú. */
+const PEVNE_PASMA = new Set(['hlavicka', 'konzultacie', 'cta'])
+
+/**
+ * Poradie farieb pásiem pre konkrétnu stránku služby.
+ *
+ * Deväť detailov má deväť rôznych sád pásiem: bohatá služba ich má osem,
+ * chudobná štyri. Kým mala každá sekcia farbu napevno, chudobným stránkam
+ * vypadli práve tie pásma, ktoré striedanie robili, a ostali tri biele za
+ * sebou. Medzi nimi bol dvakrát spodný a horný odsadok sekcie, čo je 260 px
+ * prázdnej bielej bez jediného predelu — nečíta sa to ako predel medzi témami,
+ * ale ako diera v stránke. Preto sa farba nepriraďuje sekcii, ale počíta z
+ * poradia: pásmo, ktoré na stránke ostalo, prevezme farbu po tom, ktoré
+ * vypadlo. Obsah sa nikde nedopĺňa.
+ *
+ * Pravidlá, v tomto poradí:
+ *  • pevné pásmo si farbu drží (hlavička je biela, vyhlášky a CTA tmavé);
+ *  • po tmavom pásme sa vracia biela — tmavé je akcent a KOMPOZICIA.md ho
+ *    strieda so svetlým (STANDARDY B5: dve tmavé za sebou nikdy);
+ *  • tmavé pásmo, ktoré by stálo tesne pred tmavým CTA, ustúpi na bielu;
+ *  • ostatné pásma berú opak predchádzajúcej svetlej farby.
+ *
+ * Hlavička a úvod bohatej služby sú výnimka: perex hlavičky a prvý odsek úvodu
+ * sú jedna myšlienka a delí ich prerušovaná `Lajna`, takže spoločné biele
+ * pozadie je predel aj tak. Chudobná služba úvod ako pokračovanie textu nemá —
+ * je to pásmo s fotkou a zoznamom podkladov, preto vstupuje do striedania.
+ */
+function rytmusPasiem(kluce, pevneNavyse = []) {
+  const pevne = new Set([...PEVNE_PASMA, ...pevneNavyse])
+  const farby = {}
+  let predchadzajuca = null
+
+  kluce.forEach((kluc, i) => {
+    const zaklad = ZAKLADNE_PASMO[kluc]
+    let farba = zaklad
+    if (!pevne.has(kluc)) {
+      const dalsiePevneTmave = pevne.has(kluce[i + 1]) && ZAKLADNE_PASMO[kluce[i + 1]] === 'tmava'
+      if (zaklad === 'tmava') farba = predchadzajuca === 'tmava' || dalsiePevneTmave ? 'biela' : 'tmava'
+      else if (predchadzajuca === 'tmava') farba = 'biela'
+      else if (predchadzajuca) farba = OPACNA_SVETLA[predchadzajuca]
+    }
+    farby[kluc] = farba
+    predchadzajuca = farba
+  })
+
+  return farby
+}
 
 /**
  * Šablóna deviatich stránok služieb. Bohatosť stránky určujú dáta, nie
@@ -59,8 +123,8 @@ const popisFotky = (f) => (f.prvok ? `${f.prvok} · ${f.miesto}` : f.miesto)
  * zoznam „Čo k tejto službe dopĺňa klient“ vpravo. Prázdne miesto sa
  * nevypĺňa vatou, mení sa rozloženie tých istých prvkov.
  *
- * Rytmus pásiem drží KOMPOZICIA.md; dve tmavé za sebou sú zakázané, preto
- * galéria ustúpi na bielu tam, kde pred ňou stojí tmavé pásmo s vyhláškami.
+ * Rytmus pásiem drží `rytmusPasiem` vyššie: farby sa nepriraďujú sekciám
+ * napevno, ale sa počítajú z poradia pásiem, ktoré na stránke naozaj vznikli.
  */
 export default function SluzbaDetail() {
   const { slug } = useParams()
@@ -79,12 +143,30 @@ export default function SluzbaDetail() {
   // vlastný štítok, ktorý stránka preberá namiesto vlastného nadpisu.
   const konzultacie = sluzba.konzultacie
   const maKonzultacie = Boolean(konzultacie || (sluzba.normy && sluzba.normy.length))
-  const pasmoGalerie = maKonzultacie ? 'biela' : 'tmava'
   const suvisiace = (sluzba.suvisiace || []).map(sluzbaPodlaSlugu).filter(Boolean)
   const maPodklady = Boolean(sluzba.chyba?.length)
   // Pri chudobných službách stojí zoznam podkladov rovno v úvodnom pásme.
   // Samostatné sivé pásmo len s ním by bolo takmer prázdne.
   const podkladyVUvode = !maOdseky && maPodklady
+
+  // Pásma, ktoré na tejto stránke skutočne vzniknú, v poradí zhora nadol.
+  // Hlavička je v zozname tiež: farbu si drží, ale rytmus sa počíta od nej.
+  const pasmo = rytmusPasiem(
+    [
+      'hlavicka',
+      'uvod',
+      sluzba.zoznamy?.length ? 'rozsah' : null,
+      sluzba.vyhody?.length ? 'vyhody' : null,
+      sluzba.tabulka || sluzba.navod ? 'technicky' : null,
+      maKonzultacie ? 'konzultacie' : null,
+      galeria.length ? 'galeria' : null,
+      maPodklady && !podkladyVUvode ? 'podklady' : null,
+      suvisiace.length ? 'suvisiace' : null,
+      'cta',
+    ].filter(Boolean),
+    maOdseky ? ['uvod'] : [],
+  )
+  const galeriaTmava = pasmo.galeria === 'tmava'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -127,7 +209,7 @@ export default function SluzbaDetail() {
 
       {/* 1. Úvod. Dve kompozície podľa toho, čo je v dátach. */}
       {maOdseky ? (
-        <Sekcia pasmo="biela">
+        <Sekcia pasmo={pasmo.uvod}>
           <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-7">
               {sluzba.odseky.map((o, i) => (
@@ -162,7 +244,7 @@ export default function SluzbaDetail() {
                     w={uvodnaFotka.w}
                     h={uvodnaFotka.h}
                     alt={altFotky(uvodnaFotka)}
-                    popis={uvodnaFotka.miesto}
+                    popis={popisFotky(uvodnaFotka)}
                     pomer={uvodnaFotka.h > uvodnaFotka.w * 1.34 ? '3/4' : null}
                     priorita
                   />
@@ -172,7 +254,7 @@ export default function SluzbaDetail() {
           </div>
         </Sekcia>
       ) : (
-        <Sekcia pasmo="biela" padding="male">
+        <Sekcia pasmo={pasmo.uvod} padding="male">
           <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16">
             {uvodnaFotka ? (
               <Reveal className="lg:col-span-7">
@@ -185,7 +267,7 @@ export default function SluzbaDetail() {
                     w={uvodnaFotka.w}
                     h={uvodnaFotka.h}
                     alt={altFotky(uvodnaFotka)}
-                    popis={uvodnaFotka.miesto}
+                    popis={popisFotky(uvodnaFotka)}
                     pomer="21/9"
                     priorita
                   />
@@ -213,7 +295,7 @@ export default function SluzbaDetail() {
 
       {/* 2. Zoznamy podkategórií: stĺpce s vlasovou linkou, položky pod sebou. */}
       {sluzba.zoznamy?.length ? (
-        <Sekcia pasmo="siva">
+        <Sekcia pasmo={pasmo.rozsah}>
           <SekciaHlavicka stitok="Rozsah" nadpis="Čo služba zahŕňa" />
           {/* Aj jediný zoznam ostáva v polovičnom stĺpci: cez celú šírku
               kontajnera by z položiek boli nečitateľne dlhé riadky. */}
@@ -239,21 +321,31 @@ export default function SluzbaDetail() {
         </Sekcia>
       ) : null}
 
-      {/* 3. Výhody: len tam, kde ich pôvodný web uvádzal (retardéry). */}
+      {/* 3. Výhody: len tam, kde ich pôvodný web uvádzal (retardéry).
+
+          Jeden stĺpec so širokými riadkami, nie mriežka. Výhod je sedem, a
+          sedem je prvočíslo: v dvoch stĺpcoch vyjde 4 + 3, takže posledná
+          položka stojí sama a vedľa nej ostane prázdne pole vysoké ako celý
+          riadok; v troch stĺpcoch je to 3 + 3 + 1, čo je to isté ešte
+          výraznejšie. Jediný stĺpec osirelú položku ani dieru mať nemôže —
+          každý riadok je celý riadok. Opticky pridáva ešte jedno: oko číta
+          zoznam zhora nadol jednou linkou a neskáče cez 64 px medzeru medzi
+          stĺpcami, pričom dĺžka riadkov sa nestrieda náhodne podľa toho, ako
+          dlhá je susedná bunka. Je to aj forma, ktorú web na tej istej
+          stránke používa v „Čo služba zahŕňa“, v návode na inštaláciu aj v
+          zozname podkladov: vlasová linka, akcentová čiarka, veta. */}
       {sluzba.vyhody?.length ? (
-        <Sekcia pasmo="biela">
+        <Sekcia pasmo={pasmo.vyhody}>
           <SekciaHlavicka
             stitok="Výhody"
             nadpis={sluzba.znacky?.length ? `Výhody ${sluzba.znacky[0]}` : 'Výhody riešenia'}
           />
-          <Stagger className="mt-12 grid grid-cols-1 gap-x-16 gap-y-1 lg:grid-cols-2" staggerChildren={0.06}>
+          <Stagger className="mt-12 border-t border-[var(--color-border)]" staggerChildren={0.06}>
             {sluzba.vyhody.map((v) => (
               <StaggerItem key={v} as="div">
-                {/* `h-full`: bez neho končí vlasová linka krátkej výhody hore
-                    v riadku a linka dlhej výhody dole, a mriežka sa rozstrapká. */}
-                <p className="flex h-full gap-4 border-b border-[var(--color-border)] py-5 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                <p className="flex gap-5 border-b border-[var(--color-border)] py-5 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">
                   <span aria-hidden="true" className="mt-[0.7em] h-[2px] w-4 shrink-0 bg-[var(--color-accent)]" />
-                  <span className="max-w-[52ch]">{v}</span>
+                  <span className="max-w-[62ch]">{v}</span>
                 </p>
               </StaggerItem>
             ))}
@@ -266,7 +358,7 @@ export default function SluzbaDetail() {
           ako marginálie vo voľnom stĺpci — pod tabuľkou visela a pravá
           polovica pásma ostávala prázdna. */}
       {sluzba.tabulka || sluzba.navod ? (
-        <Sekcia pasmo="biela">
+        <Sekcia pasmo={pasmo.technicky}>
           {sluzba.tabulka ? (
             <>
               <SekciaHlavicka stitok="Parametre" nadpis={sluzba.tabulka.titulok} sirkaNadpisu="max-w-[24ch]" />
@@ -369,13 +461,13 @@ export default function SluzbaDetail() {
 
       {/* 6. Galéria služby. Popisy sú pravdivé: miesto uvádzame len tam, kde ho dáta potvrdzujú. */}
       {galeria.length ? (
-        <Sekcia pasmo={pasmoGalerie}>
+        <Sekcia pasmo={pasmo.galeria}>
           <SekciaHlavicka
-            tmava={pasmoGalerie === 'tmava'}
+            tmava={galeriaTmava}
             stitok="Galéria"
             nadpis="Fotografie z realizácií"
             akcia={
-              <Tlacidlo variant="tichy" tmava={pasmoGalerie === 'tmava'} to="/realizacie">
+              <Tlacidlo variant="tichy" tmava={galeriaTmava} to="/realizacie">
                 Všetky realizácie
               </Tlacidlo>
             }
@@ -393,7 +485,7 @@ export default function SluzbaDetail() {
                   alt={altFotky(f)}
                   popis={popisFotky(f)}
                   pomer="4/3"
-                  tmava={pasmoGalerie === 'tmava'}
+                  tmava={galeriaTmava}
                 />
               </StaggerItem>
             ))}
@@ -404,7 +496,7 @@ export default function SluzbaDetail() {
       {/* 7. Čo od klienta potrebujeme. Zámerne nenápadné: je to demo a klient
           má vidieť, ktoré miesta čakajú na jeho podklady. Nič sa nepredstiera. */}
       {maPodklady && !podkladyVUvode ? (
-        <Sekcia pasmo="siva" padding="male">
+        <Sekcia pasmo={pasmo.podklady} padding="male">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-4">
               <HlavickaPodkladov velky />
@@ -419,7 +511,7 @@ export default function SluzbaDetail() {
       {/* 8. Súvisiace služby: karty bez rámu, aby na stránke nestáli tri
           rovnaké orámované boxy vedľa seba (STANDARDY B6). */}
       {suvisiace.length ? (
-        <Sekcia pasmo="biela">
+        <Sekcia pasmo={pasmo.suvisiace}>
           <SekciaHlavicka
             stitok="Ďalej"
             nadpis="Súvisiace služby"
