@@ -34,7 +34,7 @@ function useSirsieAkoLg() {
 }
 
 /**
- * Služby na Domove. Na `lg` a vyššie je to kruhový objazd — podpisový prvok
+ * Služby na Domove. Na `lg` a vyššie je to kruhový objazd: podpisový prvok
  * webu aj prvok z odboru klienta; vľavo stojí detail práve aktívnej služby.
  * Na mobile a tablete je to čistý zoznam so skupinami a náhľadmi: koleso sa
  * na 390 px nedá zmysluplne ovládať a v behu v4 sa z mobilu na pokyn

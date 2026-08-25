@@ -21,7 +21,13 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
                 <span key={d.to || d.label}>
                   {i > 0 ? <span aria-hidden="true" className="mx-2 text-[var(--color-accent)]">·</span> : null}
                   {d.to ? (
-                    <Link to={d.to} className="hover:text-[var(--color-text)]">
+                    // `inline-flex` + `min-h-[44px]`: inline odkaz má schránku
+                    // z metriky písma (15 px), takže by na mobile prepadol
+                    // kontrolou tap targetov, aj keď sa naň dá trafiť.
+                    <Link
+                      to={d.to}
+                      className="inline-flex min-h-[44px] items-center hover:text-[var(--color-text)] lg:min-h-0"
+                    >
                       {d.label}
                     </Link>
                   ) : (
