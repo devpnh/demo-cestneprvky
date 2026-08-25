@@ -141,31 +141,36 @@ FIRMA.partner = FIRMA.konzultacie
  * Vety o technológii sú zúžené na tie prvky, pri ktorých ich pôvodný web
  * naozaj tvrdí (lepené obrubníky, stierkovanie, retardéry na lepidlo).
  * Celý blok je v `poznamky/HANDOVER.md` na potvrdenie klientom.
+ *
+ * Popisy sú zámerne krátke a približne rovnako dlhé: sekcia ich sádže do
+ * štyroch stĺpcov po ~33 znakoch na riadok a dlhé vety tam vyzerali ako
+ * štyri rôzne vysoké kôpky textu. Vety o kratšom obmedzení premávky a o
+ * pokračovaní prác nesie sekcia Prečo (`FIRMA.pristup`).
  */
 export const PROCES = sadzbaHlboko([
   {
     id: 'dopyt',
     nazov: 'Dopyt a obhliadka',
     popis:
-      'Napíšete nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme obhliadku na mieste.',
+      'Napíšete nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme obhliadku.',
   },
   {
     id: 'navrh',
     nazov: 'Návrh a ponuka',
     popis:
-      'Schému, vzor, farebný odtieň aj rozloženie prvkov prispôsobíme vašej požiadavke a platným vyhláškam. K návrhu dostanete cenovú ponuku na konkrétny rozsah prác.',
+      'Schému, vzor aj rozloženie prvkov prispôsobíme vašej požiadavke a platným vyhláškam. K návrhu dostanete cenovú ponuku.',
   },
   {
     id: 'realizacia',
     nazov: 'Realizácia',
     popis:
-      'Prvky osadíme na mieste. Pri lepených obrubníkoch a stierkovanom značení odpadajú búracie práce aj ťažké mechanizmy, takže obmedzenie premávky trvá kratšie.',
+      'Prvky osadíme na mieste. Pri lepených obrubníkoch a stierkovanom značení odpadajú búracie práce aj ťažké mechanizmy.',
   },
   {
     id: 'odovzdanie',
     nazov: 'Odovzdanie',
     popis:
-      'Úsek odovzdáme do užívania. Lepené obrubníky majú po 30 minútach 100 % pevnosti, takže sa dá hneď pokračovať v ďalších stavebných prácach.',
+      'Úsek odovzdáme do užívania. Lepené obrubníky majú po 30 minútach 100 % pevnosti.',
   },
 ])
 

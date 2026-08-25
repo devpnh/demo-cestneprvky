@@ -56,14 +56,15 @@ export default function SluzbyPrehlad() {
 
   return (
     <Sekcia id="sluzby" pasmo="biela">
-      {/* Perex má na `lg` vlastné miesto v ľavom stĺpci pod nadpisom: ľavý
-          stĺpec bol o 193 px kratší než objazd a nad detailom aktívnej služby
-          zívala prázdna plocha. Na užších obrazovkách ľavý stĺpec neexistuje,
-          tam ostáva perex v hlavičke sekcie. */}
+      {/* Perex stojí v pravom stĺpci hlavičky ako na každej inej sekcii webu.
+          Keď bol na `lg` presunutý doľava, ostal pravý horný roh sekcie
+          prázdny na 340 px a odkaz „Všetkých deväť služieb“ v ňom visel sám.
+          Medzera v ľavom stĺpci, kvôli ktorej sa presúval, medzitým zanikla
+          zmenšením objazdu: medzi nadpisom a detailom je dnes 48 px. */}
       <SekciaHlavicka
         stitok="Služby"
         nadpis="Čo realizujeme na pozemných komunikáciách"
-        perex={siroke ? null : PEREX}
+        perex={PEREX}
         akcia={
           <Tlacidlo variant="tichy" to="/sluzby">
             Všetkých deväť služieb
@@ -74,11 +75,7 @@ export default function SluzbyPrehlad() {
       {siroke ? (
         <div className="mt-12 grid grid-cols-12 items-start gap-16">
           <Reveal className="col-span-5">
-            <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-              {PEREX}
-            </p>
-
-            <div aria-hidden="true" className="mt-10 h-[2px] w-full bg-[var(--color-border)]">
+            <div aria-hidden="true" className="h-[2px] w-full bg-[var(--color-border)]">
               <div
                 className={`h-full bg-[var(--color-accent)] ${
                   reduced ? '' : 'transition-[width] duration-[var(--duration-fast)]'
