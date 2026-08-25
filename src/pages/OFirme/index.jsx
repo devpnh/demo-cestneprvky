@@ -9,8 +9,8 @@ import {
   Fotka,
   Lajna,
 } from '../../components/kit/index.js'
-import { Reveal, Stagger, StaggerItem } from '../../components/primitives/index.js'
-import { FIRMA } from '../../content/firma.js'
+import { Reveal } from '../../components/primitives/index.js'
+import { FIRMA, PROCES } from '../../content/firma.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 
 const META = routaPodlaCesty('/o-firme')
@@ -19,18 +19,23 @@ const META = routaPodlaCesty('/o-firme')
 const JEMNA_LINKA = { borderColor: 'color-mix(in srgb, var(--color-bg) 18%, transparent)' }
 
 /**
- * Zástupný text v dátach má tvar `[DOPLNÍ KLIENT: …]`. Hranatá zátvorka na
- * stránke vyzerá ako nedorobené CMS pole, preto z nej berieme len vetu a
- * samotné „doplní klient“ nesie mono štítok — tá istá forma ako v tabuľke
- * fakturačných údajov na `/kontakt`.
+ * Zástupné pole v dátach má tvar `[DOPLNÍ KLIENT: …]` a býva vložené do vety
+ * (`FIRMA.znacky`) aj samostatné (`FIRMA.aktuality`). Hranatá zátvorka na
+ * stránke vyzerá ako nedorobené CMS pole, preto text rozoberieme na doloženú
+ * časť a na chýbajúcu; „doplní klient“ nesie mono štítok — tá istá forma ako
+ * v tabuľke fakturačných údajov na `/kontakt`.
  */
-const ZASTUPNY_TEXT = /^\[\s*DOPLNÍ KLIENT\s*:?\s*([\s\S]*?)\s*\]$/
+const ZASTUPNY_TEXT = /\[\s*DOPLNÍ KLIENT\s*:?\s*([\s\S]*?)\s*\]/
 
-function vetaZastupnehoTextu(poznamka, nahrada) {
-  const zhoda = (poznamka || '').trim().match(ZASTUPNY_TEXT)
-  const veta = (zhoda ? zhoda[1] : poznamka || '').trim()
-  if (!veta) return nahrada
-  return veta.charAt(0).toUpperCase() + veta.slice(1)
+function rozoberZastupnyText(text) {
+  const zdroj = (text || '').trim()
+  const zhoda = zdroj.match(ZASTUPNY_TEXT)
+  if (!zhoda) return { doloziene: zdroj, chyba: '' }
+  const doloziene = (zdroj.slice(0, zhoda.index) + zdroj.slice(zhoda.index + zhoda[0].length))
+    .replace(/\s+/g, ' ')
+    .trim()
+  const chyba = zhoda[1].trim()
+  return { doloziene, chyba: chyba ? chyba.charAt(0).toUpperCase() + chyba.slice(1) : '' }
 }
 
 /**
@@ -48,9 +53,9 @@ function rozdelPrvuVetu(odsek) {
  * O firme.
  *
  * Rytmus pásiem podľa `poznamky/KOMPOZICIA.md` §2: biela (hlavička) → sivá
- * (firma) → biela (prístup) → tmavá (partner a normy) → biela (aktuality) →
- * tmavá (CTA, ktoré plynulo prechádza do tmavej pätičky). Dve tmavé obsahové
- * pásma za sebou nikde nie sú.
+ * (firma) → biela (prístup) → tmavá (konzultácie, normy, materiály) → biela
+ * (aktuality) → tmavá (CTA, ktoré plynulo prechádza do tmavej pätičky). Dve
+ * tmavé obsahové pásma za sebou nikde nie sú.
  *
  * Všetky vety o klientovi pochádzajú z `src/content/firma.js` a
  * `src/content/global.json`. Tu vznikajú len mikro-labely a nadpisy sekcií
@@ -82,7 +87,10 @@ export default function OFirme() {
           <div className="lg:col-span-7">
             <Reveal>
               <MonoStitok>Firma</MonoStitok>
-              <p className="mt-5 max-w-[24ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-medium leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+              {/* Vyhlásenie je od kola 3 dlhšie (119 znakov), preto o stupeň
+                  menší rez a širší blok: v `--text-3xl` na 24ch by malo päť
+                  riadkov a preválcovalo by odseky pod sebou. */}
+              <p className="mt-5 max-w-[34ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.25] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                 {vyhlasenie}
               </p>
             </Reveal>
@@ -142,13 +150,16 @@ export default function OFirme() {
         </ul>
       </Sekcia>
 
-      {/* Partner a legislatíva na tmavom pásme. */}
-      <Sekcia id="partner" pasmo="tmava">
+      {/* Kam po konzultáciu, legislatíva a materiály na tmavom pásme.
+          Blok o Únii nevidiacich a slabozrakých Slovenska NIE JE vyhlásenie o
+          vzťahu s ňou: hovorí o tom, čo Únia robí, a odkazuje na jej web.
+          Znenie vlastní `FIRMA.konzultacie`, tu sa neprepisuje. */}
+      <Sekcia id="konzultacie" pasmo="tmava">
         <SekciaHlavicka
           tmava
-          stitok="Spolupráca"
-          nadpis={FIRMA.partner.nazov}
-          perex={FIRMA.partner.popis}
+          stitok={FIRMA.konzultacie.stitok}
+          nadpis={FIRMA.konzultacie.nazov}
+          perex={FIRMA.konzultacie.popis}
           sirkaNadpisu="max-w-[16ch]"
         />
 
@@ -156,48 +167,74 @@ export default function OFirme() {
           <Tlacidlo
             variant="tichy"
             tmava
-            href={FIRMA.partner.url}
+            href={FIRMA.konzultacie.url}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Pozrieť architektonickebariery.sk
+            {`Pozrieť ${FIRMA.konzultacie.odkazText}`}
           </Tlacidlo>
         </Reveal>
 
         <Lajna tmava className="mt-12" />
 
-        <div className="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <MonoStitok tmava>Legislatíva</MonoStitok>
-            <ul className="mt-6">
-              {FIRMA.normy.map((norma) => (
-                <li
-                  key={norma}
-                  className="max-w-[34ch] border-t py-4 font-[family-name:var(--font-mono)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)]"
-                  style={JEMNA_LINKA}
-                >
-                  {norma}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <Reveal className="mt-14">
+          <MonoStitok tmava>Legislatíva</MonoStitok>
+          <ul className="mt-6 grid grid-cols-1 gap-x-16 sm:grid-cols-2">
+            {FIRMA.normy.map((norma) => (
+              <li
+                key={norma}
+                className="border-t py-4 font-[family-name:var(--font-mono)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)]"
+                style={JEMNA_LINKA}
+              >
+                {norma}
+              </li>
+            ))}
+          </ul>
+        </Reveal>
 
-          <div className="lg:col-span-7">
-            <MonoStitok tmava>Materiály a značky</MonoStitok>
-            <Stagger staggerChildren={0.06} as="ul" className="mt-6 flex flex-wrap gap-3">
-              {FIRMA.znacky.map((znacka) => (
-                <StaggerItem
-                  as="li"
-                  key={znacka.nazov}
-                  className="border px-4 py-3 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)]"
-                  style={{ ...JEMNA_LINKA, borderRadius: 'var(--radius-sm)' }}
-                >
+        <Reveal className="mt-16">
+          <MonoStitok tmava>Materiály a značky</MonoStitok>
+        </Reveal>
+
+        {/* Značky ako heslá so slovníkovým popisom: `dt` a `dd` sú priamymi
+            deťmi jedného `div`-u v `dl`, hlbšie vnorenie by bolo neplatné HTML.
+            Preto je `Reveal` samotný ten `div`. */}
+        <dl className="mt-8">
+          {FIRMA.znacky.map((znacka, i) => {
+            const { doloziene, chyba } = rozoberZastupnyText(znacka.popis)
+            return (
+              <Reveal
+                key={znacka.nazov}
+                className={`grid grid-cols-1 gap-4 border-t pt-6 lg:grid-cols-12 lg:gap-16 ${i === 0 ? '' : 'mt-8'}`}
+                style={JEMNA_LINKA}
+              >
+                <dt className="max-w-[22ch] font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-medium leading-[var(--leading-tight)] text-[var(--color-bg)] lg:col-span-4">
                   {znacka.nazov}
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </div>
-        </div>
+                </dt>
+                <dd className="lg:col-span-8">
+                  {doloziene ? (
+                    <p className="max-w-[58ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
+                      {doloziene}
+                    </p>
+                  ) : null}
+                  {chyba ? (
+                    <div
+                      className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t pt-4 ${doloziene ? 'mt-4' : ''}`}
+                      style={JEMNA_LINKA}
+                    >
+                      <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
+                        {chyba}
+                      </p>
+                      <MonoStitok tmava sCiarkou={false} className="shrink-0">
+                        Doplní klient
+                      </MonoStitok>
+                    </div>
+                  ) : null}
+                </dd>
+              </Reveal>
+            )
+          })}
+        </dl>
       </Sekcia>
 
       {/* Aktuality — jediná položka z pôvodného webu. `url` je null, preto to
@@ -219,7 +256,7 @@ export default function OFirme() {
                   </h3>
                   <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4">
                     <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                      {vetaZastupnehoTextu(clanok.poznamka, 'Odkaz na pôvodný článok a názov média.')}
+                      {rozoberZastupnyText(clanok.poznamka).chyba || 'Odkaz na pôvodný článok a názov média.'}
                     </p>
                     <MonoStitok className="shrink-0">Doplní klient</MonoStitok>
                   </div>
@@ -236,7 +273,7 @@ export default function OFirme() {
           tmava
           stitok="Ďalší krok"
           nadpis="Dohodneme si obhliadku"
-          perex="Pozrieme sa na povrch, spád a organizáciu dopravy priamo na mieste. Potom navrhneme riešenie a cenovú ponuku na konkrétny rozsah prác."
+          perex={PROCES[0].popis}
           sirkaNadpisu="max-w-[14ch]"
         />
         <Reveal className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">

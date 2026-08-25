@@ -56,7 +56,7 @@ export default function Kontakt() {
       <StranHlavicka
         stitok="Kontakt"
         nadpis="Napíšte nám typ prvku, miesto a rozsah"
-        perex="Ozveme sa s termínom obhliadky a návrhom riešenia. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku."
+        perex="Ozveme sa a dohodneme ďalší postup. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku."
       />
 
       {/* Spojenie a formulár. Formulár je zámerne na svetlom pásme — jeho polia
