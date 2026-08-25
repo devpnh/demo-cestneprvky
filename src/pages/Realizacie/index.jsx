@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { MonoStitok, Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
+import { Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
-import { GALERIA, MIESTA_REALIZACII } from '../../content/realizacie.js'
+import { GALERIA } from '../../content/realizacie.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 import {
   castiPopisu,
@@ -16,6 +16,7 @@ import {
   typySkupiny,
 } from './skupiny.js'
 import Filtre from './Filtre.jsx'
+import MapaRealizacii from './MapaRealizacii.jsx'
 import Lightbox from './Lightbox.jsx'
 
 const META = routaPodlaCesty('/realizacie')
@@ -269,32 +270,7 @@ export default function Realizacie() {
           </div>
         ) : null}
 
-        {/*
-          Miesta z názvov fotografií klienta, vrátane ôsmich, ku ktorým fotku
-          nemáme. Stojí až za mriežkou zámerne: je to doklad o rozsahu, nie
-          filter, a nad mriežkou by odtlačil prvú fotku pod ohyb.
-
-          Mená miest sú v prirodzenom písme, nie v mono verzálkach ako
-          `PasFaktov`: sú to vlastné mená, teda obsah, nie technický štítok
-          (STANDARDY B4), a pätnásť verzálkových názvov za sebou sa číta ako
-          krik. Oddeľovač je prilepený nezlomiteľnou medzerou, aby nikdy
-          nezačínal riadok, a `--color-accent-deep` má na bielej 5,76:1.
-        */}
-        <div className="mt-16 border-t border-[var(--color-border)] pt-8">
-          <MonoStitok>Miesta realizácií</MonoStitok>
-          <ul className="mt-5 flex max-w-[70ch] flex-wrap gap-x-3 gap-y-1 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-            {MIESTA_REALIZACII.map((m, i) => (
-              <li key={m} className="max-w-full">
-                {m}
-                {i < MIESTA_REALIZACII.length - 1 ? (
-                  <span aria-hidden="true" className="text-[var(--color-accent-deep)]">
-                    {'\u00a0·'}
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <MapaRealizacii />
       </Sekcia>
 
       <Sekcia pasmo="tmava">

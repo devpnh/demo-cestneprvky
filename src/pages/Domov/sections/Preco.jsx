@@ -1,5 +1,5 @@
-import { Sekcia, SekciaHlavicka } from '../../../components/kit/index.js'
-import { Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { MonoStitok, Sekcia } from '../../../components/kit/index.js'
+import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
 import { FIRMA } from '../../../content/firma.js'
 
 /**
@@ -23,7 +23,23 @@ import { FIRMA } from '../../../content/firma.js'
 export default function Preco() {
   return (
     <Sekcia id="preco" pasmo="siva">
-      <SekciaHlavicka stitok="Prečo Cestné prvky" nadpis={FIRMA.claim} perex={FIRMA.technologie.uvod} />
+      {/* Hlavička zámerne nepoužíva `SekciaHlavicka`: tá stavia perex do
+          12-stĺpcovej mriežky s dorazením vpravo (`lg:ml-auto`), takže mu ľavá
+          hrana vychádzala na 855 px, kým druhý stĺpec argumentov pod ním
+          začína na 752 px. Rozdiel 103 px bolo v sekcii vidno. Hlavička preto
+          beží na tej istej dvojstĺpcovej mriežke ako argumenty a perex sedí
+          presne nad popisom vpravo, oboma hranami. */}
+      <Reveal className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-2 lg:items-end">
+        <div>
+          <MonoStitok>Prečo Cestné prvky</MonoStitok>
+          <h2 className="mt-5 max-w-[20ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+            {FIRMA.claim}
+          </h2>
+        </div>
+        <p className="font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+          {FIRMA.technologie.uvod}
+        </p>
+      </Reveal>
 
       <Stagger
         staggerChildren={0.07}
