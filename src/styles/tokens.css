@@ -8,6 +8,7 @@
   --color-text: #26292c;
   --color-muted: #5c6166;
   --color-accent: #f03314;
+  --color-accent-deep: #c5250d; /* hover/pressed akcentu, z palety klienta; nikdy ako plocha */
   --color-accent-2: #1b1e20;
   --color-on-accent: #ffffff;
   --color-border: #e1e3e5;
