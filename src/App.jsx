@@ -1,4 +1,4 @@
-import { Suspense, lazy, useRef } from 'react'
+import { useRef } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { useLenis } from './lib/useLenis.js'
@@ -9,20 +9,22 @@ import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 import ScrollToTop from './components/layout/ScrollToTop.jsx'
 
-// Stránky lenivo: bundle sa rozpadne na chunk na routu, takže domovská
-// stránka neťahá tabuľku DEBUZ ani galériu realizácií.
-const Domov = lazy(() => import('./pages/Domov/index.jsx'))
-const Sluzby = lazy(() => import('./pages/Sluzby/index.jsx'))
-const SluzbaDetail = lazy(() => import('./pages/Sluzby/Detail.jsx'))
-const Realizacie = lazy(() => import('./pages/Realizacie/index.jsx'))
-const OFirme = lazy(() => import('./pages/OFirme/index.jsx'))
-const Kontakt = lazy(() => import('./pages/Kontakt/index.jsx'))
-const NotFound = lazy(() => import('./pages/NotFound.jsx'))
-
-/** Neutrálny fallback, ktorý rezervuje výšku. Bez neho by pätička vyskočila hore. */
-function Nacitava() {
-  return <div className="min-h-[60vh]" aria-hidden="true" />
-}
+// Stránky sú importované priamo, nie cez `lazy`.
+//
+// Dôvod je meraný: pri lenivom načítaní vykreslí Suspense najprv fallback
+// vysoký 60 vh, pätička sedí hneď pod ním a po dorazení chunku spadne o
+// niekoľko tisíc pixelov nižšie. Lighthouse to videl ako jediný veľký posun
+// s CLS 0,404 (`body > div#root > footer`). Delenie na chunky pritom
+// neušetrilo takmer nič: spoločný balík má 496 kB, kým chunky stránok mali
+// 1 až 28 kB, teda dokopy okolo 50 kB. Za odstránený skok layoutu je to
+// výmena, ktorú robíme radi.
+import Domov from './pages/Domov/index.jsx'
+import Sluzby from './pages/Sluzby/index.jsx'
+import SluzbaDetail from './pages/Sluzby/Detail.jsx'
+import Realizacie from './pages/Realizacie/index.jsx'
+import OFirme from './pages/OFirme/index.jsx'
+import Kontakt from './pages/Kontakt/index.jsx'
+import NotFound from './pages/NotFound.jsx'
 
 /**
  * Prechod medzi routami: fade + 12 px slide-up, 300 ms, house easing.
@@ -52,8 +54,7 @@ function PrechodRoutov() {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div key={location.pathname} {...animacia}>
-        <Suspense fallback={<Nacitava />}>
-          <Routes location={location}>
+        <Routes location={location}>
             <Route path="/" element={<Domov />} />
             <Route path="/sluzby" element={<Sluzby />} />
             <Route path="/sluzby/:slug" element={<SluzbaDetail />} />
@@ -61,8 +62,7 @@ function PrechodRoutov() {
             <Route path="/o-firme" element={<OFirme />} />
             <Route path="/kontakt" element={<Kontakt />} />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+        </Routes>
       </motion.div>
     </AnimatePresence>
   )

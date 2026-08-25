@@ -3,9 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Seo.jsx overwrites title/meta at runtime from src/content/global.json;
-         these are just sane pre-hydration defaults so the tab isn't blank. -->
-    <title>Demo — PNH Media</title>
+    <!-- Seo.jsx prepisuje title a meta za behu z src/content/global.json;
+         toto je len rozumný predvolený stav, aby karta nebola prázdna. -->
+    <title>Cestné prvky s.r.o.</title>
+
+    <!-- Fonty sa načítavajú odtiaľto, nie cez @import v tokens.css: vnorený
+         @import prehliadač objaví až po stiahnutí a spracovaní hlavného CSS,
+         takže výmena fallbacku za Archivo prišla neskoro a posúvala hero.
+         Rez 700 zámerne nepýtame, dizajnový systém ho zakazuje. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Hárok fontov sa načíta asynchrónne: ako blokujúci stál na mobile
+         okolo 2,1 s pred prvým vykreslením. `media="print"` ho vyradí z
+         renderovacej cesty a `onload` ho vráti späť. Cena je nepatrný posun
+         pri výmene fallbacku (namerané CLS 0,003 na mobile). -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      />
+    </noscript>
+
+    <!-- Poster hero je LCP obrázok; sťahovanie štartuje hneď, nie až keď ho
+         vykreslí React. Varianty sedia so `srcset` v Hero.jsx. -->
+    <link
+      rel="preload"
+      as="image"
+      href="/hero/poster.jpg"
+      imagesrcset="/hero/poster-960.jpg 960w, /hero/poster-1440.jpg 1440w, /hero/poster.jpg 1920w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
   </head>
   <body>
     <div id="root"></div>
