@@ -129,11 +129,15 @@ function PolozkaScrub({ progress, index, deti }) {
   )
 }
 
-/** Položka bez fotky: ostáva čitateľná, len sa nerozsvecuje. */
-function PolozkaStaticka({ deti }) {
+/**
+ * Položka bez vlastnej fázy. V tečúcej verzii nie je čo „rozsvecovať“, takže
+ * je celý zoznam v plnej sile; v pripnutej verzii je stlmená na 0,55, čo je
+ * na tmavom pásme 5,5:1 — teda stále čitateľné telo, nie dekorácia.
+ */
+function PolozkaStaticka({ deti, tlmena }) {
   return (
-    <li className={TRIEDA_POLOZKY} style={{ opacity: 0.55 }}>
-      <Odrazka akcent={false} />
+    <li className={TRIEDA_POLOZKY} style={tlmena ? { opacity: 0.55 } : undefined}>
+      <Odrazka akcent={!tlmena} />
       <span>{deti}</span>
     </li>
   )
@@ -153,7 +157,7 @@ function ZoznamyPrvkov({ progress = null, triedaWrap = 'mt-8 grid grid-cols-1 ga
               if (progress && i >= 0) {
                 return <PolozkaScrub key={polozka} progress={progress} index={i} deti={polozka} />
               }
-              return <PolozkaStaticka key={polozka} deti={polozka} />
+              return <PolozkaStaticka key={polozka} deti={polozka} tlmena={!!progress} />
             })}
           </ul>
         </div>
