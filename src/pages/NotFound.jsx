@@ -16,7 +16,10 @@ export default function NotFound() {
     <>
       <Seo title={ROUTA_404.title} description={ROUTA_404.description} />
 
-      <section className="mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y)]">
+      <section
+        data-pasmo="biela"
+        className="mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y)]"
+      >
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <p className="flex items-center gap-3 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)] before:h-[2px] before:w-6 before:bg-[var(--color-accent)] before:content-['']">
@@ -34,7 +37,7 @@ export default function NotFound() {
               <button
                 type="button"
                 onClick={() => openObhliadka()}
-                className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-accent-deep,#C5250D)]"
+                className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-accent-deep)]"
                 style={{ borderRadius: 'var(--radius-sm)' }}
               >
                 Dohodnúť obhliadku a cenu

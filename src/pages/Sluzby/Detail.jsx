@@ -299,7 +299,7 @@ export default function SluzbaDetail() {
               <Stagger as="ol" className="mt-8 max-w-[68ch]" staggerChildren={0.07}>
                 {sluzba.navod.kroky.map((k, i) => (
                   <StaggerItem as="li" key={k.slice(0, 40)} className="flex gap-5 border-t border-[var(--color-border)] py-5">
-                    <span className="mt-[0.35em] shrink-0 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-accent)]">
+                    <span className="mt-[0.35em] shrink-0 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-accent-deep)]">
                       {i + 1}
                     </span>
                     <span className="font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">

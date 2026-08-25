@@ -162,7 +162,7 @@ export default function Lightbox({ polozky, index, onZavri, onPrepni }) {
           </p>
           <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.72)]">
             {polozka.miesto}
-            <span aria-hidden="true" className="mx-3 text-[var(--color-accent)]">
+            <span aria-hidden="true" className="mx-3 text-[rgba(255,255,255,0.72)]">
               ·
             </span>
             {polozka.prostredie}

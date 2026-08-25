@@ -19,7 +19,7 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
             <nav aria-label="Drobková navigácia" className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
               {drobky.map((d, i) => (
                 <span key={d.to || d.label}>
-                  {i > 0 ? <span aria-hidden="true" className="mx-2 text-[var(--color-accent)]">·</span> : null}
+                  {i > 0 ? <span aria-hidden="true" className="mx-2 text-[var(--color-accent-deep)]">·</span> : null}
                   {d.to ? (
                     // `inline-flex` + `min-h-[44px]`: inline odkaz má schránku
                     // z metriky písma (15 px), takže by na mobile prepadol

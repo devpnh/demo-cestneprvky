@@ -163,7 +163,7 @@ export default function Realizacie() {
                   </span>
                   <span className="mt-1 block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
                     {r.miesto}
-                    <span aria-hidden="true" className="mx-2 text-[var(--color-accent)]">
+                    <span aria-hidden="true" className="mx-2 text-[var(--color-accent-deep)]">
                       ·
                     </span>
                     {r.prostredie}
