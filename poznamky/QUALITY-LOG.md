@@ -137,3 +137,31 @@ Raster a deľba práce: `poznamky/KOMPOZICIA.md`. Mapa obsahu: `poznamky/MAPA-OB
   - Rozmery fotiek sa merali dvakrát, lebo manažér medzitým prevzorkoval assety. Krížová kontrola manažéra po oboch zásahoch: **60 fotoodkazov, 0 nezrovnalostí** medzi `w`/`h` v dátach a súbormi na disku.
 - **Shell (Staviteľ Layout):** `react-router-dom` v7, `basename` z `import.meta.env.BASE_URL`, lazy stránky, prechod fade + 12 px / 300 ms cez `AnimatePresence mode="wait"`, `ScrollToTop` s fokusom na `<main>`, `Header` (fixed, priehľadný len na `/`, mobilné menu ako súrodenec headera kvôli `backdrop-filter`), `Footer` s odkazmi na routy (starý mŕtvy `#technologie` je preč), `Seo` s props na routu, `scripts/postbuild.mjs` kopíruje `index.html` → `404.html`. Overené: 14 ciest 200, 0 pageerror, 1× h1, `scrollWidth` 390 na všetkých.
   - Odchýlka od kontraktu: dáta exportujú `ROUTY`/`NAVIGACIA`, nie `ROUTES` → shell má adaptér `src/components/layout/routy.js`, aby sa prípadné premenovanie riešilo na jednom mieste.
+
+## Kolo 1 — stavba stránok, prvý audit, výkon
+- **Štyria stavitelia paralelne** na disjunktných súboroch (Domov 5 sekcií · Služby prehľad + 9 detailov + objazd · Realizácie sticky + galéria · O firme + Kontakt). Kompozíciu Domova a stuby sekcií napísal manažér vopred, aby sa nikto nebil o `index.jsx` a build ostal zelený počas celého behu.
+- **Tri chyby zdieľaného kitu našli stavitelia, nie audit** (a všetky sú z rodiny „Tailwind nerozhoduje podľa poradia tried v reťazci“):
+  1. `PasFaktov` mal `whitespace-nowrap` na celej položke → fakt „Konzultácie: Únia nevidiacich…“ má na 390 px cez 440 px a ťahal `scrollWidth` dokumentu na 461. Oprava: text sa láme, nezlomiteľný je len oddeľovač (NBSP + `·`).
+  2. `Tlacidlo` malo `px-7` v základe, takže `px-0` vo variante `tichy` sa nikdy neuplatnilo a tichý odkaz začínal o 28 px vpravo od mriežky. Oprava: padding je vo variantoch, nie v základe.
+  3. Drobčekový odkaz v `StranHlavicka` je inline, takže meral 49×15 px. Oprava: `inline-flex min-h-[44px]`.
+  Obe lokálne obchádzky, ktoré si stavitelia museli spraviť, sú odstránené — pravda ostáva na jednom mieste.
+- **Nález staviteľa Realizácií v odsúhlasenom kóde:** `useTransform` s rozsahom, ktorý nekončí na 1, dostane od WAAPI implicitný záverečný keyframe s pôvodnou hodnotou štýlu. Prvý záber sa preto lineárne vracal do plnej viditeľnosti (0,07 → 0,27 → 0,47 → 1,0) a presvital popod celý scrub. Ten istý bug bol aj v pôvodnej `src/sections/Debarierizacia.jsx`. Každý rozsah dnes explicitne pokrýva `[0 … 1]`.
+- **Nový audit** (`poznamky/audit.mjs` + `audit-utils.mjs` + `audit-meranie.mjs`): 43 kontrol = 19 súborových + 14 na každú z 15 ciest + 10 viazaných na stránky, spolu **239 riadkov**, viewporty 1440/768/390, `--json` na porovnávanie kôl. Nové oproti v4: `F1d` (rozmery v dátach == rozmery súborov, čiže budúci CLS), `F1e`, `S1` (dist/404.html == index.html), `S3` (nikto neimportuje mŕtve `src/sections`), `F5` (width+height na každom `<img>`), `B3r` (žiadna farba mimo tokenov, tolerancia ΔRGB ≤ 8 vrátane lineárnych zmesí), `ALIGN` (ľavé hrany sekcií na kontajneri ±1 px), `NAVv5`, `NAPv5`, `ROUTEv5`, `OBSAHv5`. Audítor si sám overil, že audit odhalí zavedenú chybu (druhý H1, tieň, dlhý title) — a chybu do repa nevložil.
+- Prvý beh nad hotovými stránkami: **217/239, 22 ❌ = tri reálne nálezy** (kontrast akcentových oddeľovačov, drobček 49×15 px, 404 bez `data-pasmo`). Po opravách **239/239 ✅ a druhý raz po sebe 239/239 ✅**.
+- Mŕtve `src/sections/**` zmazané.
+
+### Výkon (Lighthouse na lokálnom builde)
+| | pred | po |
+|---|---|---|
+| Mobile performance | 72 | **94** |
+| Mobile LCP | 5,3 s | **2,9 s** |
+| Desktop performance | 75 → 95 | **99** |
+| CLS (desktop) | **0,404** | 0,017 |
+| CLS (mobile) | 0,003 | 0,003 |
+
+Tri príčiny a opravy:
+1. **CLS 0,404** — `lazy` stránky: Suspense vykreslil fallback vysoký 60 vh, pätička sedela hneď pod ním a po dorazení chunku spadla o tisíce pixelov (Lighthouse ukázal presne `body > div#root > footer`, skóre 0,4). Chunky stránok mali pritom 1 až 28 kB proti spoločnému balíku 496 kB, takže delenie neušetrilo nič. `lazy` odstránené.
+2. **Render-blocking 2,1 s na mobile** — hárok Google Fonts. Presunutý z `@import` v `tokens.css` do `index.html` a načítaný asynchrónne (`media="print"` + `onload`), s `<noscript>` fallbackom. Rez 700 sa už nesťahuje, dizajnový systém ho zakazuje.
+3. **LCP 5,3 s / 222 kB navyše** — poster hero sa na telefón sťahoval v 1920 px a začal až po vykreslení Reactom. Pribudli `poster-960.jpg` (90 kB) a `poster-1440.jpg` (182 kB), `srcSet` + `sizes="100vw"` v `Hero.jsx` a `<link rel="preload" imagesrcset>` v `index.html`.
+
+**Otvorené rozhodnutie pre Petra:** Lighthouse Accessibility je 96, jediný nález je primárne CTA — biela na `#F03314` = 4,04:1 pri 19 px. `STANDARDY` B7 to povoľuje (veľký text ≥ 19 px pri reze 600+ má limit 3:1) a je to vedomé rozhodnutie z iterácie 3 v auguste. `axe` však počíta „bold“ až od rezu 700, ktorý dizajnový systém zakazuje (B4). Cesty von sú tri: nechať tak (dnešný stav), dať tlačidlu výplň `--color-accent-deep` (biela na `#c5250d` = 5,76:1, ale mení sa firemná červená na hlavnom prvku), alebo zväčšiť text CTA na 24 px. Bez pokynu neurobím ani jedno.
