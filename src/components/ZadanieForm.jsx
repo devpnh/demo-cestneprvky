@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 
 export const TYPY_PRVKOV = [
   'Značenie pre nevidiacich a slabozrakých',
@@ -76,19 +76,28 @@ export default function ZadanieForm({ predvolenyTyp = '' }) {
         <label htmlFor="typ-prvku" className={LABEL}>
           Typ prvku
         </label>
-        <select
-          id="typ-prvku"
-          name="typ_prvku"
-          defaultValue={predvolenyTyp || TYPY_PRVKOV[0]}
-          className={`${POLE} mt-2 appearance-none`}
-          style={{ borderRadius: 'var(--radius-sm)' }}
-        >
-          {TYPY_PRVKOV.map((typ) => (
-            <option key={typ} value={typ}>
-              {typ}
-            </option>
-          ))}
-        </select>
+        {/* `appearance-none` zhodí natívnu šípku, takže pole vyzeralo ako
+            needitovateľný input. Šípku kreslíme sami a necháme jej miesto
+            v pravom paddingu, aby dlhé názvy typov nepodliezali pod ňu. */}
+        <div className="relative mt-2">
+          <select
+            id="typ-prvku"
+            name="typ_prvku"
+            defaultValue={predvolenyTyp || TYPY_PRVKOV[0]}
+            className={`${POLE} appearance-none pr-11`}
+            style={{ borderRadius: 'var(--radius-sm)' }}
+          >
+            {TYPY_PRVKOV.map((typ) => (
+              <option key={typ} value={typ}>
+                {typ}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            aria-hidden="true"
+            className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-accent)]"
+          />
+        </div>
       </div>
 
       <div>
