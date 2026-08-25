@@ -384,9 +384,43 @@ export function meranieStranky(vstup) {
   const mainEl = document.querySelector('main')
   const hlavnyText = mainEl ? mainEl.textContent.replace(/\s+/g, ' ').trim().slice(0, 60000) : null
 
+  // Slovenská sadzba: jednopísmenová predložka ani spojka nesmie ostať na
+  // konci riadka. Riadky skladáme z rámčekov jednotlivých slov (rovnaká
+  // vrchná hrana = rovnaký riadok), lebo zalomenie sa nedá vyčítať z textu.
+  const sadzbaZle = []
+  const JEDNOPISMENO = /^[aiouvszkAIOUVSZK]$/
+  for (const el of document.querySelectorAll('main p, main li, main h1, main h2, main h3, main dd, main dt, main figcaption, main span')) {
+    if (el.children.length || !el.firstChild || el.firstChild.nodeType !== 3) continue
+    const text = el.firstChild.nodeValue
+    if (!text || text.trim().length < 12 || !text.includes(' ')) continue
+    const riadky = new Map()
+    let i = 0
+    for (const slovo of text.split(/(\s+)/)) {
+      const dlzka = slovo.length
+      if (slovo.trim()) {
+        const r = document.createRange()
+        r.setStart(el.firstChild, i)
+        r.setEnd(el.firstChild, i + dlzka)
+        const box = r.getBoundingClientRect()
+        if (box.width || box.height) {
+          const kluc = Math.round(box.top)
+          if (!riadky.has(kluc)) riadky.set(kluc, [])
+          riadky.get(kluc).push(slovo.trim())
+        }
+      }
+      i += dlzka
+    }
+    const zoradene = [...riadky.entries()].sort((a, b) => a[0] - b[0]).map((e) => e[1])
+    for (const riadok of zoradene.slice(0, -1)) {
+      const posledne = riadok[riadok.length - 1] || ''
+      if (JEDNOPISMENO.test(posledne)) sadzbaZle.push(`„…${riadok.slice(-6).join(' ')}“`)
+    }
+  }
+
   return {
     url: location.pathname + location.search,
     hlavnyText,
+    sadzbaZle,
     seo,
     obrazky,
     rozmery,

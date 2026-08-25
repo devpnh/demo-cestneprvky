@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
+import { sadzba } from '../lib/sadzba.js'
 
 export const TYPY_PRVKOV = [
   'Značenie pre nevidiacich a slabozrakých',
@@ -49,7 +50,7 @@ export default function ZadanieForm({ predvolenyTyp = '' }) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setOdoslane(true)
     } catch {
-      setChyba('Zadanie sa nepodarilo poslať. Skúste to znova, alebo napíšte na info@cestneprvky.sk.')
+      setChyba(sadzba('Zadanie sa nepodarilo poslať. Skúste to znova, alebo napíšte na info@cestneprvky.sk.'))
     } finally {
       setPosiela(false)
     }
@@ -59,11 +60,11 @@ export default function ZadanieForm({ predvolenyTyp = '' }) {
     return (
       <div aria-live="polite">
         <p className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold text-[var(--color-text)]">
-          {'Ďakujeme, ozveme sa s termínom obhliadky.'}
+          {sadzba('Ďakujeme, ozveme sa a dohodneme ďalší postup.')}
         </p>
         {!endpoint && (
           <p className="mt-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-            {'Toto je ukážkové demo: zadanie sa zatiaľ nikam neodosiela. V ostrej verzii príde priamo na info@cestneprvky.sk.'}
+            {sadzba('Toto je ukážkové demo: zadanie sa zatiaľ nikam neodosiela. V ostrej verzii príde priamo na info@cestneprvky.sk.')}
           </p>
         )}
       </div>

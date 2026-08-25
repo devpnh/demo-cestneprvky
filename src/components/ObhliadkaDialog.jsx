@@ -3,6 +3,7 @@ import { XIcon } from 'lucide-react'
 import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription } from './ui/dialog.jsx'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import ZadanieForm from './ZadanieForm.jsx'
+import { sadzba } from '../lib/sadzba.js'
 import { OBHLIADKA_EVENT } from '../lib/obhliadka.js'
 
 /**
@@ -51,10 +52,10 @@ export default function ObhliadkaDialog() {
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                  Dohodnúť obhliadku
+                  {sadzba('Dohodnúť obhliadku')}
                 </p>
                 <DialogTitle className="mt-3 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                  {'Pošlite zadanie, vrátime sa s termínom obhliadky'}
+                  {sadzba('Pošlite zadanie, ozveme sa a dohodneme ďalší postup')}
                 </DialogTitle>
               </div>
               <DialogPrimitive.Close
@@ -67,7 +68,7 @@ export default function ObhliadkaDialog() {
             </div>
 
             <DialogDescription id="obhliadka-popis" className="mt-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-              {'Napíšte nám typ prvku, miesto a rozsah. Ozveme sa s termínom obhliadky a návrhom riešenia na mieru.'}
+              {sadzba('Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup.')}
             </DialogDescription>
 
             <div className="mt-7">

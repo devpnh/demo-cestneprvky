@@ -621,6 +621,20 @@ for (const cesta of CESTY) {
     return { ok: zle.length === 0, text: 'bez horizontálneho overflow na 1440/768/390', detail: zle.join(' | ') }
   })
 
+  skontroluj('SADZBA', cesta, () => {
+    const zle = []
+    for (const vp of VIEWPORTY) {
+      const { m } = M(cesta, vp.meno)
+      const n = (m.sadzbaZle || []).length
+      if (n) zle.push(`@${vp.meno}: ${n}× ${skratka(m.sadzbaZle, 2)}`)
+    }
+    return {
+      ok: zle.length === 0,
+      text: 'slovenská sadzba: žiadny riadok nekončí jednopísmenovou predložkou ani spojkou',
+      detail: zle.join(' | '),
+    }
+  })
+
   skontroluj('D2', cesta, () => {
     const { m } = M(cesta, '390')
     const zle = m.male.map((s) => `${s.cesta} „${s.popis}“ ${s.w}×${s.h}px`)
@@ -1277,7 +1291,7 @@ await browser.close()
 
 // ---------------------------------------------------------------- výstup
 const KONTROLY_SUBOROVE = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B1', 'B2', 'B3', 'B4', 'E4', 'F1a', 'F1b', 'F1d', 'F1e', 'S1', 'S2', 'S3']
-const KONTROLY_NA_CESTU = ['G0', 'F4', 'F5', 'D1', 'D2', 'D3', 'B2r', 'B4r', 'B3r', 'B5', 'ALIGN', 'B7', 'NAVv5', 'NAPv5']
+const KONTROLY_NA_CESTU = ['G0', 'F4', 'F5', 'D1', 'SADZBA', 'D2', 'D3', 'B2r', 'B4r', 'B3r', 'B5', 'ALIGN', 'B7', 'NAVv5', 'NAPv5']
 const KONTROLY_STRANKOVE = ['C1', 'C3', 'C4', 'C5', 'RMv5', 'ROUTEv5', 'DIALOGv5', 'SLUZBYv5', 'GALv5', 'OBSAHv5']
 
 let chyb = 0
@@ -1358,6 +1372,7 @@ process.exit(chyb ? 1 : 0)
  *   ALIGN Ľavý okraj prvého viditeľného potomka kontajnera každej sekcie sa rovná ľavému okraju kontajnera `max-w-[var(--container-max)]`, tolerancia 1 px. Kontajnerom môže byť aj samotná `<section>`; sekcia, ktorá kontajner nesie až vo vnorených sekciách, sa meria cez ne.
  *   B7    Kontrast reálne použitých dvojíc text/pozadie: telo ≥ 4,5:1, veľký text (≥ 24 px, alebo ≥ 19 px pri reze 600+) ≥ 3:1. Nad plnou farbou počíta presne; nad fotkou, gradientom, scrimom a pod `fixed`/`sticky`/`absolute` vrstvou vzorkuje pixely z full-page renderu tesne nad, pod a vedľa glyfov (mediány pásov, z nich najhorší). Rámy a podčiarknutie sa nevzorkujú. Kumulatívna `opacity` predkov sa do farby textu započíta. Rovnaká dvojica farieb a rezov je v hlásení jeden riadok s počtom.
  *   NAVv5 Hlavná navigácia má práve 4 položky, aktívna položka má `aria-current="page"` (na `/sluzby/<slug>` je to „Služby“), a v pätičke nie je mŕtvy odkaz — každý `href` vedie na existujúcu cestu alebo je `tel:`/`mailto:`/absolútny.
+ *   SADZBA Žiadny vykreslený riadok nekončí jednopísmenovou predložkou ani spojkou (slovenská sadzba, `src/lib/sadzba.js`).
  *   NAPv5 Adresa, telefón aj e-mail sú v pätičke na tejto ceste (druhá polovica požiadavky OBSAHv5).
  *
  * VIAZANÉ NA KONKRÉTNE STRÁNKY

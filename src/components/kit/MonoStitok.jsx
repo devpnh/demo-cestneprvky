@@ -3,6 +3,8 @@
  * biela na 72 % s akcentovou čiarkou — samotný `--color-muted` tam nemá
  * kontrast 4,5:1 (nález z auditu iterácie 3).
  */
+import { sadzba } from '../../lib/sadzba.js'
+
 export default function MonoStitok({ tmava = false, sCiarkou = tmava, className = '', children, ...rest }) {
   return (
     <p
@@ -11,7 +13,7 @@ export default function MonoStitok({ tmava = false, sCiarkou = tmava, className 
       } ${sCiarkou ? "flex items-center gap-3 before:h-[2px] before:w-6 before:bg-[var(--color-accent)] before:content-['']" : ''} ${className}`}
       {...rest}
     >
-      {children}
+      {typeof children === 'string' ? sadzba(children) : children}
     </p>
   )
 }

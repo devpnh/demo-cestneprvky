@@ -1,3 +1,5 @@
+import { sadzba } from '../../lib/sadzba.js'
+
 const BASE = import.meta.env.BASE_URL
 
 /**
@@ -26,7 +28,7 @@ export default function Fotka({
       src={`${BASE}assets/${src}`}
       width={w}
       height={h}
-      alt={alt}
+      alt={sadzba(alt)}
       loading={priorita ? 'eager' : 'lazy'}
       decoding="async"
       {...(priorita ? { fetchPriority: 'high' } : {})}
@@ -43,7 +45,7 @@ export default function Fotka({
           tmava ? 'text-[rgba(255,255,255,0.72)]' : 'text-[var(--color-muted)]'
         }`}
       >
-        {popis}
+        {sadzba(popis)}
       </figcaption>
     </figure>
   )

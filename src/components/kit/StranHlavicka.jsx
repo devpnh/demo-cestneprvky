@@ -3,6 +3,7 @@ import { Reveal } from '../primitives/index.js'
 import MonoStitok from './MonoStitok.jsx'
 import PasFaktov from './PasFaktov.jsx'
 import Lajna from './Lajna.jsx'
+import { sadzba } from '../../lib/sadzba.js'
 
 /**
  * Hlavička podstránky. Jednotná pre všetky routy, aby web pôsobil ako jeden
@@ -42,11 +43,11 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
 
           <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end lg:gap-16">
             <h1 className="max-w-[18ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-5xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)] lg:col-span-7">
-              {nadpis}
+              {sadzba(nadpis)}
             </h1>
             {perex ? (
               <p className="max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)] lg:col-span-5 lg:ml-auto">
-                {perex}
+                {sadzba(perex)}
               </p>
             ) : null}
           </div>

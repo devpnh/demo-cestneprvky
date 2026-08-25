@@ -1,5 +1,6 @@
 import { Reveal } from '../primitives/index.js'
 import MonoStitok from './MonoStitok.jsx'
+import { sadzba } from '../../lib/sadzba.js'
 
 /**
  * Hlavička sekcie: vľavo mikro-štítok a nadpis, vpravo perex zarovnaný na
@@ -22,7 +23,7 @@ export default function SekciaHlavicka({
     <Reveal className={className}>
       <div className={jednoStlpec ? '' : 'grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end lg:gap-16'}>
         <div className={jednoStlpec ? '' : 'lg:col-span-7'}>
-          {stitok ? <MonoStitok tmava={tmava}>{stitok}</MonoStitok> : null}
+          {stitok ? <MonoStitok tmava={tmava}>{sadzba(stitok)}</MonoStitok> : null}
           <Ako
             className={`mt-5 text-balance font-[family-name:var(--font-display)] ${
               Ako === 'h1' ? 'text-[length:var(--text-5xl)]' : 'text-[length:var(--text-4xl)]'
@@ -30,7 +31,7 @@ export default function SekciaHlavicka({
               tmava ? 'text-[var(--color-bg)]' : 'text-[var(--color-text)]'
             }`}
           >
-            {nadpis}
+            {sadzba(nadpis)}
           </Ako>
         </div>
         {perex || akcia ? (
@@ -41,7 +42,7 @@ export default function SekciaHlavicka({
                   tmava ? 'text-[var(--color-bg)] opacity-80' : 'text-[var(--color-muted)]'
                 }`}
               >
-                {perex}
+                {sadzba(perex)}
               </p>
             ) : null}
             {akcia ? <div className="mt-6">{akcia}</div> : null}

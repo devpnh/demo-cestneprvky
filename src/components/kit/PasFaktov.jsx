@@ -17,6 +17,8 @@
 const FARBA_ODDELOVACA = (tmava) =>
   tmava ? 'text-[rgba(255,255,255,0.72)]' : 'text-[var(--color-accent-deep)]'
 
+import { sadzba } from '../../lib/sadzba.js'
+
 export default function PasFaktov({ fakty = [], tmava = false, className = '' }) {
   return (
     <ul
@@ -26,7 +28,7 @@ export default function PasFaktov({ fakty = [], tmava = false, className = '' })
     >
       {fakty.map((f, i) => (
         <li key={f} className="max-w-full break-words">
-          {f}
+          {sadzba(f)}
           {i < fakty.length - 1 ? (
             <span aria-hidden="true" className={FARBA_ODDELOVACA(tmava)}>
               {'\u00a0·'}
