@@ -262,8 +262,10 @@ Po každom kole: riadok v `poznamky/QUALITY-LOG.md` (dátum · kolo · nálezy �
 Na konci:
 1. `poznamky/HANDOVER.md`: čo klient doplní (mená európskych partnerov, plné názvy miest MT/TN/BB, roky realizácií, texty služieb 5–9, logo v SVG, form endpoint, telo článku o ostrovčekoch), otvorené rozhodnutia.
 2. `README.md` projektu: štruktúra routov, dátové súbory, ako spustiť audit.
-3. `git commit` finálneho stavu; **push na `origin main` až po splnení §6.3** — deploy beží cez Actions na
-   https://devpnh.github.io/demo-cestneprvky/ ; over 200 a Actions zelené (G4). Ak Peter nechce push, tento bod vymaže.
+3. `git commit` finálneho stavu. **Poradie odovzdania (pokyn Petra): najprv lokálny náhľad, až potom push.**
+   Po splnení §6.3 spusti `npm run build` + `npx vite preview --port 4320 --strictPort` na pozadí a nahlás
+   Petrovi URL `http://localhost:4320/demo-cestneprvky/` so zoznamom routov a screenshotmi. Push na `origin main`
+   (deploy cez Actions na https://devpnh.github.io/demo-cestneprvky/, over 200 a zelené Actions, G4) až keď to Peter potvrdí.
 4. Session note `~/Desktop/Vaults/claude_conversations/Sessions/2026-MM-DD — cestne_prvky v5 prerábka.md`
    (problém / prístup / výsledok / čo sa kazilo) + riadok v `~/Desktop/Vaults/work/context/KONVERZACIE.md`.
 5. Ak sa objavilo nové pravidlo, ktoré STANDARDY neobsahovali, pridaj bod s pôvodom do `STANDARDY.md`.

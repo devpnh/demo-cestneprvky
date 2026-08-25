@@ -1,16 +1,19 @@
 /**
  * Mechanický audit dema demo-cestneprvky podľa STANDARDY.md.
  * Spustenie: node poznamky/audit.mjs [--shots <dir>] [--tag iterN]
- * Predpoklad: `npm run build` v site/ a `npx vite preview --port 4320` beží.
+ * Predpoklad: `npm run build` v koreni repa a `npx vite preview --port 4320 --strictPort` beží.
  * Výstup: riadky "✅ A1 …" / "❌ A1 … (detail)", na konci súhrn a exit code 1 pri ❌.
  */
-import { chromium } from '/Users/petersimko/Desktop/pnh_media/demogen/node_modules/playwright/index.mjs'
+import { chromium } from 'playwright'
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
-const { PNG } = createRequire(import.meta.url)('/Users/petersimko/Desktop/pnh_media/demogen/node_modules/playwright-core/lib/utilsBundle.js')
 
-const SITE = '/Users/petersimko/Desktop/pnh_media/demogen/pipeline/site'
+
+const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
+// playwright-core neexportuje ./lib/* cez "exports" — načítaj cez absolútnu cestu.
+const { PNG } = createRequire(import.meta.url)(join(SITE, 'node_modules/playwright-core/lib/utilsBundle.js'))
 const URL = 'http://localhost:4320/demo-cestneprvky/'
 const args = process.argv.slice(2)
 const shotsDir = args.includes('--shots') ? args[args.indexOf('--shots') + 1] : null
