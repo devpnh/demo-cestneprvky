@@ -1,5 +1,7 @@
 import { sadzba } from '../../lib/sadzba.js'
 
+import { MAX_MRIEZKA, srcSetPre, SIZES_MRIEZKA } from '../../lib/obrazky.js'
+
 const BASE = import.meta.env.BASE_URL
 
 /**
@@ -22,10 +24,13 @@ export default function Fotka({
   tmava = false,
   className = '',
   triedaObrazka = '',
+  sizes = SIZES_MRIEZKA,
 }) {
   const img = (
     <img
       src={`${BASE}assets/${src}`}
+      srcSet={srcSetPre(src, w, MAX_MRIEZKA)}
+      sizes={sizes}
       width={w}
       height={h}
       alt={sadzba(alt)}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { SIZES_PLNA, srcSetPre } from '../../lib/obrazky.js'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { X, ArrowLeft, ArrowRight } from 'lucide-react'
@@ -144,6 +145,8 @@ export default function Lightbox({ polozky, index, onZavri, onPrepni }) {
           key={polozka.id}
           data-lightbox-img
           src={`${BASE}assets/${polozka.src}`}
+          srcSet={srcSetPre(polozka.src, polozka.w)}
+          sizes={SIZES_PLNA}
           width={polozka.w}
           height={polozka.h}
           alt={polozka.alt}

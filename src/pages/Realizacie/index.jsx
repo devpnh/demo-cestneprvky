@@ -6,6 +6,7 @@ import { Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../component
 import { Reveal } from '../../components/primitives/index.js'
 import { GALERIA } from '../../content/realizacie.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
+import { MAX_MRIEZKA, SIZES_MRIEZKA, srcSetPre } from '../../lib/obrazky.js'
 import {
   castiPopisu,
   GALERIA_ZORADENA,
@@ -224,6 +225,8 @@ export default function Realizacie() {
                 >
                   <img
                     src={`${BASE}assets/${r.src}`}
+                    srcSet={srcSetPre(r.src, r.w, MAX_MRIEZKA)}
+                    sizes={SIZES_MRIEZKA}
                     width={r.w}
                     height={r.h}
                     alt={r.alt}
