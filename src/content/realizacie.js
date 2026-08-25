@@ -114,8 +114,11 @@ export const REALIZACIE = [
     w: 600,
     h: 390,
     alt: 'Orientačné štítky s Braillovým písmom a piktogramami',
-    miesto: 'Realizácia klienta',
+    // Produktová fotografia, nie záber z osadenia. Galéria ju preto nesmie
+    // podať ako realizáciu na mieste.
+    miesto: 'Produktová fotografia',
     isteMiesto: false,
+    produktovaFoto: true,
     prvok: 'Štítky s Braillovým písmom',
     prostredie: 'Interiér',
     sluzba: 'stitky-braillovo-pismo',
@@ -125,10 +128,13 @@ export const REALIZACIE = [
     src: '08-BA_Bosakova-600x390.jpg',
     w: 600,
     h: 390,
-    alt: 'Priechod pre chodcov po odstránení starého vodorovného značenia, Bratislava Bosákova',
+    // Na snímke sú pásy priechodu kompletné, odstránené značenie na nej vidno
+    // nie je. Popis preto hovorí o tom, čo na fotke naozaj je; fotografiu
+    // úseku pred odstránením a po ňom si pýtame v `chyba` tej služby.
+    alt: 'Priechod pre chodcov s vodorovným značením, Bratislava Bosákova',
     miesto: 'Bratislava Bosákova',
     isteMiesto: true,
-    prvok: 'Odstránené značenie',
+    prvok: 'Priechod pre chodcov',
     prostredie: 'Exteriér',
     sluzba: 'odstranenie-znacenia',
   },
@@ -447,6 +453,20 @@ export const REALIZACIE = [
 ]
 
 /** Galéria bez malých orezov, ktoré duplikujú väčšiu fotku tej istej scény. */
+/**
+ * Miesta realizácií podľa názvov fotografií klienta v pôvodnej galérii.
+ * Osem z nich nemá medzi stiahnutými assetmi fotku, ale doložené sú rovnako
+ * ako tie s fotkou, preto patria na web ako text. Zdroj: `pipeline/facts.json`
+ * → `references`. Skratky, pri ktorých si nie sme istí plným názvom mesta
+ * (MT, TN, BB, PD, TT), tu zámerne nie sú.
+ */
+export const MIESTA_REALIZACII = [
+  'Bratislava', 'Bratislava Nivy', 'Bratislava Bosákova', 'Devínska Nová Ves',
+  'Podunajské Biskupice', 'Most pri Bratislave', 'Blatná na Ostrove', 'Svederník',
+  'Milochov', 'Zubačka', 'Slanická osada', 'Kysucké Nové Mesto', 'Medený Hámor',
+  'Fiľakovo', 'Tornaľa',
+]
+
 export const GALERIA = REALIZACIE.filter((r) => !r.duplikatOf)
 
 /** Typy prvkov pre filter, v poradí prvého výskytu v galérii. */

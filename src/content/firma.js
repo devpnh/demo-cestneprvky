@@ -15,7 +15,7 @@ export const FIRMA = {
 
   uvod: [
     'Firma Cestné prvky s.r.o. bola založená v roku 2012. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku.',
-    'Pracujeme pre mestá, župy, správcov ciest, stavebné firmy a developerov. Osádzame značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a spomaľovače dopravy.',
+    'Osádzame značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a spomaľovače dopravy. Pracujeme na cestách, chodníkoch, priechodoch, parkoviskách aj vo vnútorných priestoroch.',
     'V dopravných stavbách používame technológie, ktoré nevyžadujú zásah do pôvodných konštrukcií: stierkovanie studeným plastom, lepenie nízkych obrubníkov akrylovým tmelom a osádzanie retardérov DEBUZ® na dvojzložkové lepidlo. Materiály a technológie odoberáme od európskych výrobcov.',
   ],
 
@@ -44,10 +44,19 @@ export const FIRMA = {
 
   normy: ['vyhláška MŽP SR č. 532/2002 Z. z.', 'vyhláška MV SR č. 9/2009 Z. z.'],
 
-  partner: {
+  /**
+   * POZOR, toto NIE JE vyhlásenie o spolupráci. Pôvodný web na Úniu len
+   * odkazuje ako na miesto, kde sa dajú získať konzultácie a stanoviská.
+   * Tvrdiť partnerstvo s existujúcou organizáciou bez jej vedomia sa nesmie,
+   * preto veta hovorí o tom, čo robí Únia, nie o tom, čo robíme s ňou.
+   * `stitok` používajú stránky ako nadpis bloku, aby nikde nestálo „Partner“.
+   */
+  konzultacie: {
+    stitok: 'Kam po konzultáciu',
     nazov: 'Únia nevidiacich a slabozrakých Slovenska',
     popis:
-      'Poskytuje konzultácie k riešeniam architektonickej prístupnosti pre ľudí so zrakovým postihnutím v exteriéri aj interiéri, vydáva stanoviská k projektovej dokumentácii a konzultuje aplikáciu debarierizačných prvkov priamo na mieste realizácie.',
+      'Konzultácie k architektonickej prístupnosti pre ľudí so zrakovým postihnutím v exteriéri aj interiéri poskytuje Únia nevidiacich a slabozrakých Slovenska. Vydáva stanoviská k projektovej dokumentácii a konzultuje aplikáciu debarierizačných prvkov priamo na mieste realizácie.',
+    odkazText: 'architektonickebariery.sk',
     url: 'https://architektonickebariery.sk/',
   },
 
@@ -85,7 +94,7 @@ export const FIRMA = {
     'Žilina, realizácie po celom Slovensku',
     'vyhláška MŽP SR č. 532/2002 Z. z.',
     'vyhláška MV SR č. 9/2009 Z. z.',
-    'Konzultácie: Únia nevidiacich a slabozrakých Slovenska',
+    'ColdPlastic a DEBUZ® Kölner Teller',
   ],
 
   /**
@@ -104,34 +113,42 @@ export const FIRMA = {
   ],
 }
 
+// Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.
+// Odstrániť pri záverečnej integrácii kola 3.
+FIRMA.partner = FIRMA.konzultacie
+
 /**
- * Priebeh spolupráce. Popisy sú vecné, bez sľubov o termínoch a cenách,
- * ktoré v podkladoch nemáme.
+ * Priebeh spolupráce tak, ako ho navrhujeme my — v podkladoch klienta popis
+ * spolupráce nie je. Preto tu nesmie stáť nič, čo by klientovi vkladalo do úst
+ * záväzok, ktorý nedal: žiadne lehoty, žiadne ceny, žiadna spoločná preberačka.
+ * Vety o technológii sú zúžené na tie prvky, pri ktorých ich pôvodný web
+ * naozaj tvrdí (lepené obrubníky, stierkovanie, retardéry na lepidlo).
+ * Celý blok je v `poznamky/HANDOVER.md` na potvrdenie klientom.
  */
 export const PROCES = [
   {
     id: 'dopyt',
     nazov: 'Dopyt a obhliadka',
     popis:
-      'Napíšete nám typ prvku, miesto a rozsah. Dohodneme si obhliadku a pozrieme sa na povrch, spád a organizáciu dopravy priamo na mieste.',
+      'Napíšete nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme obhliadku na mieste.',
   },
   {
     id: 'navrh',
     nazov: 'Návrh a ponuka',
     popis:
-      'Navrhneme riešenie, schému a materiál podľa vyhlášok a vášho zadania. K nemu dostanete cenovú ponuku na konkrétny rozsah prác.',
+      'Schému, vzor, farebný odtieň aj rozloženie prvkov prispôsobíme vašej požiadavke a platným vyhláškam. K návrhu dostanete cenovú ponuku na konkrétny rozsah prác.',
   },
   {
     id: 'realizacia',
     nazov: 'Realizácia',
     popis:
-      'Prvky osadíme technológiou, ktorá nevyžaduje búracie práce ani ťažké mechanizmy. Obmedzenia dopravy držíme na nevyhnutnom čase.',
+      'Prvky osadíme na mieste. Pri lepených obrubníkoch a stierkovanom značení odpadajú búracie práce aj ťažké mechanizmy, takže obmedzenie premávky trvá kratšie.',
   },
   {
     id: 'odovzdanie',
     nazov: 'Odovzdanie',
     popis:
-      'Úsek prejdeme spolu s vami, skontrolujeme osadenie prvkov a odovzdáme dielo do užívania.',
+      'Úsek odovzdáme do užívania. Lepené obrubníky majú po 30 minútach 100 % pevnosti, takže sa dá hneď pokračovať v ďalších stavebných prácach.',
   },
 ]
 

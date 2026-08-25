@@ -44,7 +44,7 @@ export const ROUTY = [
     vNavigacii: true,
     title: 'O firme | Cestné prvky s.r.o., od roku 2012',
     description:
-      'Cestné prvky s.r.o. zo Žiliny osádza prvky pozemných komunikácií od roku 2012. Prístup, technológie, vyhlášky a spolupráca s Úniou nevidiacich.',
+      'Cestné prvky s.r.o. zo Žiliny osádza prvky pozemných komunikácií od roku 2012. Prístup, technológie ColdPlastic a DEBUZ® a súlad s vyhláškami.',
   },
   {
     path: '/kontakt',

@@ -48,7 +48,7 @@ export const SLUZBY = [
     nazovKratky: 'Značenie pre nevidiacich',
     skupina: 'debarierizacia-a-znacenie',
     perex:
-      'Pre mestá, správcov budov a projektantov, ktorí potrebujú viesť osoby so zrakovým postihnutím po chodníku, priechode aj vnútri budovy.',
+      'Štruktúrované značenie a mosadzné či nerezové indikátory, ktoré vedú a varujú osoby so zrakovým postihnutím na chodníku, priechode aj vo vnútri budovy.',
     odseky: [
       'Štruktúrované vodorovné značenie a piktogramy realizujeme metódou stierkovania studeným plastom Kaltplastik. Nanášame ich na rôzne povrchy bez nutnosti zásahu do pôvodných konštrukcií.',
       'Schému, vzor, farebný odtieň aj rozloženie prvkov prispôsobíme vašej požiadavke. Technológia spĺňa metodiku navrhovania debarierizačných opatrení pre osoby s obmedzenou schopnosťou pohybu a orientácie na pozemných komunikáciách v zmysle platnej vyhlášky MŽP SR č. 532/2002 Z. z. a vyhlášky MV SR č. 9/2009 Z. z.',
@@ -72,7 +72,10 @@ export const SLUZBY = [
       },
     ],
     normy: ['vyhláška MŽP SR č. 532/2002 Z. z.', 'vyhláška MV SR č. 9/2009 Z. z.'],
-    partner: {
+    // Nie partnerstvo: pôvodný web na Úniu odkazuje ako na miesto, kde sa
+    // dajú získať konzultácie a stanoviská. Viac v komentári vo `firma.js`.
+    konzultacie: {
+      stitok: 'Kam po konzultáciu',
       nazov: 'Únia nevidiacich a slabozrakých Slovenska',
       popis:
         'Poskytuje konzultácie k riešeniam architektonickej prístupnosti pre ľudí so zrakovým postihnutím v exteriéri aj interiéri, vydáva stanoviská k projektovej dokumentácii a konzultuje aplikáciu debarierizačných prvkov priamo na mieste realizácie.',
@@ -135,7 +138,7 @@ export const SLUZBY = [
     nazovKratky: 'Vodorovné značenie',
     skupina: 'debarierizacia-a-znacenie',
     perex:
-      'Pre správcov ciest, mestá a firmy, ktoré potrebujú trvanlivé značenie jazdných pruhov, priechodov, parkovísk aj vnútorných plôch areálu.',
+      'Trvalé značenie jazdných pruhov, cyklistických chodníkov, priechodov pre chodcov, priemyselných a skladovacích zón, letísk, parkovacích miest aj podzemných garáží.',
     odseky: [
       'Od moderného dopravného značenia sa žiada vysoká bezpečnosť dopravy, dlhá životnosť a ľahké spracovanie. Inštalácie realizujeme na zákazku z materiálov ColdPlastic a riešenie prispôsobíme vášmu zadaniu.',
       'Studený plast ColdPlastic neobsahuje rozpúšťadlá a je určený na dopravné značenie. Použite ho na trvalé značenie jazdných pruhov, cyklistických chodníkov, priechodov pre chodcov, priemyselných a skladovacích zón, letísk, parkovacích miest aj podzemných garáží.',
@@ -214,7 +217,7 @@ export const SLUZBY = [
     nazovKratky: 'Lepené obrubníky',
     skupina: 'prvky-vo-vozovke',
     perex:
-      'Pre stavebné firmy a správcov komunikácií, ktorí potrebujú dobudovať ostrovček, chodník alebo parkovací prah bez búrania vozovky.',
+      'Nízke obrubníky lepené k podkladu akrylovým tmelom: pri rekonštrukciách, rozširovaní chodníkov, dobudovaní ostrovčekov, kruhových križovatiek, parkovacích prahov a dorazov.',
     odseky: [
       'Nízke obrubníky lepíme k podkladu tmelom na báze akrylovej živice. Realizácia je rýchla a komunikáciu zaťaží len na krátko.',
       'Metóda sa hodí pri rekonštrukciách, pri rozširovaní alebo novom budovaní chodníkov pre peších na už existujúcich komunikáciách, pri dobudovaní cestných ostrovčekov, kruhových križovatiek, parkovacích prahov, dorazov a ďalších konštrukcií, ktoré zasahujú do vozovky a používajú sa v nich cestné obrubníky.',
@@ -276,7 +279,7 @@ export const SLUZBY = [
     nazovKratky: 'Spomaľovače dopravy',
     skupina: 'prvky-vo-vozovke',
     perex:
-      'Pre školy, škôlky, areály a nebezpečné miesta, kde potrebujete znížiť rýchlosť vozidiel bez zásahu do konštrukcie vozovky.',
+      'Retardéry DEBUZ® Kölner Teller z liateho hliníka na upokojovanie dopravy. Používajú sa na nebezpečných miestach, pri školách, škôlkach a na priechodoch v areáloch.',
     odseky: [
       'DEBUZ® retardéry Kölner Teller z liateho hliníka slúžia ako prvky na upokojovanie dopravy a v praxi sa uplatňujú už 25 rokov.',
       'Výška 35 a 50 mm a usporiadanie osadeného DEBUZ® – Kölner Teller nútia vodiča zachovať určenú rýchlosť. Osádzame ich na nebezpečných miestach, pri školách, škôlkach a na priechodoch pre chodcov v areáloch, kde potrebujete dosiahnuť žiaduce spomalenie.',
@@ -360,7 +363,7 @@ export const SLUZBY = [
     nazovKratky: 'Zálievkové hmoty',
     skupina: 'udrzba-a-povrchy',
     perex:
-      'Pre obce, správcov ciest a majiteľov parkovísk, ktorí potrebujú ošetriť škáry a opraviť výtlky v kryte vozovky.',
+      'Zálievkové a vysprávkové hmoty do krytu vozovky. Používame značky Chipfill a Coldfill.',
     znacky: ['Chipfill', 'Coldfill'],
     dlazdica: {
       src: '04-zalievkove_hmoty_01-600x390.jpg',
@@ -398,7 +401,7 @@ export const SLUZBY = [
     nazovKratky: 'Protišmykový náter',
     skupina: 'udrzba-a-povrchy',
     perex:
-      'Pre miesta so zvýšeným rizikom šmyku: hrany schodiskových stupňov, rampy, nástupištia a ďalšie pochôdzne aj pojazdné plochy.',
+      'Protišmykové pásy a nátery na miestach so zvýšeným rizikom šmyku.',
     dlazdica: {
       src: '05-Protismykove-pasy-Filakovo3-416x390.jpg',
       w: 416,
@@ -443,7 +446,7 @@ export const SLUZBY = [
     nazovKratky: 'Cyklotrasy',
     skupina: 'prvky-vo-vozovke',
     perex:
-      'Pre mestá a župy, ktoré budujú alebo obnovujú cyklistické trasy a ich napojenie na pozemné komunikácie.',
+      'Prvky a značenie pre cyklistické trasy.',
     dlazdica: {
       src: '06-IMG_1565-480x390.jpg',
       w: 480,
@@ -480,7 +483,7 @@ export const SLUZBY = [
     nazovKratky: 'Štítky a hmatové mapy',
     skupina: 'debarierizacia-a-znacenie',
     perex:
-      'Pre správcov budov a verejných priestorov, ktorí potrebujú orientačné štítky a hmatové mapy pre ľudí so zrakovým postihnutím.',
+      'Orientačné štítky s Braillovým písmom, gravírovanie a hmatové mapy pre ľudí so zrakovým postihnutím.',
     dlazdica: {
       src: '07-Braill-600x390.jpg',
       w: 600,
@@ -517,7 +520,7 @@ export const SLUZBY = [
     nazovKratky: 'Odstránenie značenia',
     skupina: 'udrzba-a-povrchy',
     perex:
-      'Pre správcov ciest a stavebné firmy, ktoré menia organizáciu dopravy alebo obnovujú značenie a potrebujú odstrániť to pôvodné.',
+      'Odstránenie prekonaného vodorovného dopravného značenia.',
     dlazdica: {
       src: '08-BA_Bosakova-600x390.jpg',
       w: 600,
@@ -550,6 +553,10 @@ export const SLUZBY = [
 ]
 
 /** Služba podľa slugu; vracia `undefined`, ak slug neexistuje (route 404). */
+// Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.
+// Odstrániť pri záverečnej integrácii kola 3.
+for (const s of SLUZBY) if (s.konzultacie && !s.partner) s.partner = s.konzultacie
+
 export const sluzbaPodlaSlugu = (slug) => SLUZBY.find((s) => s.slug === slug)
 
 /** Služby jednej skupiny v poradí z navigácie. */
