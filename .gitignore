@@ -3,3 +3,8 @@ dist
 .DS_Store
 *.local
 .env
+# generator artefacts + review screenshots (local only)
+pipeline/
+poznamky/*.jpeg
+poznamky/*.png
+poznamky/shots/

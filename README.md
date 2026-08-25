@@ -1,4 +1,4 @@
-# demogen chassis
+# Cestné prvky — demo web
 
 The podvozok every generated demo is built on. **Not a design system, not a
 catalogue of section variants** (PLAN.md §3) — infrastructure plus a shared
