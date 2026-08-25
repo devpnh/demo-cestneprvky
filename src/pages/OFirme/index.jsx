@@ -19,18 +19,30 @@ const META = routaPodlaCesty('/o-firme')
 const JEMNA_LINKA = { borderColor: 'color-mix(in srgb, var(--color-bg) 18%, transparent)' }
 
 /**
- * Najdlhší fakt, ktorý sa na 390 px zmestí do pásu.
- *
- * `PasFaktov` drží položku aj s oddeľovačom nedeliteľnú (`whitespace-nowrap`),
- * aby „·“ nevisela na začiatku riadka. Na 390 px má kontajner 350 px vnútornej
- * šírky a mono 12 px s tracking 0,08 em zaberie ~8,3 px na znak, takže fakt
- * `Konzultácie: Únia nevidiacich a slabozrakých Slovenska` (54 znakov) meria
- * 441 px a vytiahol dokument na scrollWidth 461. Kit meniť nesmieme, preto do
- * hlavičky idú fakty, ktoré sa zmestia; vynechaný fakt o konzultáciách ÚNSS
- * stojí o dve pásma nižšie ako celá sekcia „Spolupráca“ aj s odkazom, takže sa
- * zo stránky nestráca.
+ * Zástupný text v dátach má tvar `[DOPLNÍ KLIENT: …]`. Hranatá zátvorka na
+ * stránke vyzerá ako nedorobené CMS pole, preto z nej berieme len vetu a
+ * samotné „doplní klient“ nesie mono štítok — tá istá forma ako v tabuľke
+ * fakturačných údajov na `/kontakt`.
  */
-const MAX_ZNAKOV_FAKTU = 42
+const ZASTUPNY_TEXT = /^\[\s*DOPLNÍ KLIENT\s*:?\s*([\s\S]*?)\s*\]$/
+
+function vetaZastupnehoTextu(poznamka, nahrada) {
+  const zhoda = (poznamka || '').trim().match(ZASTUPNY_TEXT)
+  const veta = (zhoda ? zhoda[1] : poznamka || '').trim()
+  if (!veta) return nahrada
+  return veta.charAt(0).toUpperCase() + veta.slice(1)
+}
+
+/**
+ * Prvá veta odseku ako výrazné úvodné vyhlásenie pásma, zvyšok ako telový
+ * text. Text sa nemení, mení sa len sadzba: v prvom kole tu stál claim
+ * „Šetríme váš čas aj peniaze“, ale na webe smie zaznieť práve raz a to na
+ * Domove v sekcii Prečo.
+ */
+function rozdelPrvuVetu(odsek) {
+  const koniec = odsek.indexOf('. ')
+  return koniec < 0 ? [odsek, ''] : [odsek.slice(0, koniec + 1), odsek.slice(koniec + 2)]
+}
 
 /**
  * O firme.
@@ -50,6 +62,8 @@ const MAX_ZNAKOV_FAKTU = 42
  */
 export default function OFirme() {
   const [uvodPerex, ...uvodOdseky] = FIRMA.uvod
+  const [vyhlasenie, zvysokPrvehoOdseku] = rozdelPrvuVetu(uvodOdseky[0] || '')
+  const odsekyTela = [zvysokPrvehoOdseku, ...uvodOdseky.slice(1)].filter(Boolean)
 
   return (
     <>
@@ -59,7 +73,7 @@ export default function OFirme() {
         stitok="O firme"
         nadpis="Dopravné stavby od roku 2012"
         perex={uvodPerex}
-        fakty={FIRMA.fakty.filter((f) => f.length <= MAX_ZNAKOV_FAKTU)}
+        fakty={FIRMA.fakty}
       />
 
       {/* Firma — úvodné odseky a claim ako výrazné vyhlásenie, vpravo fotka. */}
@@ -68,15 +82,13 @@ export default function OFirme() {
           <div className="lg:col-span-7">
             <Reveal>
               <MonoStitok>Firma</MonoStitok>
-              {/* Claim z pôvodného webu. Tam bol vo verzálkach a s výkričníkom,
-                  tu je vetou v Archive 500 — tá istá pravda, iná hlasitosť. */}
-              <p className="mt-5 max-w-[20ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-medium leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                {FIRMA.claim}
+              <p className="mt-5 max-w-[24ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-medium leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                {vyhlasenie}
               </p>
             </Reveal>
 
             <Reveal className="mt-9">
-              {uvodOdseky.map((odsek, i) => (
+              {odsekyTela.map((odsek, i) => (
                 <p
                   key={odsek}
                   className={`max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)] ${
@@ -205,9 +217,12 @@ export default function OFirme() {
                   <h3 className="max-w-[30ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                     {clanok.titulok}
                   </h3>
-                  <p className="mt-5 max-w-[52ch] font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                    {clanok.poznamka || 'Odkaz na článok doplní klient.'}
-                  </p>
+                  <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4">
+                    <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+                      {vetaZastupnehoTextu(clanok.poznamka, 'Odkaz na pôvodný článok a názov média.')}
+                    </p>
+                    <MonoStitok className="shrink-0">Doplní klient</MonoStitok>
+                  </div>
                 </div>
               </Reveal>
             </li>

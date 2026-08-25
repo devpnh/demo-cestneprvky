@@ -76,8 +76,17 @@ function HeroPozadie({ onSegment }) {
   return (
     <div ref={bgRef} className="absolute inset-0 overflow-hidden bg-[var(--color-surface-2)]" aria-hidden="true">
       <motion.div className="absolute inset-0" style={reduced ? undefined : { scale }}>
+        {/* Poster je LCP obrázok. `srcset` preto, aby telefón neťahal
+            1920 px verziu (Lighthouse mobile hlásil 222 kB navyše);
+            `sizes="100vw"`, lebo pozadie vždy vypĺňa celú šírku. */}
         <img
           src={`${import.meta.env.BASE_URL}hero/poster.jpg`}
+          srcSet={[
+            `${import.meta.env.BASE_URL}hero/poster-960.jpg 960w`,
+            `${import.meta.env.BASE_URL}hero/poster-1440.jpg 1440w`,
+            `${import.meta.env.BASE_URL}hero/poster.jpg 1920w`,
+          ].join(', ')}
+          sizes="100vw"
           width={1920}
           height={1080}
           alt=""
@@ -152,7 +161,13 @@ function PopisokZaberu({ idx }) {
 }
 
 /** Šípka na ďalšiu sekciu. Lenis drží vlastnú pozíciu scrollu, natívny skok
- *  na kotvu by prepísal späť pri najbližšom rAF, preto skrolujeme cez neho. */
+ *  na kotvu by prepísal späť pri najbližšom rAF, preto skrolujeme cez neho.
+ *
+ *  Sedí na ľavej osi mriežky, nie v strede obrazovky: obsah hero je zarovnaný
+ *  vľavo, takže vycentrovaná šípka visela sama a nesedela s ničím. Obal má
+ *  presne ten istý kontajner ako obsah hero (78rem + `--container-padding-x`),
+ *  preto je ľavá hrana šípky totožná s ľavou hranou H1 aj tlačidiel.
+ *  Obal je `pointer-events-none`, aby neúmyselne neprekryl tlačidlá nad ním. */
 function ScrollCue() {
   const reduced = useReducedMotion()
 
@@ -164,24 +179,27 @@ function ScrollCue() {
   }
 
   return (
-    <a
-      href="#sluzby"
-      onClick={naSluzby}
-      aria-label="Prejsť na služby"
-      className="absolute bottom-4 left-1/2 z-10 hidden h-[44px] w-[44px] -translate-x-1/2 items-center justify-center text-[rgba(255,255,255,0.86)] transition-colors duration-[var(--duration-fast)] hover:text-[var(--color-bg)] lg:flex"
-    >
-      {reduced ? (
-        <ArrowDown className="h-5 w-5" aria-hidden="true" />
-      ) : (
-        <motion.span
-          className="flex"
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-        >
+    <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 w-full max-w-[var(--container-max)] -translate-x-1/2 px-[var(--container-padding-x)]">
+      <a
+        data-scroll-cue
+        href="#sluzby"
+        onClick={naSluzby}
+        aria-label="Prejsť na služby"
+        className="pointer-events-auto hidden h-[44px] w-[44px] items-center justify-start text-[rgba(255,255,255,0.86)] transition-colors duration-[var(--duration-fast)] hover:text-[var(--color-bg)] lg:flex"
+      >
+        {reduced ? (
           <ArrowDown className="h-5 w-5" aria-hidden="true" />
-        </motion.span>
-      )}
-    </a>
+        ) : (
+          <motion.span
+            className="flex"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <ArrowDown className="h-5 w-5" aria-hidden="true" />
+          </motion.span>
+        )}
+      </a>
+    </div>
   )
 }
 
@@ -207,10 +225,13 @@ export default function Hero() {
       {/* Obsah je v DOM prvý zámerne: prvé dieťa sekcie má byť kontajner
           s rovnakou ľavou hranou ako v ostatných pásmach (audit meria
           zarovnanie práve na ňom). Pozadie je mimo toku (`absolute inset-0`)
-          a obsah má `z-10`, takže poradie v DOM na vrstvenie nemá vplyv. */}
+          a obsah má `z-10`, takže poradie v DOM na vrstvenie nemá vplyv.
+          Spodný padding je od 1024 px väčší, lebo pod tlačidlami stojí na tej
+          istej ľavej osi šípka na ďalšiu sekciu; pri `lg:pb-16` by jej ostali
+          nad hlavou 4 px. */}
       <div
         data-hero-obsah
-        className="relative z-10 mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)] pb-14 pt-[104px] lg:pb-16"
+        className="relative z-10 mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)] pb-14 pt-[104px] lg:pb-28"
       >
         <Stagger staggerChildren={0.07}>
           <StaggerItem>

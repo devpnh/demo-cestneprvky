@@ -11,9 +11,11 @@ import { FIRMA } from '../../../content/firma.js'
  * konzultácie ÚNSS. Žiadne počty realizácií ani roky skúseností: tie
  * v podkladoch klienta nie sú (STANDARDY A3).
  *
- * Na 390 px sa `whitespace-nowrap` položiek zámerne uvoľňuje: najdlhší fakt
- * má v mono reze 12 px cez 380 px a nezlomený by pretiahol dokument doprava
- * (D1). Od 640 px, kde sa už vojde, platí nedeliteľnosť z kitu.
+ * Lámanie riadkov tu neriešime žiadnou triedou: `PasFaktov` z kitu lepí
+ * oddeľovač „·“ k poslednému slovu nezlomiteľnou medzerou, takže oddeľovač
+ * neprepadne sám na riadok a zároveň sa najdlhší fakt (v mono reze 12 px cez
+ * 380 px) na 390 px normálne zlomí a neťahá `scrollWidth` dokumentu (D1).
+ * Vlastný `whitespace-nowrap` by túto opravu zrušil — nepridávať.
  */
 export default function Fakty() {
   return (
