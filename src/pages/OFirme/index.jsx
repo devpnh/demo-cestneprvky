@@ -56,22 +56,24 @@ const JEMNA_LINKA = { borderColor: 'color-mix(in srgb, var(--color-bg) 18%, tran
 
 /**
  * Zástupné pole v dátach má tvar `[DOPLNÍ KLIENT: …]` a býva vložené do vety
- * (`FIRMA.znacky`) aj samostatné (`FIRMA.aktuality`). Hranatá zátvorka na
- * stránke vyzerá ako nedorobené CMS pole, preto text rozoberieme na doloženú
- * časť a na chýbajúcu; „doplní klient“ nesie mono štítok — tá istá forma ako
- * v tabuľke fakturačných údajov na `/kontakt`.
+ * (`FIRMA.znacky`) aj samostatné (`FIRMA.aktuality`). Na stránku nejde ani
+ * ono, ani štítok „doplní klient“: pre návštevníka je to hluk o našej
+ * rozrobenosti, nie informácia o firme. Zostane len doložená časť vety, a keď
+ * po odstránení nezostane nič, riadok sa nevykreslí. `src/content/**` sa
+ * nemení — čo tam raz príde, sa objaví samo.
+ *
+ * Vety už prešli slovenskou sadzbou v `src/content/firma.js`, takže po
+ * jednopísmenových predložkách nesú nezlomiteľnú medzeru. Preto tu žiadne
+ * `\s+` ani `trim()`: obe by NBSP zrovnali na obyčajnú medzeru a sadzba by
+ * sa stratila. Čistí sa len obyčajná medzera a tabulátor, a veta bez
+ * zástupného poľa sa nedotýka vôbec.
  */
-const ZASTUPNY_TEXT = /\[\s*DOPLNÍ KLIENT\s*:?\s*([\s\S]*?)\s*\]/
+const ZASTUPNY_TEXT = /\s*\[\s*DOPLNÍ KLIENT\s*:?\s*[\s\S]*?\]\s*/
 
-function rozoberZastupnyText(text) {
-  const zdroj = (text || '').trim()
-  const zhoda = zdroj.match(ZASTUPNY_TEXT)
-  if (!zhoda) return { doloziene: zdroj, chyba: '' }
-  const doloziene = (zdroj.slice(0, zhoda.index) + zdroj.slice(zhoda.index + zhoda[0].length))
-    .replace(/\s+/g, ' ')
-    .trim()
-  const chyba = zhoda[1].trim()
-  return { doloziene, chyba: chyba ? chyba.charAt(0).toUpperCase() + chyba.slice(1) : '' }
+const bezZastupnehoTextu = (text) => {
+  const zdroj = text || ''
+  if (!ZASTUPNY_TEXT.test(zdroj)) return zdroj
+  return zdroj.replace(ZASTUPNY_TEXT, ' ').replace(/^[ \t]+|[ \t]+$/g, '')
 }
 
 /**
@@ -328,7 +330,7 @@ export default function OFirme() {
             Preto je `Reveal` samotný ten `div`. */}
         <dl className="mt-8">
           {FIRMA.znacky.map((znacka, i) => {
-            const { doloziene, chyba } = rozoberZastupnyText(znacka.popis)
+            const doloziene = bezZastupnehoTextu(znacka.popis)
             return (
               <Reveal
                 key={znacka.nazov}
@@ -344,19 +346,6 @@ export default function OFirme() {
                       {doloziene}
                     </p>
                   ) : null}
-                  {chyba ? (
-                    <div
-                      className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t pt-4 ${doloziene ? 'mt-4' : ''}`}
-                      style={JEMNA_LINKA}
-                    >
-                      <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-80">
-                        {chyba}
-                      </p>
-                      <MonoStitok tmava sCiarkou={false} className="shrink-0">
-                        Doplní klient
-                      </MonoStitok>
-                    </div>
-                  ) : null}
                 </dd>
               </Reveal>
             )
@@ -365,7 +354,8 @@ export default function OFirme() {
       </Sekcia>
 
       {/* Aktuality — jediná položka z pôvodného webu. `url` je null, preto to
-          nie je odkaz, ale položka s poznámkou pre klienta. Telo článku nemáme.
+          nie je odkaz, len titulok a rok. Telo článku ani adresu pôvodného
+          média nemáme a poznámku o tom, že chýbajú, návštevník čítať nemá.
 
           Pásmo je zámerne na malom odsadku a nadpis stojí vedľa položky, nie
           nad ňou: na plnom odsadku so samostatnou hlavičkou zaberal jeden
@@ -391,12 +381,6 @@ export default function OFirme() {
                 <h3 className="mt-4 max-w-[34ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                   {clanok.titulok}
                 </h3>
-                <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4">
-                  <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                    {rozoberZastupnyText(clanok.poznamka).chyba || 'Odkaz na pôvodný článok a názov média.'}
-                  </p>
-                  <MonoStitok className="shrink-0">Doplní klient</MonoStitok>
-                </div>
               </li>
             ))}
           </ul>

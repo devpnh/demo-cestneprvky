@@ -47,6 +47,26 @@ export const popisFotky = (fotka) => {
 }
 
 /**
+ * Údaje o zábere rozpísané na riadky pre marginálie úvodného pásma.
+ *
+ * Je to ten istý obsah, aký by inak stál v popisku pod fotkou, len vysadený
+ * ako technický list: vľavo mono názov údaja, vpravo hodnota. Pravidlo, čo sa
+ * smie tvrdiť, je jedno pre celý web (`castiPopisu`) — miesto sa uvádza len
+ * pri `isteMiesto`, inak sa nenahrádza ničím. Nič sa nedopĺňa odhadom.
+ */
+export const udajeFotky = (fotka) => {
+  const z = ZAZNAM_PODLA_SUBORU.get(fotka.src) || fotka
+  const udaje = []
+  if (z.prvok) udaje.push(['Prvok', z.prvok])
+  if (z.produktovaFoto) udaje.push(['Záber', 'Produktová fotografia'])
+  else {
+    if (z.prostredie) udaje.push(['Prostredie', z.prostredie])
+    if (z.isteMiesto && z.miesto) udaje.push(['Miesto', z.miesto])
+  }
+  return udaje
+}
+
+/**
  * Úvodná fotka služby. Berie sa najširší dostupný záber, nie prvý v poli:
  * úvodné pásmo ju sadzí na šírku textového stĺpca a mäkká, prefúknutá fotka
  * vyzerá lacno (STANDARDY F2). Pri `protismykovy-nater` je tak v úvode záber

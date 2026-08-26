@@ -3,7 +3,10 @@ import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
 import { Sekcia, SekciaHlavicka, StranHlavicka, MonoStitok, Tlacidlo } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
+import MapaSlovenska from '../../components/MapaSlovenska.jsx'
 import ZadanieForm from '../../components/ZadanieForm.jsx'
+import { sadzba } from '../../lib/sadzba.js'
+import { REGISTER } from '../../content/firma.js'
 import global from '../../content/global.json'
 
 const META = routaPodlaCesty('/kontakt')
@@ -17,13 +20,41 @@ const TEL_HREF = `tel:${NAP.phone.replace(/\s+/g, '')}`
 
 /**
  * Odkaz do máp namiesto vloženej mapy: Google embed by ťahal cudzie skripty
- * a cookies do dema, ktoré je `noindex` a nemá cookie lištu.
+ * a cookies do dema, ktoré je `noindex` a nemá cookie lištu. Samotná mapa na
+ * stránke je vlastné inline SVG (`components/MapaSlovenska.jsx`), to isté,
+ * aké kreslí `/realizacie`.
  */
 const MAPY_URL =
   'https://www.google.com/maps/search/?api=1&query=Borov%C3%A1%203295%2F36%2C%20010%2001%20%C5%BDilina'
 
-/** Údaje, ktoré v podkladoch klienta nie sú. Nevymýšľame ich, pomenujeme ich. */
-const CHYBAJUCE_UDAJE = ['IČO', 'DIČ', 'Otváracie hodiny', 'Konateľ']
+/**
+ * Zápis firmy tak, ako stojí v Obchodnom registri SR. Hodnoty vlastní
+ * `src/content/firma.js`, tu sa im len dávajú štítky a poradie.
+ *
+ * DIČ ani IČ DPH v registri nie sú a v podkladoch klienta tiež nie, takže tu
+ * riadok pre ne nie je: vymyslené číslo je horšie než chýbajúce. Otváracie
+ * hodiny nie sú údaj z registra a klient ich nedodal, preto sú tiež preč.
+ * Dátum narodenia konateľa register zverejňuje, ale na obchodnú prezentáciu
+ * nepatrí — je to osobný údaj, ktorý na kontakt nikto nepotrebuje.
+ *
+ * `REGISTER.konanie` (spôsob konania štatutára) tu nie je: blok sa volá
+ * fakturačné údaje a spôsob konania na faktúru ani do hlavičky obchodného
+ * kontaktu nepatrí. Bez neho sa ľavý stĺpec zmestí k formuláru namiesto toho,
+ * aby ho prerástol o dve tretiny obrazovky.
+ *
+ * `REGISTER` je doslovný odpis z registra a cez `sadzbaHlboko` neprešiel,
+ * preto ho tu ženieme cez `sadzba()`: „vložka č. 57757/L“ by inak nechala
+ * skratku na konci riadka.
+ */
+const REGISTROVE_UDAJE = [
+  { label: 'Obchodné meno', hodnota: REGISTER.obchodneMeno },
+  { label: 'IČO', hodnota: REGISTER.ico },
+  { label: 'Právna forma', hodnota: REGISTER.pravnaForma },
+  { label: 'Základné imanie', hodnota: REGISTER.zakladneImanie },
+  { label: 'Zápis', hodnota: REGISTER.zapis },
+  { label: 'Deň zápisu', hodnota: REGISTER.denZapisu },
+  { label: 'Konateľ', hodnota: REGISTER.konatel },
+].map(({ label, hodnota }) => ({ label, hodnota: sadzba(hodnota) }))
 
 const SPOJENIE = [
   { id: 'telefon', ikona: Phone, label: 'Telefón', hodnota: NAP.phone, href: TEL_HREF, nezalamovat: true },
@@ -35,18 +66,18 @@ const SPOJENIE = [
  * Kontakt.
  *
  * Rytmus pásiem podľa `poznamky/KOMPOZICIA.md` §2: biela (hlavička) → biela
- * (spojenie a formulár) → sivá (sídlo ako statický blok s odkazom do máp) →
- * tmavá pätička. Dve tmavé pásma za sebou tu nie sú.
+ * (spojenie a formulár) → biela (sídlo s mapou) → tmavá pätička. Dve tmavé
+ * pásma za sebou tu nie sú.
  *
- * Ľavý stĺpec nesie celú vizitku — spojenie aj fakturačné údaje. V prvom kole
+ * Ľavý stĺpec nesie celú vizitku — spojenie aj údaje zo zápisu. V prvom kole
  * boli fakturačné údaje dole a stĺpec končil 385 px nad spodkom formulára;
- * presunom hore dostal stĺpec výšku formulára a sivé pásmo dostalo jedinú
- * úlohu: adresu a odkaz do máp.
+ * presunom hore dostal stĺpec výšku formulára a pásmo Sídlo dostalo jedinú
+ * úlohu: mapu, adresu a odkaz do máp.
  *
- * Kontaktné údaje sú doslova z `src/content/global.json`, formulár je
- * existujúci `ZadanieForm` (bez `VITE_FORM_ENDPOINT` beží v demo režime a
- * potvrdenie zobrazí sám). Údaje, ktoré klient neposkytol — IČO, DIČ,
- * otváracie hodiny, meno konateľa — sú označené štítkom, nie dopísané.
+ * Kontaktné údaje sú doslova z `src/content/global.json`, údaje o zápise
+ * z `REGISTER` v `src/content/firma.js` a formulár je existujúci
+ * `ZadanieForm` (bez `VITE_FORM_ENDPOINT` beží v demo režime a potvrdenie
+ * zobrazí sám).
  */
 export default function Kontakt() {
   return (
@@ -104,19 +135,24 @@ export default function Kontakt() {
               })}
             </ul>
 
+            {/* Fakturačné údaje: štítok naľavo, hodnota napravo od neho, nie pod
+                ním — riadkov je osem a osem dvojriadkových blokov by z vizitky
+                spravilo druhý formulár. Na 390 px sa dvojica zloží pod seba,
+                lebo „Okresný súd Žilina, oddiel Sro, vložka č. 57757/L“ sa do
+                polovice mobilnej šírky nezmestí. */}
             <Reveal className="mt-14">
               <MonoStitok>Fakturačné údaje</MonoStitok>
               <dl className="mt-6">
-                {CHYBAJUCE_UDAJE.map((polozka) => (
+                {REGISTROVE_UDAJE.map(({ label, hodnota }) => (
                   <div
-                    key={polozka}
-                    className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-[var(--color-border)] py-4"
+                    key={label}
+                    className="grid grid-cols-1 gap-x-6 gap-y-1 border-t border-[var(--color-border)] py-3 sm:grid-cols-[9rem_1fr] sm:items-baseline"
                   >
-                    <dt className="font-[family-name:var(--font-body)] text-[length:var(--text-base)] text-[var(--color-text)]">
-                      {polozka}
+                    <dt className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
+                      {label}
                     </dt>
-                    <dd className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                      Doplní klient
+                    <dd className="font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                      {hodnota}
                     </dd>
                   </div>
                 ))}
@@ -143,30 +179,40 @@ export default function Kontakt() {
         </div>
       </Sekcia>
 
-      {/* Sídlo: kontaktný blok s odkazom do máp, žiadny vložený Google embed
-          a nič, čo by mapu predstieralo. Nadpisom je samotná adresa. */}
+      {/* Sídlo: vlastné inline SVG Slovenska s jedinou značkou, ten istý obrys
+          aký kreslí `/realizacie`. Žiadny iframe, žiadny cudzí mapový podklad,
+          žiadne cookies. Vedľa mapy stojí adresa a odkaz do máp; na 390 px sa
+          mriežka zloží a mapa ostane nad textom. */}
       <Sekcia id="sidlo" pasmo="biela">
-        <SekciaHlavicka
-          stitok="Sídlo"
-          // Adresa po riadkoch ako na obálke: pri jednom reťazci s `text-balance`
-          // sa zalomilo PSČ na „010 / 01“. Celý reťazec `ADRESA` ostáva na
-          // stránke v riadku Adresa v ľavom stĺpci.
-          nadpis={
-            <>
-              {`${NAP.street},`}
-              <br />
-              {`${NAP.postalCode} ${NAP.city},`}
-              <br />
-              {NAP.country}
-            </>
-          }
-          sirkaNadpisu="max-w-[16ch]"
-          akcia={
-            <Tlacidlo variant="sekundar" href={MAPY_URL} target="_blank" rel="noopener noreferrer">
-              Otvoriť v mapách
-            </Tlacidlo>
-          }
-        />
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <Reveal className="lg:col-span-7">
+            <MapaSlovenska popis={`Mapa Slovenska so sídlom firmy v Žiline, ${ADRESA}`} />
+          </Reveal>
+
+          <div className="lg:col-span-5">
+            <SekciaHlavicka
+              stitok="Sídlo"
+              // Adresa po riadkoch ako na obálke: pri jednom reťazci s `text-balance`
+              // sa zalomilo PSČ na „010 / 01“. Celý reťazec `ADRESA` ostáva na
+              // stránke v riadku Adresa v ľavom stĺpci.
+              nadpis={
+                <>
+                  {`${NAP.street},`}
+                  <br />
+                  {`${NAP.postalCode} ${NAP.city},`}
+                  <br />
+                  {NAP.country}
+                </>
+              }
+              sirkaNadpisu="max-w-[16ch]"
+            />
+            <Reveal className="mt-8">
+              <Tlacidlo variant="sekundar" href={MAPY_URL} target="_blank" rel="noopener noreferrer">
+                Otvoriť v mapách
+              </Tlacidlo>
+            </Reveal>
+          </div>
+        </div>
       </Sekcia>
     </>
   )
