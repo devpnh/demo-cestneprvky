@@ -401,12 +401,12 @@ export default function SluzbaDetail() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
             {uvodnaFotka ? (
               <Reveal className="lg:col-span-7">
-                {/* Kým vedľa fotky stál zoznam podkladov, mala tu byť fotka
-                    plochá (21:9), aby pásmo nenarástlo. Bez neho by z takého
-                    prúžka a prázdneho pravého stĺpca ostala diera, tak má
-                    záber orez 3:2 a celú šírku, na akú ho podklady pustia
-                    (`maxSirka`, 1,4× originálu). Je to jediná fotografia
-                    stránky, takže znesie váhu úvodu. */}
+                {/* Kým vedľa fotky stál zoznam podkladov, bola fotka plochá
+                    (21:9), aby pásmo nenarástlo. Bez neho by z prúžka a
+                    prázdneho pravého stĺpca ostala diera, tak má záber orez
+                    16:9 a celých sedem stĺpcov. Vyšší orez (3:2) sme skúsili
+                    tiež: fotka potom prerástla marginálie o 240 px a pod nimi
+                    ostala prázdna plocha. `maxSirka` drží 1,4× originálu. */}
                 <div style={{ maxWidth: maxSirka(uvodnaFotka) }}>
                   <Fotka
                     src={uvodnaFotka.src}
