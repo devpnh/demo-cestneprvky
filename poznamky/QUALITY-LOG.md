@@ -203,3 +203,30 @@ Jedno pravidlo popisku fotiek pre celý web (tá istá trieda fotiek mala tri r�
 | Lighthouse desktop | perf **99** · LCP 0,9 s |
 | SEO | 63 zámerne — demo má `noindex`, vyššie sa dostať nedá |
 | Rubrika kritika | 8,6 z 10; výstupná podmienka §6.3 (každý bod ≥ 9) nesplnená, zvyšné nálezy sú vkus a kozmetika |
+
+## 2026-08-26 · nález: `whileInView` v tomto projekte nespúšťa animácie
+
+Pri oprave pipeline v sekcii Proces sa ukázalo, že animácie viazané na
+`whileInView` z knižnice `motion` sa nespúšťajú vôbec. Dôkaz je jednoznačný:
+prvok 8 000 px pod okrajom okna má `opacity: 1` a **žiadny inline `style`**,
+teda `initial` sa naň nikdy nepoužilo. Rovnako sa správa `Reveal` aj `Lajna`
+— na konci vyzerajú správne, lebo cieľový stav je totožný s tým, čo sa
+vykreslí bez animácie, a preto si toho nikto nevšimol.
+
+Sekcia Proces je odvtedy postavená na vlastnom `IntersectionObserver`
+a prechodoch v CSS. Namerané po oprave (vzorkovanie po 110 ms): pred vstupom
+do viewportu `linky [0,0,0]`, `uzly [0,0,0,0]`, potom sekvencia
+`uzol → úsečka → uzol` a po ~880 ms všetko na 1.
+
+**Otvorené:** to isté treba preveriť pri `Reveal`, `Stagger` a `Lajna`, ktoré
+`whileInView` používajú naprieč webom. Nie je to vec jednej sekcie a nemá to
+vplyv na obsah ani na audit (cieľový stav je správny), ale znamená to, že
+väčšina vstupných animácií na webe dnes v skutočnosti nebeží.
+
+## 2026-08-26 · hero podstránok, dve pásma, mapa a údaje z registra
+- **Faktový pás pod hero na Domove odstránený** (pokyn Petra). Rytmus `/` je `t b b t b b t`.
+- **Sekcia Služby na Domove prerobená z kruhového objazdu na mriežku 3 × 3 fotografií.** Objazd nesedel na mriežke (ľavý okraj 717 px proti stĺpcom 136 a 752, vpravo 67 px medzera), stĺpce nesedeli dole (749 vs 899) a deväť kruhových náhľadov po ~50 px nekomunikovalo nič. Nová mriežka má ľavé hrany 136/536/936 s odchýlkou 0 px na 1024 až 1920 px.
+- **Dve pásma namiesto troch** (pokyn Petra): sivá zrušená, ostáva svetlé a tmavé. Z toho plynie pravidlo zapísané do `KOMPOZICIA.md`: keď rytmus nerobí farba, musí ho robiť obsah — sekcia s vyše ~300 px súvislého textu bez obrazového prvku sa vracia.
+- **Hero podstránok je tmavé a farebne spracované** (vzor doktorzub.com): eyebrow v `--color-accent-svetly` s prestrkom 0,2 em, biely H1, akcentová linka pod titulom. Nový token `--color-accent-svetly: #ff6a4d` — samotný akcent má na tmavom pásme len 3,61:1, tento 5,17:1. Hlavička webu sa už neriadi cestou, ale **prvým `data-pasmo` v `<main>`**, takže je priehľadná nad každým tmavým pásmom; `main` stratil `pt-[72px]` a odsadenie si drží prvé pásmo samo.
+- **Mapa miest realizácií** na `/realizacie`: vlastné inline SVG, obrys Natural Earth 1:10m zjednodušený na 223 bodov, 15 miest podľa skutočných súradníc, prepojené hoverom so zoznamom. Žiadny externý mapový podklad ani cookies.
+- **Údaje z registra namiesto zástupných textov.** Finstat je za Cloudflare (HTTP 403), preto sa čerpalo z **Obchodného registra SR** (Okresný súd Žilina) a z **RPO Štatistického úradu SR**: IČO 46 875 891, obchodné meno „Cestné prvky, s.r.o.“, deň zápisu 10. 11. 2012, vložka Sro/57757/L, konateľ Ján Lešňovský. Dátum narodenia konateľa register zverejňuje, na web nejde. **DIČ ani IČ DPH tieto registre nezverejňujú**, riadok sa preto vypúšťa, nevymýšľa.
