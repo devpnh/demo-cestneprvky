@@ -189,9 +189,23 @@ function FotkaZoznamu({ fotka }) {
  * Rytmus pásiem drží `rytmusPasiem` vyššie: farby sa nepriraďujú sekciám
  * napevno, ale sa počítajú z poradia pásiem, ktoré na stránke naozaj vznikli.
  */
+/**
+ * Počet rokov v praxi sa nevypisuje natvrdo: vyťahuje sa z odsekov služby,
+ * takže keď klient text zmení, štítok sa zmení s ním, a keď vetu vypustí,
+ * štítok zmizne. Číslo patrí výrobku DEBUZ®, nie firme.
+ */
+function rokyVPraxi(sluzba) {
+  for (const odsek of sluzba?.odseky || []) {
+    const m = String(odsek).match(/(\d{1,3})\s*rok/i)
+    if (m) return m[1]
+  }
+  return null
+}
+
 export default function SluzbaDetail() {
   const { slug } = useParams()
   const sluzba = sluzbaPodlaSlugu(slug)
+  const ROKY_V_PRAXI = rokyVPraxi(sluzba)
 
   // Neexistujúci slug renderuje tú istú 404 ako `*`, takže stránka má stále
   // presne jeden H1 a používateľ dostane rovnaké východiská.
@@ -460,16 +474,40 @@ export default function SluzbaDetail() {
             stitok="Výhody"
             nadpis={sluzba.znacky?.length ? `Výhody ${sluzba.znacky[0]}` : 'Výhody riešenia'}
           />
-          <Stagger className="mt-12 border-t border-[var(--color-border)]" staggerChildren={0.06}>
-            {sluzba.vyhody.map((v) => (
-              <StaggerItem key={v} as="div">
-                <p className="flex gap-5 border-b border-[var(--color-border)] py-5 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">
-                  <span aria-hidden="true" className="mt-[0.7em] h-[2px] w-4 shrink-0 bg-[var(--color-accent)]" />
-                  <span className="max-w-[62ch]">{v}</span>
-                </p>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          {/* Pásmo malo vyše 1 000 px súvislého textu bez jediného obrazu.
+              Fotografiu sem dať nemôžeme: služba má v podkladoch jediný záber
+              retardérov a ten je úvodnou fotkou tej istej stránky. Namiesto
+              ilustrácie preto stojí vedľa zoznamu technický štítok s číslom,
+              ktoré je doslova v texte klienta („v praxi nachádzajú výborné
+              uplatnenie už 25 rokov“) — a je pripísané výrobku, nie firme. */}
+          <div className="mt-12 grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-12">
+            <Stagger className="border-t border-[var(--color-border)] lg:col-span-8" staggerChildren={0.06}>
+              {sluzba.vyhody.map((v) => (
+                <StaggerItem key={v} as="div">
+                  <p className="flex gap-5 border-b border-[var(--color-border)] py-5 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                    <span aria-hidden="true" className="mt-[0.7em] h-[2px] w-4 shrink-0 bg-[var(--color-accent)]" />
+                    <span className="max-w-[62ch]">{v}</span>
+                  </p>
+                </StaggerItem>
+              ))}
+            </Stagger>
+
+            {ROKY_V_PRAXI ? (
+              <Reveal className="lg:col-span-4 lg:h-full">
+                <div
+                  className="flex h-full flex-col justify-center border border-[var(--color-border)] px-8 py-10"
+                  style={{ borderRadius: 'var(--radius-sm)' }}
+                >
+                  <p className="font-[family-name:var(--font-display)] text-[length:var(--text-5xl)] font-semibold leading-none tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                    {`${ROKY_V_PRAXI} rokov`}
+                  </p>
+                  <p className="mt-4 max-w-[24ch] font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[var(--color-muted)]">
+                    {sluzba.znacky?.length ? `${sluzba.znacky[0]} v praxi` : 'v praxi'}
+                  </p>
+                </div>
+              </Reveal>
+            ) : null}
+          </div>
         </Sekcia>
       ) : null}
 

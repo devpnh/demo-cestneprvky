@@ -11,6 +11,7 @@ import {
 } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
 import { FIRMA, PROCES } from '../../content/firma.js'
+import { castiPopisu } from '../Realizacie/skupiny.js'
 import { REALIZACIE } from '../../content/realizacie.js'
 // Popisok pod fotkou má na celom webe jedno pravidlo a to žije v `Sluzby/fotky.js`
 // (typ prvku, prostredie, miesto len keď je doložené). Preto sa sem importuje
@@ -96,6 +97,9 @@ function rozoberZastupnyText(text) {
  * nie je to skrátenie obsahu, ale rozdelenie, aby ten istý odsek nestál na
  * jednej obrazovke dvakrát.
  */
+/** Doklad k pásmu konzultácií: prvok, ktorý vyhlášky predpisujú. */
+const FOTO_KONZULTACIE = REALIZACIE.find((r) => r.id === 'tornala-signalny-pas') || null
+
 export default function OFirme() {
   const [uvodPerex, ...uvodOdseky] = FIRMA.uvod
 
@@ -264,6 +268,27 @@ export default function OFirme() {
           perex={FIRMA.konzultacie.popis}
           sirkaNadpisu="max-w-[16ch]"
         />
+
+        {/* Pásmo bolo 1 469 px súvislého textu bez jediného obrazu, teda presne
+            to, čo sa na `/o-firme` vytýkalo. Signálny pás v Tornali je prvok,
+            ku ktorému Únia vydáva stanoviská a ktorý predpisujú obe vyhlášky
+            uvedené o kus nižšie, takže pásmo dokladá, nie zdobí. */}
+        {FOTO_KONZULTACIE ? (
+          <Reveal className="mt-12">
+            <Fotka
+              src={FOTO_KONZULTACIE.src}
+              w={FOTO_KONZULTACIE.w}
+              h={FOTO_KONZULTACIE.h}
+              alt={FOTO_KONZULTACIE.alt}
+              popis={`${FOTO_KONZULTACIE.prvok} · ${castiPopisu(FOTO_KONZULTACIE)[0]}`}
+              tmava
+              sizes="(min-width: 1024px) 82vw, 100vw"
+              maxSirka={Infinity}
+              triedaObrazka="aspect-[4/3] sm:aspect-[21/9] lg:aspect-[3/1]"
+              className="[&_figcaption]:border-t [&_figcaption]:pt-4"
+            />
+          </Reveal>
+        ) : null}
 
         <Reveal className="mt-10">
           <Tlacidlo
