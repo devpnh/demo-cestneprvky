@@ -40,7 +40,13 @@ podľa pokynu „najprv lokálne, potom gh“.
 
 ---
 
-## 2. Čo dopĺňa klient (18 položiek, všetky sú viditeľné aj na webe)
+## 2. Čo dopĺňa klient (18 položiek)
+
+> **Zmena 26. 8. 2026:** zástupné bloky „Doplní klient“ boli na pokyn Petra
+> odstránené z celého webu (overené: 0 výskytov na všetkých 14 cestách).
+> Tento zoznam je odteraz **jediná evidencia** toho, čo od klienta potrebujeme.
+> V dátach polia `chyba` v `src/content/sluzby.js` zostávajú, len sa nikde
+> nevykresľujú; komponent `Podklady.jsx` je zmazaný.
 
 | # | Kde | Čo potrebujeme |
 |---|---|---|
@@ -67,8 +73,15 @@ podľa pokynu „najprv lokálne, potom gh“.
 - **Logo v SVG.** Dnešné je PNG 145 × 86 px, v hlavičke sa renderuje na 81 × 48 px, čiže pri
   dvojnásobnej hustote pixelov je mierne rozmazané. Je to prvý prvok vľavo hore na každej stránke
   a kódom sa to opraviť nedá.
-- **Fakturačné údaje:** IČO, DIČ, otváracie hodiny a meno konateľa na webe klienta nie sú,
-  na `/kontakt` sú preto označené štítkom „Doplní klient“. Nič sme nevymýšľali.
+- **Fakturačné údaje sú doplnené z verejných registrov** (26. 8. 2026): IČO 46 875 891,
+  obchodné meno „Cestné prvky, s.r.o.“, právna forma, zápis Okresný súd Žilina, oddiel Sro,
+  vložka č. 57757/L, deň zápisu 10. 11. 2012, konateľ Ján Lešňovský, základné imanie 5 000 EUR.
+  Zdroj: Obchodný register SR a Register právnických osôb ŠÚ SR. Finstat sa použiť nedal,
+  je za Cloudflare (HTTP 403).
+  - **DIČ a IČ DPH stále chýbajú** — Obchodný register ani RPO ich nezverejňujú, riadok sme
+    preto z webu vypustili. Ak ich klient dodá, patria do `REGISTER` vo `firma.js`.
+  - **Otváracie hodiny** nie sú údaj z registra a klient ich nikde neuvádza; riadok je vypustený.
+  - **Dátum narodenia konateľa** register zverejňuje, na web sme ho zámerne nedali.
 - **Endpoint formulára:** `VITE_FORM_ENDPOINT` (Formspark). Bez neho beží demo režim a odoslanie
   zobrazí potvrdenie bez odoslania, čo je v paneli napísané.
 - **Plné názvy miest pri skratkách z názvov fotografií:** `PD` (odhad Prievidza), `MT` (Martin),
