@@ -25,11 +25,14 @@ export default function Fotka({
   className = '',
   triedaObrazka = '',
   sizes = SIZES_MRIEZKA,
+  // Strop kandidátov `srcset`. Dlaždica v mriežke si vystačí s 960w, fotka
+  // cez celú šírku kontajnera by sa z nej roztiahla — tá si pýta originál.
+  maxSirka = MAX_MRIEZKA,
 }) {
   const img = (
     <img
       src={`${BASE}assets/${src}`}
-      srcSet={srcSetPre(src, w, MAX_MRIEZKA)}
+      srcSet={srcSetPre(src, w, maxSirka)}
       sizes={sizes}
       width={w}
       height={h}

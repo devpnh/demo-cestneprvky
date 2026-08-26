@@ -5,17 +5,25 @@ import { castiPopisu } from '../../Realizacie/skupiny.js'
 
 /**
  * Šesť záberov na Domov. Vyberáme podľa `id`, nie podľa poradia v poli, aby
- * doplnenie fotky do `realizacie.js` výber nepremiešalo. Kritérium: šesť
- * rôznych typov prvkov na šiestich rôznych miestach a všetky s
- * `isteMiesto: true`, takže pod každou fotkou stojí overiteľné miesto.
+ * doplnenie fotky do `realizacie.js` výber nepremiešalo.
+ *
+ * Kritérium sa zmenilo: pôvodná šestica mala všetky miesta doložené, ale päť
+ * zo šiestich fotiek stálo aj inde na tej istej stránke (dlaždice služieb,
+ * sticky Debarierizácia, sekcia Prečo). Výber tak bol prakticky opakovaním
+ * Domova. Teraz je prvým kritériom, aby sa fotka **inde na `/` nevyskytovala**,
+ * a druhým, aby šesť záberov ukázalo šesť rôznych typov prvkov aj prostredí.
+ *
+ * Cena za to je, že tri zo šiestich miest nie sú doložené. Popisok ich preto
+ * nevypisuje (pravidlo `castiPopisu`) a stojí v ňom prostredie. Doplniť miesta
+ * je položka v `poznamky/HANDOVER.md`.
  */
 const VYBER_ID = [
   'zubacka-nastupiste', // Vodiaca línia · Zubačka
-  'medeny-hamor-obrubnik', // Lepený obrubník · Medený Hámor
-  'tornala-signalny-pas', // Signálny pás · Tornaľa
-  'filakovo-protismykove-pasy', // Protišmykový náter · Fiľakovo
-  'bosakova-odstranene-znacenie', // Odstránené značenie · Bratislava Bosákova
-  'varovny-pas-ba', // Varovný pás · Bratislava
+  'signalny-pas-priechod-ba', // Signálny pás · Bratislava
+  'nivy-interier-vstup', // Vodiaca línia v interiéri · Bratislava Nivy
+  'mosadzne-indikatory-varovny-pas', // Mosadzné indikátory · miesto nedoložené
+  'protismykovy-nater-nastupiste', // Protišmykový náter · miesto nedoložené
+  'priechod-nerezova-linia', // Vodiaca línia v priechode · miesto nedoložené
 ]
 
 const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Boolean)
@@ -24,8 +32,7 @@ const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Bool
  * Popis fotky je fakt. Pravidlo, čo sa smie napísať pod ktorú fotku, je jedno
  * pre celý web a býva v `Realizacie/skupiny.js`; teaser z neho berie prvú časť
  * (doložené miesto, inak prostredie, pri produktovej fotke jej pomenovanie),
- * aby sa popisky Domova a galérie nikdy nerozišli. Vo výbere pre Domov sú
- * beztak všetky miesta doložené.
+ * aby sa popisky Domova a galérie nikdy nerozišli.
  */
 const popis = (r) => `${r.prvok} · ${castiPopisu(r)[0]}`
 

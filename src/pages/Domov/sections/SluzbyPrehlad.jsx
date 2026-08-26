@@ -1,12 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
-import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
-import { Reveal } from '../../../components/primitives/index.js'
-import { useReducedMotion } from '../../../lib/useReducedMotion.js'
-import { SKUPINY, SLUZBY, sluzbyPodlaSkupiny, skupinaPodlaId } from '../../../content/sluzby.js'
-import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
+import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo, Fotka } from '../../../components/kit/index.js'
+import { Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { SKUPINY, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
 import { altFotky } from '../../Sluzby/fotky.js'
 
 const BASE = import.meta.env.BASE_URL
@@ -15,9 +12,16 @@ const BASE = import.meta.env.BASE_URL
 const PEREX = `Deväť služieb v troch celkoch: ${SKUPINY.map((s) => s.nazov.toLowerCase()).join(', ')}.`
 
 /**
+ * Dlaždica má na `lg` presne 368 px (kontajner 1 168 px, tri stĺpce, medzera
+ * 32 px), teda 26 vw na 1 440 px. Bez tejto hodnoty by si prehliadač podľa
+ * predvoleného `SIZES_MRIEZKA` pýtal 33 vw a sťahoval zbytočne väčší variant.
+ */
+const SIZES_DLAZDICA = '(min-width: 1024px) 26vw, 100vw'
+
+/**
  * Sleduje šírku okna, nie výšku (STANDARDY C2: výšku na dotykových
  * zariadeniach mení lišta prehliadača). Počiatočný stav sa číta priamo z
- * `matchMedia`, takže desktop vykreslí objazd hneď pri prvom rendere a
+ * `matchMedia`, takže desktop vykreslí mriežku hneď pri prvom rendere a
  * neprebliskne cez mobilný zoznam.
  */
 function useSirsieAkoLg() {
@@ -35,32 +39,71 @@ function useSirsieAkoLg() {
 }
 
 /**
- * Služby na Domove. Na `lg` a vyššie je to kruhový objazd: podpisový prvok
- * webu aj prvok z odboru klienta; vľavo stojí detail práve aktívnej služby.
- * Na mobile a tablete je to čistý zoznam so skupinami a náhľadmi: koleso sa
- * na 390 px nedá zmysluplne ovládať a v behu v4 sa z mobilu na pokyn
- * odstránilo, takže sa sem nevracia.
+ * Jedna služba ako fotografická dlaždica. Prehľad, nie katalóg: fotka, názov
+ * a šípka, žiadny perex — perexy stoja na `/sluzby`, kde má návštevník na
+ * čítanie priestor. Celá dlaždica je odkaz, takže cieľ má vyše 300 × 290 px.
  *
- * Objazd sa pod 1024 px vôbec nemontuje (nie je len skrytý cez CSS): audit
- * potom počíta presne deväť uzlov a nie osemnásť, a telefón nedrží v pamäti
- * deväť fotiek, ktoré nikdy neuvidí.
+ * Hover je jazyk kitu (KOMPOZÍCIA §4): vlasový rám do akcentu, šípka o 2 px
+ * vpravo a priblíženie fotky o 2 %. Priblíženie je pod `motion-safe`, rám a
+ * šípka ostávajú aj pri `prefers-reduced-motion`, aby bol stav kurzora
+ * čitateľný bez pohybu.
+ */
+function Dlazdica({ sluzba }) {
+  return (
+    <Link
+      to={`/sluzby/${sluzba.slug}`}
+      data-dlazdica="sluzba"
+      className="group block"
+    >
+      <Fotka
+        src={sluzba.dlazdica.src}
+        w={sluzba.dlazdica.w}
+        h={sluzba.dlazdica.h}
+        alt={altFotky(sluzba.dlazdica)}
+        pomer="3/2"
+        sizes={SIZES_DLAZDICA}
+        className="overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] [border-radius:var(--radius-sm)] group-hover:border-[var(--color-accent)]"
+        triedaObrazka="motion-safe:transition-transform motion-safe:duration-[var(--duration-slow)] motion-safe:group-hover:scale-[1.02]"
+      />
+      <div className="mt-4 flex min-h-[3.25rem] items-start justify-between gap-4">
+        <h3 className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+          {sluzba.nazovKratky || sluzba.nazov}
+        </h3>
+        <ArrowRight
+          className="mt-[3px] h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
+          aria-hidden="true"
+        />
+      </div>
+    </Link>
+  )
+}
+
+/**
+ * Služby na Domove.
+ *
+ * Od `lg` je to mriežka 3 × 3: tri riadky = tri celky zo `SKUPINY`, ktoré
+ * majú presne 3 + 3 + 3 služby. Predchodcom bol kruhový objazd; kolo 4 ho
+ * zrušilo, lebo ako prehľad nefungoval — deväť náhľadov po 50 px neukázalo
+ * nič, poradie sa z kruhu nedalo prečítať a fotka orezaná do kruhu prestala
+ * byť fotkou. Objazd navyše nesedel na mriežke kontajnera (ľavá hrana 717 px
+ * proti stĺpcom na 136 a 752 px) a pod textovým stĺpcom nechával 150 px
+ * prázdna. Mriežka stojí na tých istých stĺpcoch ako všetko ostatné v sekcii
+ * a prázdne miesto v nej nevzniká.
+ *
+ * Vizuálnu silu nesie deväť skutočných fotografií klienta, nie dekorácia.
+ * Riadok celku uvádza mono štítok a vlasová linka cez celú šírku kontajnera.
+ *
+ * Na mobile a tablete ostáva zoznam s náhľadmi: mriežka troch dlaždíc sa na
+ * 390 px zmysluplne nezobrazí a zoznam s perexom tam funguje. Nad 1024 px sa
+ * zoznam vôbec nemontuje (nie je len skrytý cez CSS) a naopak — na stránke je
+ * tak vždy práve deväť fotiek služieb, nie osemnásť, a telefón nesťahuje
+ * dlaždice, ktoré nikdy neuvidí.
  */
 export default function SluzbyPrehlad() {
-  const reduced = useReducedMotion()
   const siroke = useSirsieAkoLg()
-  const [active, setActive] = useState(0)
-  const vyber = useCallback((i) => setActive(i), [])
-
-  const aktivna = SLUZBY[active]
-  const skupinaAktivnej = skupinaPodlaId(aktivna.skupina)
 
   return (
     <Sekcia id="sluzby" pasmo="biela">
-      {/* Perex stojí v pravom stĺpci hlavičky ako na každej inej sekcii webu.
-          Keď bol na `lg` presunutý doľava, ostal pravý horný roh sekcie
-          prázdny na 340 px a odkaz „Všetkých deväť služieb“ v ňom visel sám.
-          Medzera v ľavom stĺpci, kvôli ktorej sa presúval, medzitým zanikla
-          zmenšením objazdu: medzi nadpisom a detailom je dnes 48 px. */}
       <SekciaHlavicka
         stitok="Služby"
         nadpis="Čo realizujeme na pozemných komunikáciách"
@@ -73,60 +116,20 @@ export default function SluzbyPrehlad() {
       />
 
       {siroke ? (
-        <div className="mt-12 grid grid-cols-12 items-start gap-16">
-          <Reveal className="col-span-5">
-            <div aria-hidden="true" className="h-[2px] w-full bg-[var(--color-border)]">
-              <div
-                className={`h-full bg-[var(--color-accent)] ${
-                  reduced ? '' : 'transition-[width] duration-[var(--duration-fast)]'
-                }`}
-                style={{ width: `${((active + 1) / SLUZBY.length) * 100}%` }}
-              />
+        <div className="mt-14">
+          {SKUPINY.map((skupina, si) => (
+            <div key={skupina.id} className={si === 0 ? '' : 'mt-14'}>
+              <MonoStitok sCiarkou={false}>{skupina.nazov}</MonoStitok>
+              <div aria-hidden="true" className="mt-4 h-px w-full bg-[var(--color-border)]" />
+              <Stagger staggerChildren={0.06} className="mt-8 grid grid-cols-3 gap-x-8">
+                {sluzbyPodlaSkupiny(skupina.id).map((s) => (
+                  <StaggerItem key={s.slug}>
+                    <Dlazdica sluzba={s} />
+                  </StaggerItem>
+                ))}
+              </Stagger>
             </div>
-
-            <motion.div
-              key={active}
-              initial={reduced ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              // Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
-              // názve tak nevznikne diera medzi titulom a textom, a poloha
-              // objazdu ostáva pri prepínaní služieb rovnaká (nález z behu v4).
-              className="mt-5 min-h-[13rem]"
-            >
-              <MonoStitok sCiarkou={false}>{skupinaAktivnej?.nazov}</MonoStitok>
-              <h3 className="mt-3 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                {aktivna.nazov}
-              </h3>
-              <p className="mt-4 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                {aktivna.perex}
-              </p>
-            </motion.div>
-
-            <p className="mt-5 flex items-baseline justify-between gap-6 border-t border-[var(--color-border)] pt-4">
-              <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                {aktivna.dlazdica.miesto}
-              </span>
-              <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-muted)]">
-                {`${active + 1} / ${SLUZBY.length}`}
-              </span>
-            </p>
-
-            <Tlacidlo variant="tichy" to={`/sluzby/${aktivna.slug}`} className="mt-8">
-              Detail služby
-            </Tlacidlo>
-          </Reveal>
-
-          <Reveal className="col-span-7">
-            <KruhovyObjazd
-              sluzby={SLUZBY}
-              active={active}
-              onActive={vyber}
-              reduced={reduced}
-              velkost={520}
-              uzol={50}
-            />
-          </Reveal>
+          ))}
         </div>
       ) : (
         <div className="mt-12">

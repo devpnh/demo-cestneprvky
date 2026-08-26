@@ -11,9 +11,44 @@ import {
 } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
 import { FIRMA, PROCES } from '../../content/firma.js'
+import { REALIZACIE } from '../../content/realizacie.js'
+// Popisok pod fotkou má na celom webe jedno pravidlo a to žije v `Sluzby/fotky.js`
+// (typ prvku, prostredie, miesto len keď je doložené). Preto sa sem importuje
+// namiesto toho, aby si stránka písala vlastnú verziu tej istej vety.
+import { altFotky, maxSirka, popisFotky } from '../Sluzby/fotky.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 
 const META = routaPodlaCesty('/o-firme')
+
+/**
+ * Fotografia k argumentu v sekcii Prístup.
+ *
+ * Kľúč je názov argumentu z `FIRMA.pristup`, hodnota súbor z katalógu
+ * `REALIZACIE`. Priradenie je doslovné, nie kompozičné:
+ *
+ *  • „Bez búracích prác a ťažkých mechanizmov“ — lepený obrubník na hotovom
+ *    asfaltovom kryte je presne ten postup, o ktorom argument hovorí;
+ *  • „Súlad s vyhláškami“ — varovný pás zo štruktúrovaného značenia je
+ *    debarierizačný prvok, ktorý sa podľa uvedených vyhlášok navrhuje;
+ *  • „Materiály európskych výrobcov“ — osadené retardéry DEBUZ® Kölner
+ *    Teller, teda jeden z troch materiálov, ktoré argument menuje.
+ *
+ * Argument „Krátke obmedzenie dopravy“ tu nie je. Hovorí o lepených
+ * obrubníkoch a jediná scéna, ktorá ich dokladá (Medený Hámor), stojí
+ * o riadok vyššie pri prvom argumente. Druhý orez tej istej scény by nebol
+ * ďalší dôkaz, len výplň, preto ten riadok ostáva bez fotky.
+ */
+const FOTKA_ARGUMENTU = {
+  'Bez búracích prác a ťažkých mechanizmov': '13-Medeny_Hamor_1-scaled.jpg',
+  'Súlad s vyhláškami': '23-BA-1-scaled.jpg',
+  'Materiály európskych výrobcov': '03-MT_1-600x390.jpg',
+}
+
+const ZAZNAM_PODLA_SUBORU = new Map(REALIZACIE.map((r) => [r.src, r]))
+
+/** Sadzba v dátach vkladá nezlomiteľné medzery, kľúč ich vracia na obyčajné. */
+const fotkaArgumentu = (nazov) =>
+  ZAZNAM_PODLA_SUBORU.get(FOTKA_ARGUMENTU[(nazov || '').replace(/\u00A0/g, ' ')]) || null
 
 /** Vlasová linka na tmavom pásme: biela s nízkou alfou, nie sivá z tokenov. */
 const JEMNA_LINKA = { borderColor: 'color-mix(in srgb, var(--color-bg) 18%, transparent)' }
@@ -142,8 +177,16 @@ export default function OFirme() {
         </div>
       </Sekcia>
 
-      {/* Prístup — štyri argumenty ako vysadené názvy so súvislým textom,
-          nie dlaždice: tie isté fakty ako na Domove, iná forma. */}
+      {/* Prístup — štyri argumenty, tri z nich s fotografiou toho, čo tvrdia.
+
+          Tie isté vety nesie Domov v sekcii Prečo, ale v inej forme: tam sú
+          dva stĺpce holého textu na jednej mriežke, tu je každý argument
+          samostatný riadok pásma a vedľa neho stojí záber z realizácie, ktorá
+          ho dokladá. Strany sa striedajú. Bez fotiek to bolo 1004 px súvislého
+          textu bez jediného obrazového prvku (KOMPOZICIA §2). Priradenie fotky
+          k argumentu je v `FOTKA_ARGUMENTU` hore aj s odôvodnením; argument,
+          ku ktorému podklady doložený záber nemajú, ostáva bez fotky a jeho
+          text sa namiesto toho roztiahne cez sedem stĺpcov. */}
       <Sekcia id="pristup" pasmo="biela">
         <SekciaHlavicka
           stitok="Prístup"
@@ -152,21 +195,60 @@ export default function OFirme() {
         />
 
         <ul className="mt-14">
-          {FIRMA.pristup.map((argument, i) => (
-            <li
-              key={argument.nazov}
-              className={`border-t border-[var(--color-border)] ${i === 0 ? '' : 'mt-10'} pt-8`}
-            >
-              <Reveal className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-16">
-                <h3 className="max-w-[22ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)] lg:col-span-5">
-                  {argument.nazov}
-                </h3>
-                <p className="max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)] lg:col-span-7">
-                  {argument.popis}
-                </p>
-              </Reveal>
-            </li>
-          ))}
+          {FIRMA.pristup.map((argument, i) => {
+            const fotka = fotkaArgumentu(argument.nazov)
+            // Striedajú sa len riadky s fotkou: prvý ju má vpravo, druhý vľavo.
+            const vlavo =
+              FIRMA.pristup.slice(0, i).filter((a) => fotkaArgumentu(a.nazov)).length % 2 === 1
+            return (
+              <li
+                key={argument.nazov}
+                className={`border-t border-[var(--color-border)] ${i === 0 ? '' : 'mt-14'} pt-8`}
+              >
+                <Reveal className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
+                  <div
+                    className={
+                      fotka
+                        ? vlavo
+                          ? 'lg:col-span-7 lg:col-start-6 lg:row-start-1'
+                          : 'lg:col-span-7 lg:col-start-1 lg:row-start-1'
+                        : 'lg:col-span-7 lg:col-start-1 lg:row-start-1'
+                    }
+                  >
+                    <h3 className="max-w-[22ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                      {argument.nazov}
+                    </h3>
+                    <p className="mt-5 max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+                      {argument.popis}
+                    </p>
+                  </div>
+
+                  {fotka ? (
+                    <div
+                      className={
+                        vlavo
+                          ? 'lg:col-span-4 lg:col-start-1 lg:row-start-1'
+                          : 'lg:col-span-4 lg:col-start-9 lg:row-start-1'
+                      }
+                    >
+                      {/* Orez 4/3 je ten istý pomer ako v galérii realizácií,
+                          `maxSirka` nepustí 600 px súbor nad jeho možnosti. */}
+                      <div style={{ maxWidth: maxSirka(fotka) }}>
+                        <Fotka
+                          src={fotka.src}
+                          w={fotka.w}
+                          h={fotka.h}
+                          alt={altFotky(fotka)}
+                          popis={popisFotky(fotka)}
+                          pomer="3/2"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </Reveal>
+              </li>
+            )
+          })}
         </ul>
       </Sekcia>
 
@@ -258,33 +340,42 @@ export default function OFirme() {
       </Sekcia>
 
       {/* Aktuality — jediná položka z pôvodného webu. `url` je null, preto to
-          nie je odkaz, ale položka s poznámkou pre klienta. Telo článku nemáme. */}
-      <Sekcia id="aktuality" pasmo="biela">
-        <SekciaHlavicka nadpis="Aktuality" sirkaNadpisu="max-w-[12ch]" />
+          nie je odkaz, ale položka s poznámkou pre klienta. Telo článku nemáme.
 
-        <ul className="mt-12">
-          {FIRMA.aktuality.map((clanok, i) => (
-            <li
-              key={clanok.titulok}
-              className={`border-t border-[var(--color-border)] ${i === 0 ? '' : 'mt-10'} pt-8`}
-            >
-              <Reveal className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-16">
-                <MonoStitok className="lg:col-span-3">{clanok.rok}</MonoStitok>
-                <div className="lg:col-span-9">
-                  <h3 className="max-w-[30ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                    {clanok.titulok}
-                  </h3>
-                  <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4">
-                    <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                      {rozoberZastupnyText(clanok.poznamka).chyba || 'Odkaz na pôvodný článok a názov média.'}
-                    </p>
-                    <MonoStitok className="shrink-0">Doplní klient</MonoStitok>
-                  </div>
+          Pásmo je zámerne na malom odsadku a nadpis stojí vedľa položky, nie
+          nad ňou: na plnom odsadku so samostatnou hlavičkou zaberal jeden
+          titulok bez odkazu 539 px, čo je na jednu vetu pol obrazovky. Fotku
+          k nemu nedávame — článok je o bezpečnostných ostrovčekoch a záber
+          lepeného ostrovčeka si v `sluzby.js` (lepené obrubníky) od klienta
+          práve pýtame, takže by vedľa titulku stál prvok, ktorý s ním
+          nesúvisí. Zrušiť sa pásmo nedá: oddeľuje tmavé pásmo vyhlášok od
+          tmavého CTA (STANDARDY B5). */}
+      <Sekcia id="aktuality" pasmo="biela" padding="male">
+        <Reveal className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
+          <h2 className="max-w-[12ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)] lg:col-span-4">
+            Aktuality
+          </h2>
+
+          <ul className="lg:col-span-8">
+            {FIRMA.aktuality.map((clanok, i) => (
+              <li
+                key={clanok.titulok}
+                className={`border-t border-[var(--color-text)] ${i === 0 ? '' : 'mt-10'} pt-5`}
+              >
+                <MonoStitok>{clanok.rok}</MonoStitok>
+                <h3 className="mt-4 max-w-[34ch] font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium leading-[1.2] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                  {clanok.titulok}
+                </h3>
+                <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4">
+                  <p className="max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+                    {rozoberZastupnyText(clanok.poznamka).chyba || 'Odkaz na pôvodný článok a názov média.'}
+                  </p>
+                  <MonoStitok className="shrink-0">Doplní klient</MonoStitok>
                 </div>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
       </Sekcia>
 
       {/* CTA — text krokov z `PROCES`, akcie sú obhliadka a galéria realizácií. */}

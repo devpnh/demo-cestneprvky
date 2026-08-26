@@ -18,7 +18,14 @@ import { FIRMA, PROCES } from '../../content/firma.js'
 import KartaSluzby from './KartaSluzby.jsx'
 import TabulkaDebuz from './TabulkaDebuz.jsx'
 import ZoznamPodkladov, { HlavickaPodkladov } from './Podklady.jsx'
-import { altFotky, maxSirka, popisFotky, uvodnaFotkaSluzby } from './fotky.js'
+import {
+  altFotky,
+  fotkaKonzultacii,
+  fotkaZoznamu,
+  maxSirka,
+  popisFotky,
+  uvodnaFotkaSluzby,
+} from './fotky.js'
 
 /**
  * Malý orez a veľká fotka tej istej scény sú v dátach previazané cez
@@ -28,9 +35,14 @@ import { altFotky, maxSirka, popisFotky, uvodnaFotkaSluzby } from './fotky.js'
 const KLUC_SCENY = new Map(REALIZACIE.map((r) => [r.src, r.duplikatOf || r.src]))
 const scena = (src) => KLUC_SCENY.get(src) || src
 
-/** Fotky služby a jej realizácie bez duplicít a bez tej, ktorá je už v úvode. */
-function galeriaSluzby(sluzba, uvodna, maxPocet = 6) {
-  const videne = new Set(uvodna ? [scena(uvodna.src)] : [])
+/**
+ * Fotky služby a jej realizácie bez duplicít a bez tých, ktoré na stránke už
+ * niekde stoja. `pouzite` je celý zoznam z úvodu, zo zoznamov podkategórií a
+ * z bloku konzultácií: fotografia má na stránke dokladať jednu vec na jednom
+ * mieste, nie sa opakovať o dve pásma nižšie v inom oreze.
+ */
+function galeriaSluzby(sluzba, pouzite, maxPocet = 6) {
+  const videne = new Set(pouzite.filter(Boolean).map((f) => scena(f.src)))
   const vysledok = []
   const pridaj = (f) => {
     const kluc = scena(f.src)
@@ -108,6 +120,59 @@ function rytmusPasiem(kluce, pevneNavyse = []) {
   return farby
 }
 
+// ------------------------------------------------------- zoznamy podkategórií
+
+/** Nadpis jedného celku v zozname podkategórií: výrazná linka a názov. */
+function NadpisZoznamu({ children, className = '' }) {
+  return (
+    <h3
+      className={`border-t border-[var(--color-text)] pt-5 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)] ${className}`}
+    >
+      {children}
+    </h3>
+  )
+}
+
+/**
+ * Položky celku pod sebou, každá na vlasovej linke. `hornaLinka` je pre
+ * rozloženie, v ktorom položky stoja vedľa nadpisu a nie pod ním: horná
+ * výrazná linka zoznamu tak pokračuje v tej istej osi ako linka nadpisu.
+ */
+function PolozkyZoznamu({ polozky, hornaLinka = false, className = '' }) {
+  return (
+    <ul className={`${hornaLinka ? 'border-t border-[var(--color-text)]' : ''} ${className}`}>
+      {polozky.map((p) => (
+        <li
+          key={p}
+          className="border-b border-[var(--color-border)] py-4 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]"
+        >
+          {p}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * Fotografia vedľa zoznamu podkategórií. Orez 4/3 je ten istý ako v galérii
+ * služby, takže sa fotky na stránke nebijú rôznymi pomermi; `maxSirka`
+ * nepustí malý súbor nad 1,4-násobok jeho skutočnej šírky.
+ */
+function FotkaZoznamu({ fotka }) {
+  return (
+    <div style={{ maxWidth: maxSirka(fotka) }}>
+      <Fotka
+        src={fotka.src}
+        w={fotka.w}
+        h={fotka.h}
+        alt={altFotky(fotka)}
+        popis={popisFotky(fotka)}
+        pomer="4/3"
+      />
+    </div>
+  )
+}
+
 /**
  * Šablóna deviatich stránok služieb. Bohatosť stránky určujú dáta, nie
  * šablóna: služby s plným textom z pôvodného webu majú odseky, zoznamy,
@@ -134,7 +199,20 @@ export default function SluzbaDetail() {
 
   const uvodnaFotka = uvodnaFotkaSluzby(sluzba)
   const maOdseky = Array.isArray(sluzba.odseky) && sluzba.odseky.length > 0
-  const galeria = galeriaSluzby(sluzba, uvodnaFotka)
+
+  // Zoznamy podkategórií aj s fotkou, ktorá ich dokladá (kde ju podklady majú).
+  const zoznamy = (sluzba.zoznamy || []).map((z) => ({ z, fotka: fotkaZoznamu(sluzba.slug, z.titulok) }))
+  const fotkaKonz = fotkaKonzultacii(sluzba.slug)
+
+  /**
+   * Jediný zoznam bez fotky nedostane vlastné pásmo, ale pokračuje pod
+   * úvodom za prerušovanou linkou. Ako samostatná sekcia to bolo 722 px
+   * súvislého textu bez jediného obrazového prvku (KOMPOZICIA §2) a pritom
+   * nesie štyri riadky. V úvodnom pásme stojí vedľa fotky služby, ktorá už
+   * v ňom je; obsah sa nikde nemení ani nedopĺňa.
+   */
+  const zoznamVUvode = maOdseky && zoznamy.length === 1 && !zoznamy[0].fotka
+  const galeria = galeriaSluzby(sluzba, [uvodnaFotka, ...zoznamy.map((x) => x.fotka), fotkaKonz])
   // Únia nevidiacich a slabozrakých Slovenska je miesto, kam sa chodí po
   // konzultáciu a stanovisko. Pôvodný web na ňu len odkazuje a nič spoločné
   // s ňou netvrdí; dáta preto pole volajú `konzultacie` a nesú aj jeho
@@ -153,7 +231,7 @@ export default function SluzbaDetail() {
     [
       'hlavicka',
       'uvod',
-      sluzba.zoznamy?.length ? 'rozsah' : null,
+      zoznamy.length && !zoznamVUvode ? 'rozsah' : null,
       sluzba.vyhody?.length ? 'vyhody' : null,
       sluzba.tabulka || sluzba.navod ? 'technicky' : null,
       maKonzultacie ? 'konzultacie' : null,
@@ -250,6 +328,21 @@ export default function SluzbaDetail() {
               </Reveal>
             ) : null}
           </div>
+
+          {/* Jediný zoznam podkategórií bez vlastnej fotky pokračuje tu, za
+              prerušovanou linkou. Vo vlastnom pásme z neho bolo 722 px textu
+              bez jediného obrazového prvku; tu stojí v pásme, ktoré fotku
+              služby už nesie. Text sa nemení, mení sa len umiestnenie. */}
+          {zoznamVUvode ? (
+            <>
+              <Lajna className="my-16" />
+              <SekciaHlavicka stitok="Rozsah" nadpis="Čo služba zahŕňa" />
+              <Reveal className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
+                <NadpisZoznamu className="lg:col-span-4">{zoznamy[0].z.titulok}</NadpisZoznamu>
+                <PolozkyZoznamu polozky={zoznamy[0].z.polozky} hornaLinka className="lg:col-span-7 lg:col-start-6" />
+              </Reveal>
+            </>
+          ) : null}
         </Sekcia>
       ) : (
         <Sekcia pasmo={pasmo.uvod} padding="male">
@@ -291,31 +384,60 @@ export default function SluzbaDetail() {
         </Sekcia>
       )}
 
-      {/* 2. Zoznamy podkategórií: stĺpce s vlasovou linkou, položky pod sebou. */}
-      {sluzba.zoznamy?.length ? (
+      {/* 2. Zoznamy podkategórií.
+
+          Dva zoznamy vedľa seba boli dva stĺpce holého textu vysoké 722 až
+          845 px. Teraz je každý celok samostatný riadok pásma: názov a
+          položky na jednej strane, fotografia toho prvku na druhej, strany
+          sa striedajú. Fotka sa priraďuje doslova — súbor musí v katalógu
+          realizácií patriť tejto službe a jeho `prvok` musí byť položkou
+          toho zoznamu (`fotkaZoznamu` v `fotky.js`). Kde takú fotku podklady
+          nemajú, riadok fotku nedostane a namiesto prázdneho stĺpca sa
+          položky roztiahnu cez sedem stĺpcov. */}
+      {zoznamy.length && !zoznamVUvode ? (
         <Sekcia pasmo={pasmo.rozsah}>
           <SekciaHlavicka stitok="Rozsah" nadpis="Čo služba zahŕňa" />
-          {/* Aj jediný zoznam ostáva v polovičnom stĺpci: cez celú šírku
-              kontajnera by z položiek boli nečitateľne dlhé riadky. */}
-          <Stagger className="mt-12 grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-12" staggerChildren={0.07}>
-            {sluzba.zoznamy.map((z) => (
-              <StaggerItem key={z.titulok}>
-                <h3 className="border-t border-[var(--color-text)] pt-5 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                  {z.titulok}
-                </h3>
-                <ul className="mt-6">
-                  {z.polozky.map((p) => (
-                    <li
-                      key={p}
-                      className="border-b border-[var(--color-border)] py-4 font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-text)]"
-                    >
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <div className="mt-12">
+            {zoznamy.map(({ z, fotka }, i) => {
+              // Striedajú sa len riadky s fotkou: prvý ju má vpravo, druhý vľavo.
+              const vlavo = zoznamy.slice(0, i).filter((x) => x.fotka).length % 2 === 1
+              return (
+                <Reveal
+                  key={z.titulok}
+                  className={`grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16 ${i === 0 ? '' : 'mt-16'}`}
+                >
+                  {fotka ? (
+                    <>
+                      <div
+                        className={
+                          vlavo
+                            ? 'lg:col-span-6 lg:col-start-7 lg:row-start-1'
+                            : 'lg:col-span-6 lg:col-start-1 lg:row-start-1'
+                        }
+                      >
+                        <NadpisZoznamu>{z.titulok}</NadpisZoznamu>
+                        <PolozkyZoznamu polozky={z.polozky} className="mt-6" />
+                      </div>
+                      <div
+                        className={
+                          vlavo
+                            ? 'lg:col-span-5 lg:col-start-1 lg:row-start-1'
+                            : 'lg:col-span-5 lg:col-start-8 lg:row-start-1'
+                        }
+                      >
+                        <FotkaZoznamu fotka={fotka} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <NadpisZoznamu className="lg:col-span-4">{z.titulok}</NadpisZoznamu>
+                      <PolozkyZoznamu polozky={z.polozky} hornaLinka className="lg:col-span-7 lg:col-start-6" />
+                    </>
+                  )}
+                </Reveal>
+              )
+            })}
+          </div>
         </Sekcia>
       ) : null}
 
@@ -434,23 +556,45 @@ export default function SluzbaDetail() {
               ) : null}
             </Reveal>
 
-            {sluzba.normy?.length ? (
+            {sluzba.normy?.length || fotkaKonz ? (
               <Reveal className="lg:col-span-5 lg:ml-auto">
-                <MonoStitok tmava sCiarkou={false}>
-                  Vyhlášky
-                </MonoStitok>
-                {/* Vlasový rám na tmavom pásme je predpísaný v KOMPOZICIA.md
-                    ako color-mix nad `--color-bg`, nie ako vlastná rgba. */}
-                <ul className="mt-5 border-t border-[color-mix(in_srgb,var(--color-bg)_18%,transparent)]">
-                  {sluzba.normy.map((n) => (
-                    <li
-                      key={n}
-                      className="border-b border-[color-mix(in_srgb,var(--color-bg)_18%,transparent)] py-4 font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)]"
-                    >
-                      {n}
-                    </li>
-                  ))}
-                </ul>
+                {/* Text bloku hovorí o debarierizačných prvkoch, ku ktorým
+                    Únia vydáva stanoviská. Nad zoznamom vyhlášok preto stojí
+                    presne taký prvok: signálny pás a vodiaca línia
+                    v priechode pre chodcov. Bez neho malo pásmo 634 px bez
+                    jediného obrazového prvku. */}
+                {fotkaKonz ? (
+                  <div className="mb-12" style={{ maxWidth: maxSirka(fotkaKonz) }}>
+                    <Fotka
+                      src={fotkaKonz.src}
+                      w={fotkaKonz.w}
+                      h={fotkaKonz.h}
+                      alt={altFotky(fotkaKonz)}
+                      popis={popisFotky(fotkaKonz)}
+                      pomer="4/3"
+                      tmava
+                    />
+                  </div>
+                ) : null}
+                {sluzba.normy?.length ? (
+                  <>
+                    <MonoStitok tmava sCiarkou={false}>
+                      Vyhlášky
+                    </MonoStitok>
+                    {/* Vlasový rám na tmavom pásme je predpísaný v KOMPOZICIA.md
+                        ako color-mix nad `--color-bg`, nie ako vlastná rgba. */}
+                    <ul className="mt-5 border-t border-[color-mix(in_srgb,var(--color-bg)_18%,transparent)]">
+                      {sluzba.normy.map((n) => (
+                        <li
+                          key={n}
+                          className="border-b border-[color-mix(in_srgb,var(--color-bg)_18%,transparent)] py-4 font-[family-name:var(--font-mono)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)]"
+                        >
+                          {n}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
               </Reveal>
             ) : null}
           </div>

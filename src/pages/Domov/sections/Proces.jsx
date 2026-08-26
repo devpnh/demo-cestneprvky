@@ -1,9 +1,23 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Sekcia, SekciaHlavicka } from '../../../components/kit/index.js'
-import { Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { Sekcia, SekciaHlavicka, Fotka } from '../../../components/kit/index.js'
+import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { PROCES } from '../../../content/firma.js'
+import { GALERIA } from '../../../content/realizacie.js'
+import { castiPopisu } from '../../Realizacie/skupiny.js'
+
+/**
+ * Výsledok procesu, nie jeho ilustrácia: hotový priechod so signálnym pásom,
+ * vodiacou líniou a vodorovným značením, teda presne to, čo posledný krok
+ * („Odovzdanie“) odovzdáva do užívania. Iný obrazový obsah sa nedopĺňa —
+ * podklady k jednotlivým krokom (obhliadka, návrh, montáž) neexistujú a
+ * vymýšľať sa nebudú.
+ */
+const VYSLEDOK = GALERIA.find((r) => r.id === 'priechod-signalny-pas')
+
+/** Popisok fotky je fakt: typ prvku a to, čo je z nej doložené (KOMPOZÍCIA §5). */
+const popisVysledku = (r) => [r.prvok, ...castiPopisu(r)].filter(Boolean).join(' · ')
 
 /**
  * Spojnica medzi dvoma uzlami. Kreslí sa pri vstupe do viewportu
@@ -37,6 +51,9 @@ function Spojnica({ zvisla = false, poradie = 0, className = '' }) {
  * desktope je z krokov vodorovná linka so štyrmi uzlami, na mobile tá istá
  * linka stojí zvisle. Uzol kroku, na ktorom je kurzor, sa vyplní akcentom;
  * pri načítaní svieti prvý, lebo spolupráca sa začína dopytom.
+ *
+ * Nad krokmi stojí jeden široký záber hotovej realizácie (`VYSLEDOK`).
+ * Spojnica s uzlami ostáva nedotknutá, pás je nad ňou.
  */
 export default function Proces() {
   const [aktivny, setAktivny] = useState(0)
@@ -44,6 +61,28 @@ export default function Proces() {
   return (
     <Sekcia id="proces" pasmo="biela">
       <SekciaHlavicka stitok="Postup" nadpis="Ako prebieha spolupráca" />
+
+      {/* Široký pás nad krokmi. Sekcia mala 612 px a ani jeden obrazový prvok
+          — po zrušení sivého pásma (KOMPOZÍCIA §2) robí rytmus obsah, nie
+          odtieň pozadia. Pomer sa mení so šírkou okna: na 390 px by z pásu 3 : 1
+          ostal 117 px vysoký prúžok, v ktorom sa priechod nedá prečítať. */}
+      {VYSLEDOK ? (
+        <Reveal className="mt-14 lg:mt-16">
+          <Fotka
+            src={VYSLEDOK.src}
+            w={VYSLEDOK.w}
+            h={VYSLEDOK.h}
+            alt={VYSLEDOK.alt}
+            popis={popisVysledku(VYSLEDOK)}
+            sizes="(min-width: 1024px) 82vw, 100vw"
+            // Pás ide cez celú šírku kontajnera (1 168 px), takže strop 960w
+            // z mriežky by ho roztiahol o pätinu. Tu si pýtame originál.
+            maxSirka={Infinity}
+            triedaObrazka="aspect-[4/3] sm:aspect-[21/9] lg:aspect-[3/1]"
+            className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"
+          />
+        </Reveal>
+      ) : null}
 
       <Stagger
         staggerChildren={0.08}
