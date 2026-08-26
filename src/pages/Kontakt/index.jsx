@@ -145,7 +145,7 @@ export default function Kontakt() {
 
       {/* Sídlo: kontaktný blok s odkazom do máp, žiadny vložený Google embed
           a nič, čo by mapu predstieralo. Nadpisom je samotná adresa. */}
-      <Sekcia id="sidlo" pasmo="siva">
+      <Sekcia id="sidlo" pasmo="biela">
         <SekciaHlavicka
           stitok="Sídlo"
           // Adresa po riadkoch ako na obálke: pri jednom reťazci s `text-balance`

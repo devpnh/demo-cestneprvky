@@ -10,7 +10,9 @@ import KartaSluzby from './KartaSluzby.jsx'
 const META = routaPodlaCesty('/sluzby')
 
 /** Striedanie pásiem podľa KOMPOZICIA.md: biela → sivá → biela, potom tmavé CTA. */
-const PASMA = ['biela', 'siva', 'biela']
+// Tri celky služieb sú všetky na svetlom pásme; oddeľuje ich hlavička celku
+// a vlasová linka, nie odtieň pozadia (web má dve pásma, nie tri).
+const PASMA = ['biela', 'biela', 'biela']
 
 /**
  * Prehľad služieb. Deväť služieb v troch celkoch, každý celok jedno pásmo.

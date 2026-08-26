@@ -22,7 +22,7 @@ import { FIRMA } from '../../../content/firma.js'
  */
 export default function Preco() {
   return (
-    <Sekcia id="preco" pasmo="siva">
+    <Sekcia id="preco" pasmo="biela">
       {/* Hlavička zámerne nepoužíva `SekciaHlavicka`: tá stavia perex do
           12-stĺpcovej mriežky s dorazením vpravo (`lg:ml-auto`), takže mu ľavá
           hrana vychádzala na 855 px, kým druhý stĺpec argumentov pod ním

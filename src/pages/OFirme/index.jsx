@@ -76,7 +76,7 @@ export default function OFirme() {
       />
 
       {/* Firma — úvodné odseky a claim ako výrazné vyhlásenie, vpravo fotka. */}
-      <Sekcia id="firma" pasmo="siva">
+      <Sekcia id="firma" pasmo="biela">
         {/* Text vľavo, fotka vpravo, obe centrované na spoločnú os: bloky majú
             rôznu výšku a zarovnanie hore nechávalo pod fotkou 180 px prázdna.
             Textový stĺpec je zúžený na 46ch, aby mal riadok čitateľnú dĺžku a

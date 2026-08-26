@@ -42,7 +42,7 @@ export default function Proces() {
   const [aktivny, setAktivny] = useState(0)
 
   return (
-    <Sekcia id="proces" pasmo="siva">
+    <Sekcia id="proces" pasmo="biela">
       <SekciaHlavicka stitok="Postup" nadpis="Ako prebieha spolupráca" />
 
       <Stagger

@@ -8,7 +8,7 @@ jeden web.
 
 | Komponent | Na čo |
 |---|---|
-| `Sekcia` | pásmo stránky: `pasmo="biela" \| "siva" \| "tmava"`, `padding="plne" \| "male" \| "ziadne"`, vnútri už je kontajner 78rem a `--container-padding-x`. Dáva `data-pasmo` pre audit. |
+| `Sekcia` | pásmo stránky: `pasmo="biela" \| "tmava"` (dve pásma, sivá sa zrušila), `padding="plne" \| "male" \| "ziadne"`, vnútri už je kontajner 78rem a `--container-padding-x`. Dáva `data-pasmo` pre audit. |
 | `Kontajner` | ten istý kontajner mimo `Sekcia` (hero, pásma na celú šírku) |
 | `StranHlavicka` | hlavička podstránky: štítok alebo drobky, H1, perex, voliteľné fakty a akcie, ukončená `Lajna`. **Každá podstránka ju používa — H1 na stránke je práve tu.** |
 | `SekciaHlavicka` | hlavička sekcie vnútri stránky: štítok + H2 vľavo (col-span-7), perex vpravo dole (col-span-5, `lg:ml-auto`) |
@@ -26,7 +26,18 @@ Doplnkové: `src/components/primitives/` (`Reveal`, `Stagger`/`StaggerItem`,
 `src/styles/tokens.css`. Kto potrebuje nový token, napíše to do odovzdávacej
 správy; token pridá manažér.
 
-## 2. Rytmus pásiem (STANDARDY B5: nikdy dve tmavé `<section>` za sebou)
+## 2. Rytmus pásiem — dve farby, nie tri
+
+**Web má svetlé a tmavé pásmo. Sivá medzivrstva je zrušená** (pokyn Petra,
+2026-08-26): striedanie bielej a sivej robilo rytmus z odtieňa pozadia namiesto
+z obsahu a stránka pôsobila prúžkovane. Svetlé pásma smú ísť za sebou —
+oddeľuje ich hlavička sekcie, vlasová linka a `Lajna`. Tmavé pásmo je akcent
+a hĺbka, používa sa striedmo a **nikdy nie dve za sebou** (STANDARDY B5).
+
+Z toho plynie druhá povinnosť: **žiadna sekcia nesmie byť len text.** Keď
+rytmus nerobí farba, musí ho robiť obsah — fotografia, tabuľka, zoznam
+s náhľadmi, mapa. Sekcia s viac než ~300 px súvislého textu bez jediného
+obrazového prvku sa vracia na prepracovanie.
 
 ### `/` Domov
 | # | Sekcia | Pásmo | Súbor |

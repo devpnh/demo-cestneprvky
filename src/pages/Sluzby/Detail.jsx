@@ -46,18 +46,16 @@ function galeriaSluzby(sluzba, uvodna, maxPocet = 6) {
 // ---------------------------------------------------------------- rytmus pásiem
 
 /** Dve svetlé pásma sa striedajú; tmavé je akcent, nie tretia farba v rade. */
-const OPACNA_SVETLA = { biela: 'siva', siva: 'biela' }
-
 /** Farba, ktorú by pásmo malo, keby stálo na stránke samo. */
 const ZAKLADNE_PASMO = {
   hlavicka: 'biela',
   uvod: 'biela',
-  rozsah: 'siva',
+  rozsah: 'biela',
   vyhody: 'biela',
   technicky: 'biela',
   konzultacie: 'tmava',
   galeria: 'tmava',
-  podklady: 'siva',
+  podklady: 'biela',
   suvisiace: 'biela',
   cta: 'tmava',
 }
@@ -95,13 +93,13 @@ function rytmusPasiem(kluce, pevneNavyse = []) {
   let predchadzajuca = null
 
   kluce.forEach((kluc, i) => {
-    const zaklad = ZAKLADNE_PASMO[kluc]
-    let farba = zaklad
+    let farba = ZAKLADNE_PASMO[kluc]
     if (!pevne.has(kluc)) {
+      // Jediné pravidlo, ktoré po zrušení sivej ostáva: dve tmavé pásma
+      // nesmú susediť. Svetlé pásma za sebou sú v poriadku, oddeľuje ich
+      // rytmus a vlasové linky, nie odtieň pozadia.
       const dalsiePevneTmave = pevne.has(kluce[i + 1]) && ZAKLADNE_PASMO[kluce[i + 1]] === 'tmava'
-      if (zaklad === 'tmava') farba = predchadzajuca === 'tmava' || dalsiePevneTmave ? 'biela' : 'tmava'
-      else if (predchadzajuca === 'tmava') farba = 'biela'
-      else if (predchadzajuca) farba = OPACNA_SVETLA[predchadzajuca]
+      if (farba === 'tmava' && (predchadzajuca === 'tmava' || dalsiePevneTmave)) farba = 'biela'
     }
     farby[kluc] = farba
     predchadzajuca = farba
