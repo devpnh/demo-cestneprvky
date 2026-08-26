@@ -130,6 +130,32 @@ export const FIRMA = sadzbaHlboko({
   ],
 })
 
+/**
+ * Zápis v registroch. Verejné údaje z Obchodného registra SR (Okresný súd
+ * Žilina) a z Registra právnických osôb Štatistického úradu SR, overené
+ * 26. 8. 2026. Nahrádzajú zástupné texty, ktoré tu boli predtým.
+ *
+ * Dátum narodenia konateľa register zverejňuje, na web ale nepatrí — je to
+ * osobný údaj, ktorý na obchodnú prezentáciu nie je potrebný.
+ *
+ * `obchodneMeno` je presné znenie z registra (s čiarkou pred `s.r.o.`).
+ * Značka na webe píše „Cestné prvky s.r.o.“ bez čiarky; register sa preto
+ * používa iba tam, kde ide o fakturačný údaj.
+ *
+ * DIČ ani IČ DPH tu nie sú: Obchodný register ani RPO ich nezverejňujú
+ * a Finstat je za Cloudflare. Zostávajú na klientovi.
+ */
+export const REGISTER = {
+  obchodneMeno: 'Cestné prvky, s.r.o.',
+  ico: '46 875 891',
+  pravnaForma: 'Spoločnosť s ručením obmedzeným',
+  zapis: 'Okresný súd Žilina, oddiel Sro, vložka č. 57757/L',
+  denZapisu: '10. 11. 2012',
+  konatel: 'Ján Lešňovský',
+  konanie: 'V mene spoločnosti koná konateľ samostatne.',
+  zakladneImanie: '5 000 EUR',
+}
+
 // Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.
 // Odstrániť pri záverečnej integrácii kola 3.
 FIRMA.partner = FIRMA.konzultacie

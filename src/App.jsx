@@ -76,9 +76,8 @@ export default function App() {
   useLenis()
   const { pathname } = useLocation()
   const mainRef = useRef(null)
-  // Na domovskej stránke začína hero pod priehľadnou hlavičkou, preto tam
-  // žiadny odsadzujúci padding nie je; podstránky ho potrebujú (C3).
-  const isHome = pathname === '/'
+  // Odsadenie pod fixnú hlavičku si rieši prvé pásmo stránky samo
+  // (`StranHlavicka`, hero, 404), aby mohlo ísť tmavé až po vrch obrazovky.
 
   return (
     <>
@@ -90,7 +89,7 @@ export default function App() {
         tabIndex={-1}
         // Fokus sem presúva ScrollToTop programovo, outline by pri klikaní myšou
         // len blikol okolo celej stránky.
-        className={`outline-none ${isHome ? '' : 'pt-[72px]'}`}
+        className="outline-none"
       >
         <PrechodRoutov />
       </main>

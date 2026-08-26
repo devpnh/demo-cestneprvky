@@ -9,6 +9,7 @@
   --color-text: #26292c;
   --color-muted: #5c6166;
   --color-accent: #f03314;
+  --color-accent-svetly: #ff6a4d; /* akcent čitateľný na tmavom pásme: 5,17:1 (samotný akcent má 3,61:1) */
   --color-accent-deep: #c5250d; /* hover/pressed akcentu, z palety klienta; nikdy ako plocha */
   --color-accent-2: #1b1e20;
   --color-on-accent: #ffffff;

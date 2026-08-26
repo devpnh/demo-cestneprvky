@@ -26,6 +26,24 @@ const VYSKA = 72
 export default function Header() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
+
+  /**
+   * Priehľadná hlavička nepatrí len Domovu. Podstránky majú odo dneška tmavú
+   * hlavičku stránky, takže sa nad ňou musí správať rovnako ako nad hero.
+   * Namiesto zoznamu ciest sa preto pozerá na prvé pásmo v `<main>`: keď je
+   * tmavé, hlavička je priehľadná s bielym textom. Po prechode routy sa obsah
+   * vymieňa až po dobehnutí animácie, preto druhé meranie s odstupom.
+   */
+  const [nadTmavym, setNadTmavym] = useState(false)
+  useEffect(() => {
+    const zisti = () => {
+      const prve = document.querySelector('main [data-pasmo]')
+      setNadTmavym(prve ? prve.getAttribute('data-pasmo') === 'tmava' : false)
+    }
+    zisti()
+    const id = window.setTimeout(zisti, 400)
+    return () => window.clearTimeout(id)
+  }, [pathname])
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const reduced = useReducedMotion()
@@ -79,7 +97,7 @@ export default function Header() {
     }
   }, [open, zavri])
 
-  const light = isHome && !scrolled && !open
+  const light = nadTmavym && !scrolled && !open
 
   return (
     <>

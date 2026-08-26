@@ -18,7 +18,9 @@ export default function NotFound() {
 
       <section
         data-pasmo="biela"
-        className="mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y)]"
+        // Odsadenie pod fixnú hlavičku si drží pásmo samo — `main` ho už nemá,
+        // aby mohli byť tmavé hlavičky podstránok až po vrch obrazovky.
+        className="mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] pb-[var(--section-padding-y)] pt-[calc(72px+var(--section-padding-y))]"
       >
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">

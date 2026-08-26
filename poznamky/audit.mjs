@@ -876,13 +876,17 @@ if (maCestu('/')) {
 
   skontroluj('C4', '/', () => {
     if (!HV || HV.chyba) return { ok: false, text: 'farbu textu hlavičky sa nepodarilo zmerať', detail: HV ? HV.chyba : 'meranie nebežalo' }
+    // Hlavička sa neriadi cestou, ale prvým pásmom stránky: nad tmavým je
+    // priehľadná s bielym textom, nad svetlým plná s tmavým. Podstránky majú
+    // od 26. 8. 2026 tmavú `StranHlavicka`, takže sa na `/sluzby` očakáva
+    // to isté správanie ako na `/` — a 404 (svetlé pásmo) overuje druhú vetvu.
     const biela = HV.domovTop.color === 'rgb(255, 255, 255)'
     const tmava = HV.domovScroll.color === 'rgb(38, 41, 44)'
-    const sluzbyTmava = HV.sluzbyTop.color === 'rgb(38, 41, 44)'
-    const sluzbyPlna = HV.sluzbyTop.bg !== 'rgba(0, 0, 0, 0)' && HV.sluzbyTop.bg !== 'transparent'
+    const sluzbyBiela = HV.sluzbyTop.color === 'rgb(255, 255, 255)'
+    const sluzbyPriehladna = HV.sluzbyTop.bg === 'rgba(0, 0, 0, 0)' || HV.sluzbyTop.bg === 'transparent'
     return {
-      ok: biela && tmava && sluzbyTmava && sluzbyPlna && HV.sluzbyTop.scrollY === 0,
-      text: 'nad hero biely text, po scrolle rgb(38, 41, 44), na /sluzby plná a tmavá už pri scrollY = 0',
+      ok: biela && tmava && sluzbyBiela && sluzbyPriehladna && HV.sluzbyTop.scrollY === 0,
+      text: 'nad tmavým pásmom biely text a priehľadné pozadie (/ aj /sluzby), po scrolle rgb(38, 41, 44)',
       detail: `/ hore color=${HV.domovTop.color}, / po scrolle color=${HV.domovScroll.color}, /sluzby pri scrollY=${HV.sluzbyTop.scrollY}: bg=${HV.sluzbyTop.bg} color=${HV.sluzbyTop.color}`,
     }
   })

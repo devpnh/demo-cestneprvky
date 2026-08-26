@@ -1,46 +1,52 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Sekcia, SekciaHlavicka, Fotka } from '../../../components/kit/index.js'
-import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { Sekcia, SekciaHlavicka } from '../../../components/kit/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { PROCES } from '../../../content/firma.js'
-import { GALERIA } from '../../../content/realizacie.js'
-import { castiPopisu } from '../../Realizacie/skupiny.js'
+
+const EASE = [0.16, 1, 0.3, 1]
 
 /**
- * Výsledok procesu, nie jeho ilustrácia: hotový priechod so signálnym pásom,
- * vodiacou líniou a vodorovným značením, teda presne to, čo posledný krok
- * („Odovzdanie“) odovzdáva do užívania. Iný obrazový obsah sa nedopĺňa —
- * podklady k jednotlivým krokom (obhliadka, návrh, montáž) neexistujú a
- * vymýšľať sa nebudú.
+ * Animácia pipeline.
+ *
+ * Predtým mala každá úsečka vlastný `whileInView` s ručne dopočítaným
+ * oneskorením a sedela vnútri kroku, ktorý sa sám posúval o 24 px nahor.
+ * Linka sa preto kreslila na podklade, ktorý sa pod ňou ešte hýbal, štyri
+ * pozorovatele sa spúšťali každý zvlášť a poradie kreslenia záviselo od toho,
+ * ktorý 1 px vysoký prvok stihol pretnúť viewport skôr. Výsledok bol
+ * roztrasený a nikdy nie dvakrát rovnaký.
+ *
+ * Teraz je to jedna sekvencia: orchestruje ju rodič cez `staggerChildren`
+ * a varianty sa dedia do vnorených prvkov, takže sa uzol rozsvieti, z neho
+ * vybehne úsečka k ďalšiemu uzlu a až potom nastupuje ďalší krok. Kroky menia
+ * len priehľadnosť, nie polohu — pipeline tak stojí na mieste a naozaj sa
+ * kreslí, nie pláva.
  */
-const VYSLEDOK = GALERIA.find((r) => r.id === 'priechod-signalny-pas')
+const KONTAJNER = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.22, delayChildren: 0.05 } },
+}
 
-/** Popisok fotky je fakt: typ prvku a to, čo je z nej doložené (KOMPOZÍCIA §5). */
-const popisVysledku = (r) => [r.prvok, ...castiPopisu(r)].filter(Boolean).join(' · ')
+/** Krok sa iba prelína. Žiadny posun: linka pod ním nesmie ujsť. */
+const KROK = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4, ease: EASE } },
+}
 
-/**
- * Spojnica medzi dvoma uzlami. Kreslí sa pri vstupe do viewportu
- * (`whileInView`, žiadne scroll-linkovanie — E3), pri `prefers-reduced-motion`
- * je hneď celá. Vodorovná verzia platí od 1024 px, zvislá pod ňou.
- */
-function Spojnica({ zvisla = false, poradie = 0, className = '' }) {
-  const reduced = useReducedMotion()
-  const styl = { backgroundColor: 'var(--color-border)' }
+const UZOL = {
+  hidden: { scale: 0.2, opacity: 0 },
+  visible: { scale: 1, opacity: 1, transition: { duration: 0.32, ease: EASE } },
+}
 
-  if (reduced) return <span aria-hidden="true" className={className} style={styl} />
+/** Úsečka vybehne z uzla až keď je uzol na mieste, preto oneskorenie. */
+const USECKA_VODOROVNA = {
+  hidden: { scaleX: 0 },
+  visible: { scaleX: 1, transition: { duration: 0.5, ease: EASE, delay: 0.14 } },
+}
 
-  return (
-    <motion.span
-      aria-hidden="true"
-      className={`${className} ${zvisla ? 'origin-top' : 'origin-left'}`}
-      style={styl}
-      initial={zvisla ? { scaleY: 0 } : { scaleX: 0 }}
-      whileInView={zvisla ? { scaleY: 1 } : { scaleX: 1 }}
-      viewport={{ once: true, margin: '-10% 0px' }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: poradie * 0.12 }}
-    />
-  )
+const USECKA_ZVISLA = {
+  hidden: { scaleY: 0 },
+  visible: { scaleY: 1, transition: { duration: 0.5, ease: EASE, delay: 0.14 } },
 }
 
 /**
@@ -52,65 +58,51 @@ function Spojnica({ zvisla = false, poradie = 0, className = '' }) {
  * linka stojí zvisle. Uzol kroku, na ktorom je kurzor, sa vyplní akcentom;
  * pri načítaní svieti prvý, lebo spolupráca sa začína dopytom.
  *
- * Nad krokmi stojí jeden široký záber hotovej realizácie (`VYSLEDOK`).
- * Spojnica s uzlami ostáva nedotknutá, pás je nad ňou.
+ * Sekcia je zámerne bez fotografie: je to schéma postupu, nie galéria.
  */
 export default function Proces() {
   const [aktivny, setAktivny] = useState(0)
+  const reduced = useReducedMotion()
 
   return (
     <Sekcia id="proces" pasmo="biela">
       <SekciaHlavicka stitok="Postup" nadpis="Ako prebieha spolupráca" />
 
-      {/* Široký pás nad krokmi. Sekcia mala 612 px a ani jeden obrazový prvok
-          — po zrušení sivého pásma (KOMPOZÍCIA §2) robí rytmus obsah, nie
-          odtieň pozadia. Pomer sa mení so šírkou okna: na 390 px by z pásu 3 : 1
-          ostal 117 px vysoký prúžok, v ktorom sa priechod nedá prečítať. */}
-      {VYSLEDOK ? (
-        <Reveal className="mt-14 lg:mt-16">
-          <Fotka
-            src={VYSLEDOK.src}
-            w={VYSLEDOK.w}
-            h={VYSLEDOK.h}
-            alt={VYSLEDOK.alt}
-            popis={popisVysledku(VYSLEDOK)}
-            sizes="(min-width: 1024px) 82vw, 100vw"
-            // Pás ide cez celú šírku kontajnera (1 168 px), takže strop 960w
-            // z mriežky by ho roztiahol o pätinu. Tu si pýtame originál.
-            maxSirka={Infinity}
-            triedaObrazka="aspect-[4/3] sm:aspect-[21/9] lg:aspect-[3/1]"
-            className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"
-          />
-        </Reveal>
-      ) : null}
-
-      <Stagger
-        staggerChildren={0.08}
+      <motion.div
         className="mt-16 grid grid-cols-1 gap-y-12 lg:mt-20 lg:grid-cols-4 lg:gap-x-10"
+        initial={reduced ? undefined : 'hidden'}
+        whileInView={reduced ? undefined : 'visible'}
+        viewport={{ once: true, margin: '-15% 0px' }}
+        variants={reduced ? undefined : KONTAJNER}
       >
         {PROCES.map((krok, i) => {
           const je = i === aktivny
+          const poslednyKrok = i === PROCES.length - 1
           return (
-            <StaggerItem
+            <motion.div
               key={krok.id}
               className="relative pl-9 lg:pl-0 lg:pt-9"
+              variants={reduced ? undefined : KROK}
               onMouseEnter={() => setAktivny(i)}
             >
-              {i < PROCES.length - 1 && (
+              {!poslednyKrok && (
                 <>
-                  <Spojnica
-                    zvisla
-                    poradie={i}
-                    className="absolute left-[4px] top-[25px] h-[calc(100%+32px)] w-px lg:hidden"
+                  <motion.span
+                    aria-hidden="true"
+                    className="absolute left-[4px] top-[25px] h-[calc(100%+32px)] w-px origin-top lg:hidden"
+                    style={{ backgroundColor: 'var(--color-border)' }}
+                    variants={reduced ? undefined : USECKA_ZVISLA}
                   />
-                  <Spojnica
-                    poradie={i}
-                    className="absolute left-[16px] top-[5px] hidden h-px w-[calc(100%+24px)] lg:block"
+                  <motion.span
+                    aria-hidden="true"
+                    className="absolute left-[16px] top-[5px] hidden h-px w-[calc(100%+24px)] origin-left lg:block"
+                    style={{ backgroundColor: 'var(--color-border)' }}
+                    variants={reduced ? undefined : USECKA_VODOROVNA}
                   />
                 </>
               )}
 
-              <span
+              <motion.span
                 aria-hidden="true"
                 className="absolute left-0 top-[9px] h-[10px] w-[10px] border transition-colors duration-[var(--duration-fast)] lg:top-0"
                 style={{
@@ -118,6 +110,7 @@ export default function Proces() {
                   borderColor: 'var(--color-accent)',
                   backgroundColor: je ? 'var(--color-accent)' : 'transparent',
                 }}
+                variants={reduced ? undefined : UZOL}
               />
 
               <h3 className="text-balance font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
@@ -126,10 +119,10 @@ export default function Proces() {
               <p className="mt-3 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
                 {krok.popis}
               </p>
-            </StaggerItem>
+            </motion.div>
           )
         })}
-      </Stagger>
+      </motion.div>
     </Sekcia>
   )
 }
