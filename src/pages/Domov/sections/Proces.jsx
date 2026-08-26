@@ -1,52 +1,56 @@
-import { useState } from 'react'
-import { motion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 import { Sekcia, SekciaHlavicka } from '../../../components/kit/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { PROCES } from '../../../content/firma.js'
 
-const EASE = [0.16, 1, 0.3, 1]
+/** Odstup medzi krokmi v sekundách; z neho sa počítajú oneskorenia. */
+const KROK_ODSTUP = 0.22
 
 /**
  * Animácia pipeline.
  *
- * Predtým mala každá úsečka vlastný `whileInView` s ručne dopočítaným
- * oneskorením a sedela vnútri kroku, ktorý sa sám posúval o 24 px nahor.
- * Linka sa preto kreslila na podklade, ktorý sa pod ňou ešte hýbal, štyri
- * pozorovatele sa spúšťali každý zvlášť a poradie kreslenia záviselo od toho,
- * ktorý 1 px vysoký prvok stihol pretnúť viewport skôr. Výsledok bol
- * roztrasený a nikdy nie dvakrát rovnaký.
+ * Nepoužíva `whileInView` z knižnice `motion`. Prvá verzia mala úsečku vnútri
+ * kroku, ktorý sa sám posúval, takže sa linka kreslila na plávajúcom podklade.
+ * Druhá verzia to skúsila orchestrovať cez `staggerChildren` a tretia cez
+ * `whileInView` s ručnými oneskoreniami — obe zostali stáť. Meranie ukázalo
+ * prečo: prvky pod ohybom nemali ani inline štýl s počiatočným stavom
+ * (`style` bolo `null` pri `opacity: 1`), teda `initial` sa nikdy nepoužilo
+ * a animácia nezačala. Platí to v tomto projekte na `whileInView` všeobecne,
+ * nielen tu — je to poznámka do QUALITY-LOG, nie vec tejto sekcie.
  *
- * Teraz je to jedna sekvencia: orchestruje ju rodič cez `staggerChildren`
- * a varianty sa dedia do vnorených prvkov, takže sa uzol rozsvieti, z neho
- * vybehne úsečka k ďalšiemu uzlu a až potom nastupuje ďalší krok. Kroky menia
- * len priehľadnosť, nie polohu — pipeline tak stojí na mieste a naozaj sa
- * kreslí, nie pláva.
+ * Preto vlastný `IntersectionObserver` a prechody v CSS: sekcia sa raz
+ * prepne do stavu „kreslí sa“ a jednotlivé prvky majú `transition-delay`
+ * odvodený od indexu kroku. Rozsvieti sa uzol, z neho vybehne úsečka
+ * k ďalšiemu uzlu, potom nastupuje ďalší krok. Kroky menia len priehľadnosť,
+ * nie polohu, takže pipeline stojí na mieste a naozaj sa kreslí.
+ *
+ * Pri `prefers-reduced-motion` je všetko rovno v cieľovom stave.
  */
-const KONTAJNER = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.22, delayChildren: 0.05 } },
-}
+function useKresliSa(reduced) {
+  const ref = useRef(null)
+  const [kresli, setKresli] = useState(false)
 
-/** Krok sa iba prelína. Žiadny posun: linka pod ním nesmie ujsť. */
-const KROK = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.4, ease: EASE } },
-}
+  useEffect(() => {
+    if (reduced) return undefined
+    const el = ref.current
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setKresli(true)
+      return undefined
+    }
+    const io = new IntersectionObserver(
+      (zaznamy) => {
+        if (zaznamy.some((z) => z.isIntersecting)) {
+          setKresli(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px -15% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [reduced])
 
-const UZOL = {
-  hidden: { scale: 0.2, opacity: 0 },
-  visible: { scale: 1, opacity: 1, transition: { duration: 0.32, ease: EASE } },
-}
-
-/** Úsečka vybehne z uzla až keď je uzol na mieste, preto oneskorenie. */
-const USECKA_VODOROVNA = {
-  hidden: { scaleX: 0 },
-  visible: { scaleX: 1, transition: { duration: 0.5, ease: EASE, delay: 0.14 } },
-}
-
-const USECKA_ZVISLA = {
-  hidden: { scaleY: 0 },
-  visible: { scaleY: 1, transition: { duration: 0.5, ease: EASE, delay: 0.14 } },
+  return [ref, reduced || kresli]
 }
 
 /**
@@ -63,54 +67,60 @@ const USECKA_ZVISLA = {
 export default function Proces() {
   const [aktivny, setAktivny] = useState(0)
   const reduced = useReducedMotion()
+  const [ref, kresli] = useKresliSa(reduced)
 
   return (
     <Sekcia id="proces" pasmo="biela">
       <SekciaHlavicka stitok="Postup" nadpis="Ako prebieha spolupráca" />
 
-      <motion.div
-        className="mt-16 grid grid-cols-1 gap-y-12 lg:mt-20 lg:grid-cols-4 lg:gap-x-10"
-        initial={reduced ? undefined : 'hidden'}
-        whileInView={reduced ? undefined : 'visible'}
-        viewport={{ once: true, margin: '-15% 0px' }}
-        variants={reduced ? undefined : KONTAJNER}
-      >
+      <div ref={ref} className="mt-16 grid grid-cols-1 gap-y-12 lg:mt-20 lg:grid-cols-4 lg:gap-x-10">
         {PROCES.map((krok, i) => {
           const je = i === aktivny
           const poslednyKrok = i === PROCES.length - 1
+          const odstup = i * KROK_ODSTUP
           return (
-            <motion.div
+            <div
               key={krok.id}
-              className="relative pl-9 lg:pl-0 lg:pt-9"
-              variants={reduced ? undefined : KROK}
+              data-krok={i}
+              className="relative pl-9 transition-opacity duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:pl-0 lg:pt-9"
+              style={{ opacity: kresli ? 1 : 0, transitionDelay: `${odstup}s` }}
               onMouseEnter={() => setAktivny(i)}
             >
               {!poslednyKrok && (
                 <>
-                  <motion.span
+                  <span
                     aria-hidden="true"
-                    className="absolute left-[4px] top-[25px] h-[calc(100%+32px)] w-px origin-top lg:hidden"
-                    style={{ backgroundColor: 'var(--color-border)' }}
-                    variants={reduced ? undefined : USECKA_ZVISLA}
+                    className="absolute left-[4px] top-[25px] h-[calc(100%+32px)] w-px origin-top transition-transform duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden"
+                    style={{
+                      backgroundColor: 'var(--color-border)',
+                      transform: `scaleY(${kresli ? 1 : 0})`,
+                      transitionDelay: `${odstup + 0.14}s`,
+                    }}
                   />
-                  <motion.span
+                  <span
                     aria-hidden="true"
-                    className="absolute left-[16px] top-[5px] hidden h-px w-[calc(100%+24px)] origin-left lg:block"
-                    style={{ backgroundColor: 'var(--color-border)' }}
-                    variants={reduced ? undefined : USECKA_VODOROVNA}
+                    className="absolute left-[16px] top-[5px] hidden h-px w-[calc(100%+24px)] origin-left transition-transform duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:block"
+                    style={{
+                      backgroundColor: 'var(--color-border)',
+                      transform: `scaleX(${kresli ? 1 : 0})`,
+                      transitionDelay: `${odstup + 0.14}s`,
+                    }}
                   />
                 </>
               )}
 
-              <motion.span
+              <span
                 aria-hidden="true"
-                className="absolute left-0 top-[9px] h-[10px] w-[10px] border transition-colors duration-[var(--duration-fast)] lg:top-0"
+                data-uzol={i}
+                className="absolute left-0 top-[9px] h-[10px] w-[10px] border transition-[transform,opacity,background-color] duration-[320ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:top-0"
                 style={{
                   borderRadius: 'var(--radius-sm)',
                   borderColor: 'var(--color-accent)',
                   backgroundColor: je ? 'var(--color-accent)' : 'transparent',
+                  transform: `scale(${kresli ? 1 : 0.2})`,
+                  opacity: kresli ? 1 : 0,
+                  transitionDelay: `${odstup}s`,
                 }}
-                variants={reduced ? undefined : UZOL}
               />
 
               <h3 className="text-balance font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
@@ -119,10 +129,10 @@ export default function Proces() {
               <p className="mt-3 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
                 {krok.popis}
               </p>
-            </motion.div>
+            </div>
           )
         })}
-      </motion.div>
+      </div>
     </Sekcia>
   )
 }
