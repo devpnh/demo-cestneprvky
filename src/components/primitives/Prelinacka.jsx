@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { sadzba } from '../../lib/sadzba.js'
 import { MAX_MRIEZKA, srcSetPre } from '../../lib/obrazky.js'
 
@@ -36,7 +36,10 @@ export default function Prelinacka({
   sizes = '(min-width: 1280px) 1168px, 100vw',
   maxSirka = MAX_MRIEZKA,
   reduced = false,
+  parallax = 0,
   className = '',
+  triedaRamu = '',
+  triedaPopisu = '',
 }) {
   const pocet = zabery.length
   const [aktivny, setAktivny] = useState(0)
@@ -58,6 +61,44 @@ export default function Prelinacka({
 
   const vyber = useCallback((i) => setAktivny(i), [])
 
+  /**
+   * Paralaxa záberu. Fotka je o `parallax` percent vyššia než rám a v ňom sa
+   * posúva podľa toho, kde je rám voči oknu — dolu pri nábehu, hore pri
+   * odchode. Meria sa v rAF a zapisuje priamo do štýlu, nie cez `useState`:
+   * pri scrollovaní by to inak bolo prekreslenie Reactu na každý snímok.
+   *
+   * `0` paralaxu vypína a vrstva ostane bez transformu — pri
+   * `prefers-reduced-motion` sa efekt nezapne vôbec.
+   */
+  const ramRef = useRef(null)
+  const vrstvaRef = useRef(null)
+  useEffect(() => {
+    if (!parallax || reduced) return undefined
+    const ram = ramRef.current
+    const vrstva = vrstvaRef.current
+    if (!ram || !vrstva) return undefined
+    let raf = 0
+    const zmeraj = () => {
+      raf = 0
+      const r = ram.getBoundingClientRect()
+      const rozsah = window.innerHeight + r.height
+      // 0 = rám práve vstupuje zdola, 1 = práve odchádza hore.
+      const podiel = Math.min(1, Math.max(0, (window.innerHeight - r.top) / rozsah))
+      vrstva.style.transform = `translate3d(0, ${((0.5 - podiel) * parallax).toFixed(2)}%, 0)`
+    }
+    const naplanuj = () => {
+      if (!raf) raf = requestAnimationFrame(zmeraj)
+    }
+    zmeraj()
+    window.addEventListener('scroll', naplanuj, { passive: true })
+    window.addEventListener('resize', naplanuj, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', naplanuj)
+      window.removeEventListener('resize', naplanuj)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [parallax, reduced])
+
   const zaber = zabery[aktivny]
 
   return (
@@ -69,10 +110,22 @@ export default function Prelinacka({
       onBlurCapture={() => setStoji(false)}
     >
       <div
+        ref={ramRef}
         data-prelinacka=""
-        className="relative w-full overflow-hidden bg-[var(--color-surface)]"
-        style={{ aspectRatio: pomer, borderRadius: 'var(--radius-sm)' }}
+        className={`relative w-full overflow-hidden bg-[var(--color-surface)] ${triedaRamu}`}
+        // `pomer="auto"` je pre pás, ktorý si výšku drží triedou (celoplošný
+        // záber). Vtedy sa `aspect-ratio` nenastavuje vôbec, inak by prebilo
+        // výšku z triedy.
+        // `pomer="auto"` je pre pás cez celú šírku okna, ktorý si výšku drží
+        // triedou. Vtedy sa nenastavuje ani `aspect-ratio` (prebilo by výšku
+        // z triedy), ani rádius — pás od hrany po hranu zaoblené rohy nemá.
+        style={pomer === 'auto' ? undefined : { aspectRatio: pomer, borderRadius: 'var(--radius-sm)' }}
       >
+        <div
+          ref={vrstvaRef}
+          className="absolute inset-0"
+          style={parallax && !reduced ? { top: `${-parallax / 2}%`, bottom: `${-parallax / 2}%`, height: 'auto' } : undefined}
+        >
         {zabery.map((z, i) => {
           const je = i === aktivny
           const bolo = i === predchadzajuci
@@ -97,9 +150,10 @@ export default function Prelinacka({
             />
           )
         })}
+        </div>
       </div>
 
-      <figcaption className="mt-4 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-[var(--color-border)] pt-4">
+      <figcaption className={`mt-4 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-[var(--color-border)] pt-4 ${triedaPopisu}`}>
         <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[var(--color-muted)]">
           {sadzba(zaber.popis)}
         </span>

@@ -552,3 +552,47 @@ Audit po opravách: **254/254 OK, 0 ❌**.
 ľavého stĺpca sekcie Služby a do hero nie sú z tohto behu — objavili sa
 v pracovnom strome súbežne. Ostávajú, sedia k objazdu (meno služby sa
 vymieňa po znakoch v tom istom okamihu, keď sa mení aktívny uzol).
+
+## 2026-08-27 · dynamická pätička a nové prvé pásmo pod hero
+
+### Pätička sa skladá ako hero podstránok
+
+Pokyn Petra: „dynamický footer podobne ako hero sekcia na podstránkach“.
+Má teda tie isté štyri veci v tom istom poradí ako `StranHlavicka`: logo,
+mono eyebrow (`Od roku 2012, Žilina`, oba údaje z `firma.js`), veta vysadená
+displejovým rezom, ktorá nabieha po slovách (`SplitText`, 15 slov), a
+akcentová linka; pod nimi stĺpce, ktoré nastupujú po sebe.
+
+Vrstvy pozadia sú dve: `GradientMesh` (prelievajúci sa červený opar) a nad
+ním `ZnacenieMotiv` (5 pruhov miznúcich do stratena). Opar dáva teplo, pruhy
+kresbu — samotný opar bol mäkký a nemal sa čoho chytiť.
+
+Veta nie je nová copy, je to ten istý text, čo v pätičke stál ako drobný
+odstavec. Logo sa presunulo nad ňu ako podpis; v samostatnom stĺpci pod
+linkou pri ňom ostávalo ~300 px prázdna.
+
+### Prvé pásmo pod hero má chytiť oko
+
+Pokyn: „potrebujeme tam chytiť oko zákazníka“. Skladba je teraz:
+
+1. **Biely nádych** — hero je tmavé a plné fotky, hneď za ním musí prísť
+   vzduch. Hore je len eyebrow, claim firmy v `--text-5xl` a jedna veta.
+2. **Záber cez celú šírku okna** — 1 440 × 551 px, `left = 0`, výška
+   `clamp(22rem, 58vh, 40rem)`. Je to jediné miesto na webe, kde fotka
+   opúšťa mriežku, a práve preto funguje ako zarážka. **Nie `w-screen`
+   s posunom o polovicu**: `100vw` počíta aj so zvislým scrollbarom a
+   stránka by dostala pár pixelov vodorovného pretečenia (D1). Pás je
+   priamy potomok sekcie, ktorá kontajner nemá, takže je od hrany po hranu
+   sám od seba. Namerané: `scrollWidth` 1 440 na desktope a 390 na mobile.
+3. **Paralaxa** — fotka je v páse o 16 % vyššia a posúva sa v ňom podľa
+   polohy pásu voči oknu. Meria sa v rAF a zapisuje priamo do štýlu, nie
+   cez `useState` — inak by to bolo prekreslenie Reactu na každý snímok.
+   Overené: `translate3d(0, −4,6 %)` → `−33,4 %` po 400 px scrollu.
+4. **Prelínačka** štyroch záberov, aby sa na pás dalo pozerať dlhšie než
+   dve sekundy.
+
+Pás je zámerne až POD bielou hlavičkou a nie hneď pod hero: fotka je
+opticky tmavá plocha a tesne pod tmavým hero by to boli dve tmavé plochy za
+sebou (B5).
+
+Audit: **254/254 OK, 0 ❌**, 0 chýb v konzole, 390 px bez pretečenia.

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
-import { GradientMesh, Reveal, Stagger, StaggerItem } from '../primitives/index.js'
+import { GradientMesh, Reveal, SplitText, Stagger, StaggerItem } from '../primitives/index.js'
+import ZnacenieMotiv from '../kit/ZnacenieMotiv.jsx'
 import { NAV } from './routy.js'
 import { SLUZBY } from '../../content/sluzby.js'
+import { FIRMA } from '../../content/firma.js'
 
 /** Vlasová linka na tmavom pásme: biela s nízkou alfou, nie sivá z tokenov. */
 const JEMNA_LINKA = {
@@ -36,31 +38,64 @@ const ADRESA = 'Borová 3295/36, 010 01 Žilina, Slovensko'
  * Nad stĺpcami nie je žiadna deliaca čiara (pokyn Petra, 27. 8. 2026):
  * pätičku od pásma nad ňou oddeľuje zmena farby plochy, a to je dosť —
  * červená prerušovaná čiara cez celú šírku k tomu pridávala druhý,
- * hlasnejší predel na tom istom mieste. Stĺpce nabiehajú po sebe.
+ * hlasnejší predel na tom istom mieste.
+ *
+ * ## Skladá sa ako hero podstránok
+ *
+ * Pokyn Petra (27. 8. 2026) znel „dynamický footer podobne ako hero sekcia
+ * na podstránkach“, takže má tie isté štyri veci v tom istom poradí ako
+ * `StranHlavicka`: značkovací motív v pozadí, mono eyebrow, veta vysadená
+ * displejovým rezom, ktorá nabieha po slovách, a pod ňou obsah, ktorý
+ * nastupuje po sebe.
+ *
+ * Vrstvy pozadia sú dve a v tomto poradí: `GradientMesh` (prelievajúci sa
+ * červený opar) a nad ním `ZnacenieMotiv` (jazdné pruhy miznúce do
+ * stratena). Opar dáva teplo, pruhy kresbu; samotný opar bol mäkký a nemal
+ * sa čoho chytiť.
+ *
+ * Veta nie je nová copy — je to ten istý text, aký v pätičke stál doteraz
+ * ako drobný odstavec. Zmenila sa len jeho veľkosť a to, že nabieha. Logo
+ * stojí nad ňou ako podpis; kým bolo v samostatnom stĺpci pod linkou,
+ * ostávalo pri ňom 300 px prázdna.
  */
+
+/** Čo firma robí. Jediná veta pätičky, doteraz drobná, dnes vysadená veľkosťou. */
+const VETA =
+  'Značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a ďalšie prvky pozemných komunikácií.'
+
 export default function Footer() {
   return (
     <footer className="relative isolate overflow-hidden bg-[var(--color-surface-2)]">
       <GradientMesh />
+      <ZnacenieMotiv krytie={0.85} />
 
-      <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y-sm)]">
-        <Stagger className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-          <StaggerItem className="lg:col-span-4">
-            <img
-              src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
-              width={145}
-              height={86}
-              alt="Cestné prvky s.r.o."
-              loading="lazy"
-              className="h-12 w-auto"
-            />
-            <p className="mt-5 max-w-[40ch] font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-70">
-              Značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a ďalšie prvky
-              pozemných komunikácií.
-            </p>
-          </StaggerItem>
+      <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y)]">
+        {/* Hlava pätičky v skladbe hero podstránok: eyebrow, veta po slovách,
+            akcentová linka. Rovnaké poradie, rovnaké tempo. */}
+        <Reveal posun="ziadny">
+          <img
+            src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
+            width={145}
+            height={86}
+            alt="Cestné prvky s.r.o."
+            loading="lazy"
+            className="h-12 w-auto"
+          />
+          <p className="mt-8 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-[var(--color-accent-svetly)]">
+            {`Od roku ${FIRMA.rokZalozenia}, ${FIRMA.sidlo}`}
+          </p>
+        </Reveal>
 
-          <StaggerItem as="nav" aria-label="Pätičková navigácia" className="lg:col-span-3">
+        <SplitText
+          as="p"
+          text={VETA}
+          className="mt-6 max-w-[26ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)]"
+        />
+
+        <div aria-hidden="true" className="mt-10 h-[3px] w-16 bg-[var(--color-accent)]" />
+
+        <Stagger className="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+          <StaggerItem as="nav" aria-label="Pätičková navigácia" className="lg:col-span-4">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Navigácia
             </p>
@@ -78,7 +113,7 @@ export default function Footer() {
             </ul>
           </StaggerItem>
 
-          <StaggerItem as="nav" aria-label="Služby" className="lg:col-span-5">
+          <StaggerItem as="nav" aria-label="Služby" className="lg:col-span-8">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Služby
             </p>
