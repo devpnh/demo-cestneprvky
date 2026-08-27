@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { GradientMesh, Reveal, Stagger, StaggerItem } from '../primitives/index.js'
-import Lajna from '../kit/Lajna.jsx'
 import { NAV } from './routy.js'
 import { SLUZBY } from '../../content/sluzby.js'
 
@@ -34,8 +33,10 @@ const ADRESA = 'Borová 3295/36, 010 01 Žilina, Slovensko'
  * pokračovanie predchádzajúceho tmavého bloku. Kontrola B5 to meria vrátane
  * pätičky.
  *
- * Popri opare ostáva prerušovaná akcentová čiara, ktorá sa dokreslí pri
- * vstupe pätičky do viewportu, a stĺpce nabiehajú po sebe.
+ * Nad stĺpcami nie je žiadna deliaca čiara (pokyn Petra, 27. 8. 2026):
+ * pätičku od pásma nad ňou oddeľuje zmena farby plochy, a to je dosť —
+ * červená prerušovaná čiara cez celú šírku k tomu pridávala druhý,
+ * hlasnejší predel na tom istom mieste. Stĺpce nabiehajú po sebe.
  */
 export default function Footer() {
   return (
@@ -43,8 +44,6 @@ export default function Footer() {
       <GradientMesh />
 
       <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y-sm)]">
-        <Lajna akcent className="mb-12 w-full" />
-
         <Stagger className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           <StaggerItem className="lg:col-span-4">
             <img

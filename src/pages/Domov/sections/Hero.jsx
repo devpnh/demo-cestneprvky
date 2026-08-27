@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowDown } from 'lucide-react'
 import { motion, useScroll, useTransform } from 'motion/react'
-import { Reveal, Stagger, StaggerItem, SplitText } from '../../../components/primitives/index.js'
+import { Reveal, Stagger, StaggerItem, SplitText, TextRotate } from '../../../components/primitives/index.js'
 import { Tlacidlo } from '../../../components/kit/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { openObhliadka } from '../../../lib/obhliadka.js'
@@ -24,6 +24,12 @@ const ZABERY = [
   { od: 7.2, prvok: 'Varovný pás a protišmykový náter schodiskového stupňa', miesto: null, isteMiesto: false },
   { od: 10.6, prvok: 'Značenie pre nevidiacich a slabozrakých', miesto: 'Zubačka', isteMiesto: true },
 ]
+
+/** Texty rotátora v karte. Sú to tie isté fakty zo `ZABERY`, len rozdelené na
+ *  meno prvku a miesto, aby sa dali vymieňať samostatne. Kde miesto nevieme
+ *  doložiť, ostáva prázdny reťazec — karta mlčí, nedopĺňa. */
+const MENA_PRVKOV = ZABERY.map((z) => z.prvok)
+const MIESTA_ZABEROV = ZABERY.map((z) => castiPopisu(z).join(' · '))
 
 /**
  * Dvojitý scrim nad záberom. Hodnoty nie sú vkusové: text hero sedí v dolnej
@@ -136,23 +142,49 @@ function HeroPozadie({ onSegment }) {
  * doložiť, presne podľa `castiPopisu`. Kde miesto nevieme, nič sa nedopĺňa.
  */
 function PopisokZaberu({ idx }) {
-  const z = ZABERY[idx] ?? ZABERY[0]
-  const casti = castiPopisu(z)
+  // Text karty neskáče, ale sa prepisuje po znakoch a riadi ho `idx` — teda
+  // to, čo je práve na plátne. Je to ten istý vzťah ako v podklade
+  // (`jumpTo` na prvok, ktorý sa dostal do zorného poľa), len tu ho namiesto
+  // scrollu udáva prelínačka vo videu.
+  const prvokRef = useRef(null)
+  const miestoRef = useRef(null)
+  useEffect(() => {
+    prvokRef.current?.jumpTo(idx)
+    miestoRef.current?.jumpTo(idx)
+  }, [idx])
+
   return (
     <div
       data-hero-karta
       className="hidden w-[21rem] border border-[rgba(255,255,255,0.24)] bg-[rgba(38,41,44,0.42)] p-5 backdrop-blur-md lg:block"
       style={{ borderRadius: 'var(--radius-md)' }}
     >
-      <p className="font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)]">
-        {z.prvok}
+      <p className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)]">
+        <TextRotate
+          ref={prvokRef}
+          texts={MENA_PRVKOV}
+          auto={false}
+          staggerFrom="first"
+          staggerDuration={0.008}
+          splitLevelClassName="overflow-hidden pb-[0.08em]"
+          transition={{ type: 'spring', duration: 0.6, bounce: 0 }}
+        />
       </p>
-      {casti.length > 0 ? (
-        <p className="mt-2 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.86)]">
-          {casti.join(' · ')}
-        </p>
-      ) : null}
-      <div className="mt-4 flex gap-1.5" aria-hidden="true">
+      <p className="mt-3 min-h-[1.25rem] font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.86)]">
+        <TextRotate
+          ref={miestoRef}
+          texts={MIESTA_ZABEROV}
+          auto={false}
+          splitBy="words"
+          staggerDuration={0.012}
+          splitLevelClassName="overflow-hidden"
+          transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+          initial={{ opacity: 0, y: '60%' }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: '-60%' }}
+        />
+      </p>
+      <div className="mt-5 flex gap-1.5" aria-hidden="true">
         {ZABERY.slice(0, 3).map((s, i) => (
           <span
             key={s.od}

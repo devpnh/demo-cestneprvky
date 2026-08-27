@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
-import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { Reveal, Stagger, StaggerItem, TextRotate } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
-import { SKUPINY, SLUZBY, skupinaPodlaId, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
+import { SKUPINY, SLUZBY, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
 import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
 import { altFotky } from '../../Sluzby/fotky.js'
 
@@ -12,6 +12,11 @@ const BASE = import.meta.env.BASE_URL
 
 /** Perex sa skladá z názvov celkov v dátach, aby na webe nevznikla nová veta o klientovi. */
 const PEREX = `Deväť služieb v troch celkoch: ${SKUPINY.map((s) => s.nazov.toLowerCase()).join(', ')}.`
+
+/** Texty rotátorov. Sú to celé polia z dát, nie vety poskladané v JSX. */
+const MENA_SLUZIEB = SLUZBY.map((s) => s.nazov)
+const MENA_SKUPIN = SLUZBY.map((s) => SKUPINY.find((k) => k.id === s.skupina)?.nazov ?? '')
+const MIESTA = SLUZBY.map((s) => s.dlazdica.miesto)
 
 /**
  * Sleduje šírku okna, nie výšku (STANDARDY C2: výšku na dotykových
@@ -67,8 +72,19 @@ export default function SluzbyPrehlad() {
   const [aktivna, setAktivna] = useState(0)
   const vyber = useCallback((i) => setAktivna(i), [])
 
+  // Tri rotátory, jeden zdroj pravdy: index aktívnej služby. `jumpTo` je
+  // presne ten režim z podkladu — text skočí na to, čo má návštevník práve
+  // pred očami, namiesto toho, aby si tikal vlastným taktom.
+  const stitokRef = useRef(null)
+  const menoRef = useRef(null)
+  const miestoRef = useRef(null)
+  useEffect(() => {
+    stitokRef.current?.jumpTo(aktivna)
+    menoRef.current?.jumpTo(aktivna)
+    miestoRef.current?.jumpTo(aktivna)
+  }, [aktivna])
+
   const sluzba = SLUZBY[aktivna]
-  const skupinaSluzby = skupinaPodlaId(sluzba.skupina)
 
   return (
     <Sekcia id="sluzby" pasmo="biela">
@@ -102,17 +118,56 @@ export default function SluzbyPrehlad() {
                 text stojí na `/sluzby/<slug>`, kam vedie odkaz pod menom.
                 Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
                 názve tak nevznikne diera a objazd vedľa neho pri prepínaní
-                nepodskakuje. */}
-            <div key={aktivna} data-objazd-detail="" className="mt-7 flex min-h-[11rem] flex-col justify-start">
-              <MonoStitok sCiarkou={false}>{skupinaSluzby?.nazov}</MonoStitok>
-              <h3 className="mt-4 max-w-[14ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                {sluzba.nazov}
+                nepodskakuje.
+
+                Meno služby sa nevymieňa skokom, ale po znakoch (`TextRotate`).
+                Riadi ho ten istý index ako oblúk na objazde, takže sa text
+                a fotka menia ako jedna udalosť — nie ako dve animácie, ktoré
+                sa náhodou zišli. Znaky bežia v maske `overflow-hidden`,
+                rovnako ako slová v `SplitText`, aby sa nevynárali cez susedný
+                riadok. Pri `prefers-reduced-motion` sa text len prepíše. */}
+            <div data-objazd-detail="" className="mt-7 flex min-h-[11rem] flex-col justify-start">
+              <MonoStitok sCiarkou={false}>
+                <TextRotate
+                  ref={stitokRef}
+                  texts={MENA_SKUPIN}
+                  auto={false}
+                  splitBy="words"
+                  staggerDuration={0.012}
+                  splitLevelClassName="overflow-hidden"
+                  transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+                  initial={{ opacity: 0, y: '60%' }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: '-60%' }}
+                />
+              </MonoStitok>
+              <h3 className="mt-4 max-w-[14ch] font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                <TextRotate
+                  ref={menoRef}
+                  texts={MENA_SLUZIEB}
+                  auto={false}
+                  staggerFrom="first"
+                  staggerDuration={0.006}
+                  splitLevelClassName="overflow-hidden pb-[0.08em]"
+                  transition={{ type: 'spring', duration: 0.6, bounce: 0 }}
+                />
               </h3>
             </div>
 
             <p className="mt-6 flex items-baseline justify-between gap-6 border-t border-[var(--color-border)] pt-4">
-              <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                {sluzba.dlazdica.miesto}
+              <span className="min-h-[1.25rem] font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
+                <TextRotate
+                  ref={miestoRef}
+                  texts={MIESTA}
+                  auto={false}
+                  splitBy="words"
+                  staggerDuration={0.012}
+                  splitLevelClassName="overflow-hidden"
+                  transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+                  initial={{ opacity: 0, y: '60%' }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: '-60%' }}
+                />
               </span>
               <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-muted)]">
                 {`${aktivna + 1} / ${SLUZBY.length}`}

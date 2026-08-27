@@ -430,3 +430,27 @@ bielym 14 px textom má len 4,05 : 1. Kontrola B7 pri tomto krytí prešla na
 všetkých pätnástich cestách.
 
 Audit: **254/254 OK, 0 ❌**.
+
+## 2026-08-27 · pätička bez deliacej čiary, motív mizne do stratena
+
+Dva pokyny Petra:
+
+- **Prerušovaná čiara z pätičky preč.** Pätičku od pásma nad ňou oddeľuje
+  zmena farby plochy a to stačí; červená prerušovaná čiara cez celú šírku
+  k tomu pridávala druhý, hlasnejší predel na tom istom mieste. (Pozor na
+  zámenu: červená prerušovaná čiara, ktorá je pri scrolle na spodku stránky
+  vidieť hore pod hlavičkou, je pás postupu stránkou v `Header`, nie
+  pätička — ten ostáva.)
+- **Motív nesmie ísť do jedného bodu, ale do stratena.** Úbežník bol na
+  (1180, 150), teda vnútri kresby, a ešte sa v ňom kreslila bodka; čiary sa
+  zbiehali do viditeľného bodu a motív vyzeral ako schéma perspektívy.
+  Úbežník je odteraz **mimo `viewBox`** (x 1560 pri šírke 1200), bodka je
+  preč a čiary k nemu vyblednú do nuly cez gradient na ťahu
+  (`userSpaceOnUse`, aby bledli všetky rovnako a perspektíva sa nerozpadla).
+  Kresba tak nemá koniec, ktorý by sa dal nájsť očami.
+
+Overené v prehliadači: `circle` v motíve 0, `x2 = 1560`, ťah
+`url(#pruh-mizne-tmave)`, animácia `pruhy-beh` beží, 2 gradienty;
+`footer [data-lajna]` 0. Zároveň preverené, že sa nič nerozbilo: objazd po
+hoveri na siedmy uzol prepne na `7 / 9`, opar sa po 2,5 s posunul, 0 chýb
+v konzole na šiestich cestách. Audit **254/254 OK, 0 ❌**.
