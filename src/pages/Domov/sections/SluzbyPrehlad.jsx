@@ -98,17 +98,16 @@ export default function SluzbyPrehlad() {
               />
             </div>
 
-            {/* Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
-                názve tak nevznikne diera medzi titulom a textom a objazd
-                vedľa neho pri prepínaní služieb nepodskakuje. */}
-            <div key={aktivna} data-objazd-detail="" className="mt-6 min-h-[14rem]">
+            {/* Bez perexu. Domov službu pomenúva, nevysvetľuje ju — celý
+                text stojí na `/sluzby/<slug>`, kam vedie odkaz pod menom.
+                Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
+                názve tak nevznikne diera a objazd vedľa neho pri prepínaní
+                nepodskakuje. */}
+            <div key={aktivna} data-objazd-detail="" className="mt-7 flex min-h-[11rem] flex-col justify-start">
               <MonoStitok sCiarkou={false}>{skupinaSluzby?.nazov}</MonoStitok>
-              <h3 className="mt-3 font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+              <h3 className="mt-4 max-w-[14ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                 {sluzba.nazov}
               </h3>
-              <p className="mt-4 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                {sluzba.perex}
-              </p>
             </div>
 
             <p className="mt-6 flex items-baseline justify-between gap-6 border-t border-[var(--color-border)] pt-4">
@@ -139,7 +138,7 @@ export default function SluzbyPrehlad() {
                   <StaggerItem as="li" key={s.slug}>
                     <Link
                       to={`/sluzby/${s.slug}`}
-                      className="group flex items-start gap-5 border-b border-[var(--color-border)] py-5 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)]"
+                      className="group flex items-center gap-5 border-b border-[var(--color-border)] py-4 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)]"
                     >
                       <img
                         src={`${BASE}assets/${s.dlazdica.src}`}
@@ -151,16 +150,16 @@ export default function SluzbyPrehlad() {
                         className="h-[64px] w-[96px] shrink-0 object-cover"
                         style={{ borderRadius: 'var(--radius-sm)' }}
                       />
-                      <div className="min-w-0 flex-1">
+                      {/* Aj tu bez perexu, rovnako ako na desktope: Domov
+                          službu pomenúva, text stojí na jej stránke. Zoznam
+                          sa tým na 390 px skrátil o vyše tisíc pixelov. */}
+                      <div className="flex min-w-0 flex-1 items-center">
                         <h3 className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                           {s.nazov}
                         </h3>
-                        <p className="mt-2 max-w-[58ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                          {s.perex}
-                        </p>
                       </div>
                       <ArrowRight
-                        className="mt-1 h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
+                        className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
                         aria-hidden="true"
                       />
                     </Link>

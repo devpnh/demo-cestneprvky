@@ -346,3 +346,52 @@ a `matrix(1,0,0,1,0,0)`. Je to tá istá trieda chyby, akú mala skupina
 `Stagger` — stav sa píše na jeden atribút, čítal sa z druhého.
 
 Audit po oprave: **254/254 OK, 0 ❌**.
+
+## 2026-08-27 · Domov je prezentačný; objazd sa dal ovládať len jedným uzlom
+
+Peter: Domov má byť prezentačný a nie „kopa textu nahádzaná na seba“, chýba
+mu prémiový pocit; objazd nefunguje a glitchuje pri prepínaní.
+
+### Objazd — tri príčiny, nie jedna
+
+1. **Ovládať sa dal iba posledný uzol.** Každý z deviatich uzlov visel vo
+   vlastnom priehľadnom štvorci cez CELÚ plochu objazdu (`absolute
+   inset-[10%]`) a tie sa navzájom prekrývali, takže všetky pohyby myši
+   chytal ten posledný v poradí. Playwright to hlási doslova:
+   `div.absolute.inset-[10%] intercepts pointer events`, hover na uzol 6
+   po 30 s vypršal. Obaly sú odteraz `pointer-events-none` a ukazovateľ si
+   zapína späť samotný odkaz. Overené: hover na uzly 6, 3, 9 a 1 prepne
+   detail na 6/9, 3/9, 9/9 a 1/9.
+2. **Uzly obiehali, takže sa na ne nedalo trafiť.** Veniec sa točil
+   (`orbit-spin`, 80 s na otáčku); uzol pod kurzorom uteká a keď sa naň
+   trafíte, `onMouseEnter` objazd zastaví — kurzor však medzitým skĺzol
+   vedľa a uzol uteká ďalej. Uzly odteraz **stoja** a pohyb nesie
+   **akcentový oblúk**, ktorý po vozovke prebehne k aktívnej službe (uhol sa
+   drží spojito a normalizuje do (−180°, 180°], takže z deviatej služby na
+   prvú ide po kratšej strane, nie dookola). Overené: poloha uzla po 1,5 s
+   nezmenená, oblúk sa točí 0° → 40° → 80°, pod kurzorom sa nič neposúva,
+   po odchode kurzora sa posun do 5 s obnoví.
+3. **Prelínačka v strede ukazovala dve fotky naraz.** Odchádzajúca aj
+   prichádzajúca boli v polovici prechodu priesvitné a presvitali cez seba.
+   Odchádzajúca teraz ostáva nepriehľadná pod prichádzajúcou a zhasne až
+   po dobehnutí (stav `predchadzajuca`, 620 ms).
+
+Vedľa toho: nula uzlov sedí na dvanástej hodine (`uholUzla = i · 360/počet`),
+lebo uzol stojí na hornom okraji otočeného štvorca — pri pôvodnom
+`−90 + i · 40` bola nula na deviatej hodine a oblúk mieril inam než uzol.
+
+### Domov — menej textu, väčšie obrazy
+
+- **Prečo Cestné prvky:** zo štyroch argumentov s fotkou a štvorriadkovým
+  odsekom ostali štyri nadpisy na vlasovej mriežke, jeden veľký záber 16 : 9
+  cez celú šírku kontajnera a číslo `30 min` vysadené veľkosťou hlavného
+  nadpisu. Celé znenie argumentov je na `/o-firme`, odkiaľ sem vedie odkaz.
+- **Služby:** vedľa objazdu ostal celok, meno služby v `--text-4xl`, miesto,
+  počítadlo a odkaz. Bez perexu — aj v mobilnom zozname.
+- **Realizácie:** šesť rovnakých dlaždíc 4 : 3 → jeden vedúci záber cez
+  sedem stĺpcov a dva menšie vedľa neho. Bol to tretí pravidelný raster
+  fotiek na jednej stránke.
+- **Postup:** štyri kroky bez popisov, ostala linka so štyrmi menami.
+
+Výška Domova 1440 px: 9 910 → 9 002 px. Na 390 px 10 606 px a stále 0
+horizontálneho scrollu. Audit **254/254 OK, 0 ❌**, 0 chýb v konzole.

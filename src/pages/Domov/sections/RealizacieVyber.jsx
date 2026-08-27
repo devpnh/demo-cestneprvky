@@ -1,29 +1,26 @@
 import { Sekcia, SekciaHlavicka, Fotka, Tlacidlo } from '../../../components/kit/index.js'
-import { Stagger, StaggerItem, Reveal } from '../../../components/primitives/index.js'
+import { Stagger, StaggerItem } from '../../../components/primitives/index.js'
 import { GALERIA } from '../../../content/realizacie.js'
 import { castiPopisu } from '../../Realizacie/skupiny.js'
 
 /**
- * Šesť záberov na Domov. Vyberáme podľa `id`, nie podľa poradia v poli, aby
- * doplnenie fotky do `realizacie.js` výber nepremiešalo.
+ * Tri zábery na Domov, nie šesť.
  *
- * Kritérium sa zmenilo: pôvodná šestica mala všetky miesta doložené, ale päť
- * zo šiestich fotiek stálo aj inde na tej istej stránke (dlaždice služieb,
- * sticky Debarierizácia, sekcia Prečo). Výber tak bol prakticky opakovaním
- * Domova. Teraz je prvým kritériom, aby sa fotka **inde na `/` nevyskytovala**,
- * a druhým, aby šesť záberov ukázalo šesť rôznych typov prvkov aj prostredí.
+ * Šesť rovnakých dlaždíc 4 : 3 bol na tejto stránke už tretí pravidelný
+ * raster fotiek pod sebou a celok pôsobil ako sklad obrázkov (výtka Petra,
+ * 27. 8. 2026). Domov má ukázať, nie vymenovať: jeden vedúci záber cez
+ * sedem stĺpcov a dva menšie vedľa neho. Celá galéria je na `/realizacie`
+ * a vedie tam odkaz v hlavičke sekcie.
  *
- * Cena za to je, že tri zo šiestich miest nie sú doložené. Popisok ich preto
- * nevypisuje (pravidlo `castiPopisu`) a stojí v ňom prostredie. Doplniť miesta
- * je položka v `poznamky/HANDOVER.md`.
+ * Výber je podľa `id`, nie podľa poradia v poli, aby doplnenie fotky do
+ * `realizacie.js` výber nepremiešalo. Kritérium ostáva z kola 4: fotka sa
+ * nesmie vyskytovať inde na `/` (dlaždice objazdu, sticky Debarierizácia,
+ * záber v Prečo), aby Domov neopakoval sám seba.
  */
 const VYBER_ID = [
   'zubacka-nastupiste', // Vodiaca línia · Zubačka
   'signalny-pas-priechod-ba', // Signálny pás · Bratislava
   'nivy-interier-vstup', // Vodiaca línia v interiéri · Bratislava Nivy
-  'mosadzne-indikatory-varovny-pas', // Mosadzné indikátory · miesto nedoložené
-  'protismykovy-nater-nastupiste', // Protišmykový náter · miesto nedoložené
-  'priechod-nerezova-linia', // Vodiaca línia v priechode · miesto nedoložené
 ]
 
 const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Boolean)
@@ -36,38 +33,55 @@ const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Bool
  */
 const popis = (r) => `${r.prvok} · ${castiPopisu(r)[0]}`
 
+const [VEDUCI, ...VEDLAJSIE] = VYBER
+
 export default function RealizacieVyber() {
   return (
     <Sekcia id="realizacie" pasmo="biela">
       <SekciaHlavicka
         stitok="Realizácie"
         nadpis="Osadené prvky na konkrétnych miestach"
-        perex="Ku každej fotografii uvádzame typ prvku a miesto, aby sa dala porovnať s vaším zadaním."
+        akcia={
+          <Tlacidlo variant="tichy" to="/realizacie">
+            {`Všetkých ${GALERIA.length} realizácií`}
+          </Tlacidlo>
+        }
       />
 
-      <Stagger
-        className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3"
-      >
-        {VYBER.map((r) => (
-          <StaggerItem key={r.id}>
+      <Stagger className="mt-14 grid grid-cols-1 gap-8 lg:mt-20 lg:grid-cols-12">
+        {VEDUCI ? (
+          <StaggerItem className="lg:col-span-7">
             <Fotka
-              src={r.src}
-              w={r.w}
-              h={r.h}
-              alt={r.alt}
+              src={VEDUCI.src}
+              w={VEDUCI.w}
+              h={VEDUCI.h}
+              alt={VEDUCI.alt}
               pomer="4/3"
-              popis={popis(r)}
+              popis={popis(VEDUCI)}
+              sizes="(min-width: 1024px) 58vw, 100vw"
+              maxSirka={Infinity}
               className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"
             />
           </StaggerItem>
-        ))}
-      </Stagger>
+        ) : null}
 
-      <Reveal className="mt-14 flex justify-center lg:mt-16">
-        <Tlacidlo variant="tichy" to="/realizacie">
-          {`Všetkých ${GALERIA.length} realizácií`}
-        </Tlacidlo>
-      </Reveal>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+          {VEDLAJSIE.map((r) => (
+            <StaggerItem key={r.id}>
+              <Fotka
+                src={r.src}
+                w={r.w}
+                h={r.h}
+                alt={r.alt}
+                pomer="3/2"
+                popis={popis(r)}
+                sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
+                className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"
+              />
+            </StaggerItem>
+          ))}
+        </div>
+      </Stagger>
     </Sekcia>
   )
 }

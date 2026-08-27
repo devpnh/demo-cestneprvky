@@ -62,7 +62,9 @@ function useKresliSa(reduced) {
  * linka stojí zvisle. Uzol kroku, na ktorom je kurzor, sa vyplní akcentom;
  * pri načítaní svieti prvý, lebo spolupráca sa začína dopytom.
  *
- * Sekcia je zámerne bez fotografie: je to schéma postupu, nie galéria.
+ * Sekcia je zámerne bez fotografie: je to schéma postupu, nie galéria. Od
+ * 27. 8. 2026 je aj bez popisov krokov — na Domove z nej ostala linka so
+ * štyrmi menami, ktorá sa dá prečítať na jeden pohľad.
  */
 export default function Proces() {
   const [aktivny, setAktivny] = useState(0)
@@ -123,12 +125,12 @@ export default function Proces() {
                 }}
               />
 
+              {/* Bez popisu kroku. Štyri mená sú celá schéma postupu a
+                  Domov nemá byť príručka — znenie krokov stojí na `/o-firme`
+                  a v perexoch výziev na podstránkach. */}
               <h3 className="text-balance font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
                 {krok.nazov}
               </h3>
-              <p className="mt-3 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
-                {krok.popis}
-              </p>
             </div>
           )
         })}

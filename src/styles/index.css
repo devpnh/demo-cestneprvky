@@ -270,22 +270,19 @@
   animation: dialog-pop var(--duration-fast) var(--ease-house);
 }
 
-/* Kruhový objazd v sekcii Služby: pomalá orbita + protismerná kompenzácia,
-   aby fotky ostali vzpriamené. Pauza cez .orbit-paused na rodičovi.
-   Pri prefers-reduced-motion animácie globálne stoja (blok vyššie). */
-@keyframes orbit-spin {
-  to { transform: rotate(360deg); }
+/* Detail aktívnej služby vedľa objazdu: pri prepnutí sa prelinie, nie
+   preskočí. Kľúčom je index služby, takže React blok premontuje a animácia
+   beží od začiatku. */
+@keyframes objazd-detail {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-@keyframes orbit-spin-rev {
-  to { transform: rotate(-360deg); }
-}
-.orbit-anim {
-  animation: orbit-spin 80s linear infinite;
-}
-.orbit-anim-rev {
-  animation: orbit-spin-rev 80s linear infinite;
-}
-.orbit-paused .orbit-anim,
-.orbit-paused .orbit-anim-rev {
-  animation-play-state: paused;
+.js-motion [data-objazd-detail] {
+  animation: objazd-detail var(--duration-fast) var(--ease-house) both;
 }
