@@ -104,7 +104,6 @@ export default function Preco() {
       </Reveal>
 
       <Stagger
-        staggerChildren={0.07}
         className="mt-16 grid grid-cols-1 gap-x-16 gap-y-12 lg:mt-20 lg:grid-cols-2"
       >
         {FIRMA.pristup.map((argument) => {

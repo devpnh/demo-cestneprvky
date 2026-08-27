@@ -1,8 +1,6 @@
 import { useRef } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'motion/react'
 import { useLenis } from './lib/useLenis.js'
-import { useReducedMotion } from './lib/useReducedMotion.js'
 import DemoBadge from './components/DemoBadge.jsx'
 import ObhliadkaDialog from './components/ObhliadkaDialog.jsx'
 import Header from './components/layout/Header.jsx'
@@ -27,44 +25,36 @@ import Kontakt from './pages/Kontakt/index.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 /**
- * Prechod medzi routami: fade + 12 px slide-up, 300 ms, house easing.
+ * Prechod medzi routami: fade + 14 px zdola, 500 ms, house easing.
  *
- * `mode="wait"` drží starú stránku, kým nedobehne jej exit, preto ide dovnútra
- * `<Routes location={location}>`: AnimatePresence si odkladá predchádzajúci
- * React element aj s jeho vtedajším `location`, takže odchádzajúca vrstva
- * naozaj vykresľuje starú routu a nie novú.
+ * Je to CSS animácia na obyčajnom `<div>` s `key={pathname}`, nie
+ * `AnimatePresence` s `motion.div`. Dôvod je meraný (27. 8. 2026): ten
+ * wrapper bol rodičom celého stromu stránky a potomkovia si pod ním
+ * neuplatnili vlastný počiatočný variant — čakali na propagáciu od rodiča,
+ * ktorý žiadne varianty nemal. Výsledkom bolo, že NA CELOM WEBE nebežala
+ * ani jedna vstupná animácia; po odstránení wrappera nabehli všetky.
+ * Pozri `src/lib/odhalenie.js`.
  *
- * Transform na wrapperi je len počas animácie. `motion` po dobehnutí na
- * východiskové hodnoty zapíše `transform: none`, takže `position: fixed`
- * potomkov stránok nič trvalo nerozbije.
+ * `key` na `<div>` stačí: React pri zmene cesty starý uzol zahodí a nový
+ * namontuje, takže animácia beží od začiatku. Odchádzajúca vrstva sa
+ * nekreslí zámerne — s ňou by sa dve stránky prekrývali a `ScrollToTop` by
+ * skákal cez obsah, ktorý už nie je aktuálny.
  */
 function PrechodRoutov() {
   const location = useLocation()
-  const reduced = useReducedMotion()
-
-  const animacia = reduced
-    ? {}
-    : {
-        initial: { opacity: 0, y: 12 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0 },
-        transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-      }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div key={location.pathname} {...animacia}>
-        <Routes location={location}>
-            <Route path="/" element={<Domov />} />
-            <Route path="/sluzby" element={<Sluzby />} />
-            <Route path="/sluzby/:slug" element={<SluzbaDetail />} />
-            <Route path="/realizacie" element={<Realizacie />} />
-            <Route path="/o-firme" element={<OFirme />} />
-            <Route path="/kontakt" element={<Kontakt />} />
-            <Route path="*" element={<NotFound />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+    <div key={location.pathname} data-prechod-strany="">
+      <Routes location={location}>
+        <Route path="/" element={<Domov />} />
+        <Route path="/sluzby" element={<Sluzby />} />
+        <Route path="/sluzby/:slug" element={<SluzbaDetail />} />
+        <Route path="/realizacie" element={<Realizacie />} />
+        <Route path="/o-firme" element={<OFirme />} />
+        <Route path="/kontakt" element={<Kontakt />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
   )
 }
 
@@ -74,7 +64,6 @@ function PrechodRoutov() {
  */
 export default function App() {
   useLenis()
-  const { pathname } = useLocation()
   const mainRef = useRef(null)
   // Odsadenie pod fixnú hlavičku si rieši prvé pásmo stránky samo
   // (`StranHlavicka`, hero, 404), aby mohlo ísť tmavé až po vrch obrazovky.

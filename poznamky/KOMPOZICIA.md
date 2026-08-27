@@ -10,7 +10,10 @@ jeden web.
 |---|---|
 | `Sekcia` | pásmo stránky: `pasmo="biela" \| "tmava"` (dve pásma, sivá sa zrušila), `padding="plne" \| "male" \| "ziadne"`, vnútri už je kontajner 78rem a `--container-padding-x`. Dáva `data-pasmo` pre audit. |
 | `Kontajner` | ten istý kontajner mimo `Sekcia` (hero, pásma na celú šírku) |
-| `StranHlavicka` | hlavička podstránky: štítok alebo drobky, H1, perex, voliteľné fakty a akcie, ukončená `Lajna`. **Každá podstránka ju používa — H1 na stránke je práve tu.** |
+| `Podstranka` | **šablóna podstránky. Každá podstránka ide cez ňu.** SEO + `StranHlavicka` + obsahové pásma + `PasVyzvy`. Stránka dodáva obsah, nie skladbu. |
+| `StranHlavicka` | hlavička podstránky: štítok alebo drobky, H1 po slovách, perex, dokreslená akcentová linka, voliteľné fakty a akcie; v pozadí `ZnacenieMotiv`. **H1 na stránke je práve tu.** |
+| `PasVyzvy` | záverečné tmavé pásmo výzvy so značkovacím motívom. Jedna definícia pre celý web namiesto piatich ručne poskladaných kópií. |
+| `ZnacenieMotiv` | podpisová dekorácia: jazdné pruhy zbiehajúce sa do úbežníka, pomalý posun `stroke-dashoffset`. Len pod tmavými pásmami. |
 | `SekciaHlavicka` | hlavička sekcie vnútri stránky: štítok + H2 vľavo (col-span-7), perex vpravo dole (col-span-5, `lg:ml-auto`) |
 | `MonoStitok` | mikro-label IBM Plex Mono 12 px / 0,08 em; `tmava` prepne na bielu 72 % + akcentovú čiarku |
 | `Tlacidlo` | `variant="primar" \| "sekundar" \| "tichy"`, `to` (router), `href` alebo `onClick`. Primárne je napevno 19 px/600 kvôli kontrastu bielej na akcente (4,05:1 → platí limit 3:1 pre veľký text). |
@@ -19,8 +22,23 @@ jeden web.
 | `Lajna` | prerušovaná deliaca linka v reči vodorovného značenia; kreslí sa pri vstupe do viewportu, pri reduced-motion je hneď celá |
 
 Doplnkové: `src/components/primitives/` (`Reveal`, `Stagger`/`StaggerItem`,
-`StickySection`, `Parallax`, `SplitText`, `GradientMesh`), `src/components/ui/`
+`StickySection`, `Parallax`, `SplitText`), `src/components/ui/`
 (radix chassis — **nemeniť**), `ZadanieForm`, `ObhliadkaDialog` + `openObhliadka()`.
+
+### 1a. Pohyb — jedna vrstva, `src/lib/odhalenie.js`
+
+Vstupné animácie stoja na jednom zdieľanom `IntersectionObserver`, ktorý
+prepne `data-odhal` na `in`; prechody sú v `src/styles/index.css`.
+**`whileInView` z knižnice `motion` sa v tomto projekte nepoužíva** — pod
+wrapperom prechodu routov nespúšťal nič a web tak nemal ani jednu vstupnú
+animáciu (QUALITY-LOG, 27. 8. 2026). Kto potrebuje odhalenie, siahne po
+`Reveal`, `Stagger` alebo `SplitText`, nie po vlastnej animácii.
+
+Slovník pohybu má štyri slová a nič viac: **odhalenie** (fade + 22 px zdola),
+**sekvencia** (to isté s krokom po `--i`), **dokreslenie čiary** (`scaleX`
+zľava — `Lajna`, podčiarknutie navigácie, pás postupu) a **jeden
+sticky-scrub na web** (Debarierizácia). Nekonečne bežia len dve veci:
+značkovací motív a kruhový objazd.
 
 **Nikto nepridáva farbu, font ani tieň.** Všetko ide cez tokeny v
 `src/styles/tokens.css`. Kto potrebuje nový token, napíše to do odovzdávacej

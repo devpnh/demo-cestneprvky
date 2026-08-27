@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Phone, ArrowRight, Menu, X } from 'lucide-react'
-import { motion, useScroll } from 'motion/react'
 import { useReducedMotion } from '../../lib/useReducedMotion.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 import { NAV } from './routy.js'
@@ -25,7 +24,6 @@ const VYSKA = 72
  */
 export default function Header() {
   const { pathname } = useLocation()
-  const isHome = pathname === '/'
 
   /**
    * Priehľadná hlavička nepatrí len Domovu. Podstránky majú odo dneška tmavú
@@ -47,15 +45,24 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const reduced = useReducedMotion()
-  // scrollYProgress je z definície v [0, 1] a prísne rastúci (E3).
-  const { scrollYProgress } = useScroll()
   const tlacidloRef = useRef(null)
+  const postupRef = useRef(null)
 
+  // Jedno meranie scrollu pre dve veci: prah 24 px pre farbu hlavičky a
+  // podiel prejdenej stránky pre značkovací pás pod ňou. Podiel ide priamo
+  // do štýlu elementu, nie cez `setState` — pri každom rámci by prekreslenie
+  // celej hlavičky bola zbytočná práca.
   useEffect(() => {
     let raf = 0
     const measure = () => {
       raf = 0
       setScrolled(window.scrollY > 24)
+      const el = postupRef.current
+      if (el) {
+        const dokopy = document.documentElement.scrollHeight - window.innerHeight
+        const podiel = dokopy > 0 ? Math.min(1, Math.max(0, window.scrollY / dokopy)) : 0
+        el.style.width = `${podiel * 100}%`
+      }
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure)
@@ -114,13 +121,32 @@ export default function Header() {
           color: light ? 'var(--color-bg)' : 'var(--color-text)',
         }}
       >
+        {/*
+          Postup stránkou ako čerstvo natiahnuté vodorovné značenie: pás
+          rastie zľava a odkrýva prerušovanú čiaru. Vzor je na vnútornej
+          vrstve so `100vw` šírkou a maskuje ho vonkajší `overflow-hidden`,
+          takže sa dĺžka čiarok pri raste nemení — pri `transform: scaleX`
+          by sa naťahovali a z prerušovanej čiary by sa stala guma.
+
+          Pri `prefers-reduced-motion` sa element vôbec nemontuje; audit RMv5
+          kontroluje práve to, že pod týmto nastavením `[data-scroll-progress]`
+          na stránke nie je.
+        */}
         {!reduced && (
-          <motion.div
+          <div
+            ref={postupRef}
             aria-hidden="true"
             data-scroll-progress
-            className="absolute bottom-0 left-0 h-[2px] w-full origin-left bg-[var(--color-accent)]"
-            style={{ scaleX: scrollYProgress }}
-          />
+            className="absolute bottom-0 left-0 h-[3px] w-0 overflow-hidden"
+          >
+            <div
+              className="h-full w-[100vw]"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(90deg, var(--color-accent) 0 14px, transparent 14px 24px)',
+              }}
+            />
+          </div>
         )}
 
         <div className="mx-auto flex h-full max-w-[var(--container-max)] items-center justify-between gap-6 px-[var(--container-padding-x)]">
@@ -136,17 +162,32 @@ export default function Header() {
 
           <nav aria-label="Hlavná navigácia" className="hidden items-center gap-8 lg:flex">
             {NAV.map((item) => (
+              // Podčiarknutie sa dokresľuje zľava, nie preblikne farbou
+              // rámu. Je to ten istý pohyb ako pri `Lajna` a pri páse
+              // postupu — jeden pohyb pre jednu vec na celom webe.
+              //
+              // Leží na `top-full`, teda tesne POD schránkou odkazu, nie na
+              // jeho spodnej hrane: kontrola kontrastu B7 sníma pásy cez
+              // schránku textu a akcentový prúžok vnútri nej čítala ako
+              // pozadie textu (biela na #F03314 = 4,05:1). Vonku má text
+              // pod sebou pásmo hlavičky a pomer sedí.
               <NavLink
                 key={item.path}
                 to={item.path}
                 data-nav-link
-                className={({ isActive }) =>
-                  `border-b-2 py-2 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-medium transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] ${
-                    isActive ? 'border-[var(--color-accent)]' : 'border-transparent'
-                  }`
-                }
+                className="group relative py-2 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-medium"
               >
-                {item.label}
+                {({ isActive }) => (
+                  <>
+                    {item.label}
+                    <span
+                      aria-hidden="true"
+                      className={`absolute inset-x-0 top-full h-[2px] origin-left bg-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-house)] ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -209,10 +250,14 @@ export default function Header() {
           aria-label="Mobilná navigácia"
           className="mx-auto flex max-w-[var(--container-max)] flex-col px-[var(--container-padding-x)] py-6"
         >
-          {NAV.map((item) => (
+          {NAV.map((item, i) => (
+            // Položky nabiehajú po sebe, aby otvorenie menu bolo pohyb a nie
+            // preblik. Oneskorenie je inline, lebo `Stagger` sem nepasuje —
+            // menu nemá spúšťač vo viewporte, spúšťačom je stav `open`.
             <NavLink
               key={item.path}
               to={item.path}
+              style={reduced ? undefined : { animation: `menu-polozka var(--duration-base) var(--ease-house) ${i * 55}ms both` }}
               className={({ isActive }) =>
                 `flex min-h-[56px] items-center gap-4 border-b border-[var(--color-border)] py-4 font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold text-[var(--color-text)] ${
                   isActive ? 'pl-1' : ''

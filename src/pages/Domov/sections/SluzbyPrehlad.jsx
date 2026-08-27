@@ -1,22 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo, Fotka } from '../../../components/kit/index.js'
-import { Stagger, StaggerItem } from '../../../components/primitives/index.js'
-import { SKUPINY, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
+import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
+import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { useReducedMotion } from '../../../lib/useReducedMotion.js'
+import { SKUPINY, SLUZBY, skupinaPodlaId, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
+import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
 import { altFotky } from '../../Sluzby/fotky.js'
 
 const BASE = import.meta.env.BASE_URL
 
 /** Perex sa skladá z názvov celkov v dátach, aby na webe nevznikla nová veta o klientovi. */
 const PEREX = `Deväť služieb v troch celkoch: ${SKUPINY.map((s) => s.nazov.toLowerCase()).join(', ')}.`
-
-/**
- * Dlaždica má na `lg` presne 368 px (kontajner 1 168 px, tri stĺpce, medzera
- * 32 px), teda 26 vw na 1 440 px. Bez tejto hodnoty by si prehliadač podľa
- * predvoleného `SIZES_MRIEZKA` pýtal 33 vw a sťahoval zbytočne väčší variant.
- */
-const SIZES_DLAZDICA = '(min-width: 1024px) 26vw, 100vw'
 
 /**
  * Sleduje šírku okna, nie výšku (STANDARDY C2: výšku na dotykových
@@ -39,68 +34,41 @@ function useSirsieAkoLg() {
 }
 
 /**
- * Jedna služba ako fotografická dlaždica. Prehľad, nie katalóg: fotka, názov
- * a šípka, žiadny perex — perexy stoja na `/sluzby`, kde má návštevník na
- * čítanie priestor. Celá dlaždica je odkaz, takže cieľ má vyše 300 × 290 px.
+ * Služby na Domove — kruhový objazd.
  *
- * Hover je jazyk kitu (KOMPOZÍCIA §4): vlasový rám do akcentu, šípka o 2 px
- * vpravo a priblíženie fotky o 2 %. Priblíženie je pod `motion-safe`, rám a
- * šípka ostávajú aj pri `prefers-reduced-motion`, aby bol stav kurzora
- * čitateľný bez pohybu.
- */
-function Dlazdica({ sluzba }) {
-  return (
-    <Link
-      to={`/sluzby/${sluzba.slug}`}
-      data-dlazdica="sluzba"
-      className="group block"
-    >
-      <Fotka
-        src={sluzba.dlazdica.src}
-        w={sluzba.dlazdica.w}
-        h={sluzba.dlazdica.h}
-        alt={altFotky(sluzba.dlazdica)}
-        pomer="3/2"
-        sizes={SIZES_DLAZDICA}
-        className="overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] [border-radius:var(--radius-sm)] group-hover:border-[var(--color-accent)]"
-        triedaObrazka="motion-safe:transition-transform motion-safe:duration-[var(--duration-slow)] motion-safe:group-hover:scale-[1.02]"
-      />
-      <div className="mt-4 flex min-h-[3.25rem] items-start justify-between gap-4">
-        <h3 className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-          {sluzba.nazovKratky || sluzba.nazov}
-        </h3>
-        <ArrowRight
-          className="mt-[3px] h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
-          aria-hidden="true"
-        />
-      </div>
-    </Link>
-  )
-}
-
-/**
- * Služby na Domove.
+ * Podpisový prvok webu a zároveň prvok z odboru klienta: po asfaltovom
+ * prstenci obieha deväť fotiek služieb, v strede je ostrovček s fotkou práve
+ * aktívnej služby a vľavo jej detail. Hover alebo fokus nad uzlom prepne
+ * detail, klik vedie na stránku služby; bez zásahu sa aktívna služba mení
+ * sama každé štyri sekundy a pod kurzorom stojí.
  *
- * Od `lg` je to mriežka 3 × 3: tri riadky = tri celky zo `SKUPINY`, ktoré
- * majú presne 3 + 3 + 3 služby. Predchodcom bol kruhový objazd; kolo 4 ho
- * zrušilo, lebo ako prehľad nefungoval — deväť náhľadov po 50 px neukázalo
- * nič, poradie sa z kruhu nedalo prečítať a fotka orezaná do kruhu prestala
- * byť fotkou. Objazd navyše nesedel na mriežke kontajnera (ľavá hrana 717 px
- * proti stĺpcom na 136 a 752 px) a pod textovým stĺpcom nechával 150 px
- * prázdna. Mriežka stojí na tých istých stĺpcoch ako všetko ostatné v sekcii
- * a prázdne miesto v nej nevzniká.
+ * Objazd tu už raz bol a v kole 4 ho nahradila mriežka 3 × 3 fotiek. Peter
+ * ho 27. 8. 2026 vypýtal späť — mriežka je poriadna, ale je to deviata
+ * mriežka fotiek na tom istom webe a stránka po nej vyzerala vygenerovaná.
+ * Vracia sa s opravou oboch nameraných výhrad z kola 4:
  *
- * Vizuálnu silu nesie deväť skutočných fotografií klienta, nie dekorácia.
- * Riadok celku uvádza mono štítok a vlasová linka cez celú šírku kontajnera.
+ * 1. Nesedel na mriežke. Dnes je štvorec objazdu presne siedmimi stĺpcami
+ *    dvanásťstĺpcovej mriežky (654,7 px na 1 440 px) a jeho ľavá hrana teda
+ *    sedí na tej istej osi ako všetko ostatné v sekcii. `velkost` je 660 px,
+ *    teda strop nad šírkou stĺpca — `max-width` sa nikdy neuplatní ako orez.
+ * 2. Uzly boli malé. Majú 72 px namiesto 50 px, aktívny 88 px; na fotke
+ *    prvku je pri tejto veľkosti vidieť tvar aj farbu.
  *
- * Na mobile a tablete ostáva zoznam s náhľadmi: mriežka troch dlaždíc sa na
- * 390 px zmysluplne nezobrazí a zoznam s perexom tam funguje. Nad 1024 px sa
- * zoznam vôbec nemontuje (nie je len skrytý cez CSS) a naopak — na stránke je
- * tak vždy práve deväť fotiek služieb, nie osemnásť, a telefón nesťahuje
- * dlaždice, ktoré nikdy neuvidí.
+ * Stĺpce sú centrované na spoločnú os (`items-center`), lebo textový stĺpec
+ * je nižší ako štvorec objazdu a zarovnanie hore pod ním nechávalo diery.
+ *
+ * Na mobile a tablete ostáva zoznam s náhľadmi: kruh sa na 390 px nedá
+ * zmysluplne ovládať. Objazd sa pod 1024 px vôbec nemontuje (nie je len
+ * skrytý cez CSS), takže telefón nesťahuje deväť fotiek navyše.
  */
 export default function SluzbyPrehlad() {
+  const reduced = useReducedMotion()
   const siroke = useSirsieAkoLg()
+  const [aktivna, setAktivna] = useState(0)
+  const vyber = useCallback((i) => setAktivna(i), [])
+
+  const sluzba = SLUZBY[aktivna]
+  const skupinaSluzby = skupinaPodlaId(sluzba.skupina)
 
   return (
     <Sekcia id="sluzby" pasmo="biela">
@@ -116,29 +84,59 @@ export default function SluzbyPrehlad() {
       />
 
       {siroke ? (
-        <div className="mt-14">
-          {SKUPINY.map((skupina, si) => (
-            <div key={skupina.id} className={si === 0 ? '' : 'mt-14'}>
-              <MonoStitok sCiarkou={false}>{skupina.nazov}</MonoStitok>
-              <div aria-hidden="true" className="mt-4 h-px w-full bg-[var(--color-border)]" />
-              <Stagger staggerChildren={0.06} className="mt-8 grid grid-cols-3 gap-x-8">
-                {sluzbyPodlaSkupiny(skupina.id).map((s) => (
-                  <StaggerItem key={s.slug}>
-                    <Dlazdica sluzba={s} />
-                  </StaggerItem>
-                ))}
-              </Stagger>
+        <div className="mt-16 grid grid-cols-12 items-center gap-16">
+          <Reveal className="col-span-5">
+            {/* Postup po deviatich službách ako značenie: dokreslená časť je
+                akcentová, zvyšok vlasový. Nahrádza číslovanie 01/02/03, ktoré
+                sem podľa STANDARDY B1 nepatrí. */}
+            <div aria-hidden="true" className="h-[2px] w-full bg-[var(--color-border)]">
+              <div
+                className={`h-full bg-[var(--color-accent)] ${
+                  reduced ? '' : 'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-house)]'
+                }`}
+                style={{ width: `${((aktivna + 1) / SLUZBY.length) * 100}%` }}
+              />
             </div>
-          ))}
+
+            {/* Pevnú výšku drží celý blok, nie jednotlivé riadky: pri krátkom
+                názve tak nevznikne diera medzi titulom a textom a objazd
+                vedľa neho pri prepínaní služieb nepodskakuje. */}
+            <div key={aktivna} data-objazd-detail="" className="mt-6 min-h-[14rem]">
+              <MonoStitok sCiarkou={false}>{skupinaSluzby?.nazov}</MonoStitok>
+              <h3 className="mt-3 font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+                {sluzba.nazov}
+              </h3>
+              <p className="mt-4 max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+                {sluzba.perex}
+              </p>
+            </div>
+
+            <p className="mt-6 flex items-baseline justify-between gap-6 border-t border-[var(--color-border)] pt-4">
+              <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]">
+                {sluzba.dlazdica.miesto}
+              </span>
+              <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-muted)]">
+                {`${aktivna + 1} / ${SLUZBY.length}`}
+              </span>
+            </p>
+
+            <Tlacidlo variant="tichy" to={`/sluzby/${sluzba.slug}`} className="mt-8">
+              Detail služby
+            </Tlacidlo>
+          </Reveal>
+
+          <Reveal className="col-span-7" oneskorenie={120}>
+            <KruhovyObjazd sluzby={SLUZBY} active={aktivna} onActive={vyber} reduced={reduced} />
+          </Reveal>
         </div>
       ) : (
         <div className="mt-12">
           {SKUPINY.map((skupina, si) => (
             <div key={skupina.id} className={si === 0 ? '' : 'mt-12'}>
               <MonoStitok sCiarkou={false}>{skupina.nazov}</MonoStitok>
-              <ul className="mt-4 border-t border-[var(--color-border)]">
+              <Stagger as="ul" className="mt-4 border-t border-[var(--color-border)]">
                 {sluzbyPodlaSkupiny(skupina.id).map((s) => (
-                  <li key={s.slug}>
+                  <StaggerItem as="li" key={s.slug}>
                     <Link
                       to={`/sluzby/${s.slug}`}
                       className="group flex items-start gap-5 border-b border-[var(--color-border)] py-5 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)]"
@@ -166,9 +164,9 @@ export default function SluzbyPrehlad() {
                         aria-hidden="true"
                       />
                     </Link>
-                  </li>
+                  </StaggerItem>
                 ))}
-              </ul>
+              </Stagger>
             </div>
           ))}
         </div>

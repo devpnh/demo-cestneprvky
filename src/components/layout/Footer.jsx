@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { GradientMesh } from '../primitives/index.js'
+import { Reveal, Stagger, StaggerItem } from '../primitives/index.js'
+import Lajna from '../kit/Lajna.jsx'
 import { NAV } from './routy.js'
 import { SLUZBY } from '../../content/sluzby.js'
 
@@ -21,20 +22,22 @@ const ADRESA = 'Borová 3295/36, 010 01 Žilina, Slovensko'
  * `#technologie`, ktorá nikam neviedla; tu už kotvy nie sú vôbec.
  * Žiadne sociálne siete (klient ich nemá), žiadne tiene (B2), žiadne
  * `min-h`, o rytmus pásiem sa stará stránka nad pätičkou (B5).
+ *
+ * V pozadí bol `GradientMesh` — červenkastý opar cez celú spodnú tretinu
+ * obrazovky. Bola to jediná plocha na webe, ktorá nebola ani fotkou, ani
+ * značením, ani textom: dekorácia bez pôvodu a najgenerickejší kus stránky
+ * (výtka Petra, 27. 8. 2026). Nahradila ho prerušovaná čiara, ktorá sa
+ * dokreslí pri vstupe pätičky do viewportu — ten istý pohyb ako všade inde
+ * na webe — a stĺpce nabiehajú po sebe.
  */
 export default function Footer() {
   return (
     <footer className="relative isolate overflow-hidden bg-[var(--color-surface-2)]">
-      <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
-        <GradientMesh
-          className="h-full w-full"
-          colors={['var(--color-accent-2)', 'var(--color-surface-2)', 'var(--color-accent)']}
-        />
-      </div>
-
       <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y-sm)]">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-4">
+        <Lajna akcent className="mb-12 w-full" />
+
+        <Stagger className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+          <StaggerItem className="lg:col-span-4">
             <img
               src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
               width={145}
@@ -47,9 +50,9 @@ export default function Footer() {
               Značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a ďalšie prvky
               pozemných komunikácií.
             </p>
-          </div>
+          </StaggerItem>
 
-          <nav aria-label="Pätičková navigácia" className="lg:col-span-3">
+          <StaggerItem as="nav" aria-label="Pätičková navigácia" className="lg:col-span-3">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Navigácia
             </p>
@@ -65,9 +68,9 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </nav>
+          </StaggerItem>
 
-          <nav aria-label="Služby" className="lg:col-span-5">
+          <StaggerItem as="nav" aria-label="Služby" className="lg:col-span-5">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Služby
             </p>
@@ -83,10 +86,10 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </nav>
-        </div>
+          </StaggerItem>
+        </Stagger>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 border-t pt-8 sm:grid-cols-3" style={JEMNA_LINKA}>
+        <Reveal className="mt-10 grid grid-cols-1 gap-6 border-t pt-8 sm:grid-cols-3" style={JEMNA_LINKA}>
           <div>
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Adresa
@@ -117,7 +120,7 @@ export default function Footer() {
               {PHONE}
             </a>
           </div>
-        </div>
+        </Reveal>
 
         <div className="mt-8 border-t pt-6" style={JEMNA_LINKA}>
           <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">

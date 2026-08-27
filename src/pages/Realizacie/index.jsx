@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
-import { Reveal } from '../../components/primitives/index.js'
+import { Podstranka, Sekcia, Tlacidlo } from '../../components/kit/index.js'
+import { Reveal, Stagger, StaggerItem } from '../../components/primitives/index.js'
 import { GALERIA } from '../../content/realizacie.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 import { MAX_MRIEZKA, SIZES_MRIEZKA, srcSetPre } from '../../lib/obrazky.js'
@@ -29,8 +28,8 @@ const POCET_SLUZIEB = new Set(GALERIA.map((r) => r.sluzba)).size
 /**
  * Koľko dlaždíc má mriežka pod 640 px pred rozkliknutím.
  *
- * Pod 640 px je mriežka jednostĺpcová a 32 fotiek v nej meria 17 666 px, teda
- * 21 obrazoviek jedného nepretržitého stĺpca. Vybrali sme dávkovanie, nie dva
+ * Pod 640 px je mriežka jednostĺpcová a 32 fotiek v nej dá vyše dvadsať
+ * obrazoviek jedného nepretržitého stĺpca. Vybrali sme dávkovanie, nie dva
  * užšie stĺpce: pri dvoch stĺpcoch má fotka na 390 px šírku 179 px a práve
  * fotografia je na tejto stránke celý dôkaz — vodiaca línia bežiaca do diaľky
  * sa v 179 px nedá prečítať. Dávkovanie necháva fotku cez celú šírku a skráti
@@ -47,7 +46,7 @@ const dalsieFotografie = (n) => {
 }
 
 /**
- * Pravda o tom, či mriežka beží v jednom stĺpci (`columns-1` do 639 px).
+ * Pravda o tom, či mriežka beží v jednom stĺpci (`grid-cols-1` do 639 px).
  * Dlaždice sa pod týmto bodom naozaj nemontujú, nie sú len skryté — inak by
  * sa fotky stiahli a stránka by ostala rovnako vysoká.
  */
@@ -159,16 +158,27 @@ export default function Realizacie() {
   const zrus = () => setParams(new URLSearchParams(), { replace: true })
 
   return (
-    <>
-      <Seo title={META?.title} description={META?.description} />
-
-      <StranHlavicka
-        stitok="Realizácie"
-        nadpis="Fotografie realizovaných prvkov"
-        perex={META?.description}
-        fakty={[`${GALERIA.length} fotografií`, `${POCET_SLUZIEB} služieb`, 'Exteriér a interiér']}
-      />
-
+    <Podstranka
+      meta={META}
+      stitok="Realizácie"
+      nadpis="Fotografie realizovaných prvkov"
+      fakty={[`${GALERIA.length} fotografií`, `${POCET_SLUZIEB} služieb`, 'Exteriér a interiér']}
+      vyzva={{
+        stitok: 'Zadanie',
+        nadpis: 'Pošlite zadanie k prvku z galérie',
+        perex: 'Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup.',
+        akcia: (
+          <div className="flex flex-wrap gap-4">
+            <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+              Dohodnúť obhliadku a cenu
+            </Tlacidlo>
+            <Tlacidlo variant="sekundar" tmava to="/kontakt">
+              Kontakt
+            </Tlacidlo>
+          </div>
+        ),
+      }}
+    >
       {/*
         `padding="ziadne"` + vlastný spodný padding z toho istého tokenu: medzi
         lajnou `StranHlavicka` a filtračnou lištou inak stáli dva spodné/horné
@@ -201,16 +211,23 @@ export default function Realizacie() {
           </div>
         ) : (
           /*
-           * Skutočná masonry cez CSS `columns`, nie jednotný pomer s orezom.
-           * Zábery majú pomery od 0,45 (721×1600) po 1,54 (600×390) a námetom
-           * je vodiaca čiara bežiaca do diaľky; pri jednotnom 4:3 oreze by z
-           * portrétových fotiek zostal stred bez začiatku aj konca línie.
-           * `columns` necháva každý záber celý, `width`/`height` na `<img>`
-           * držia pomer, takže rozloženie stĺpcov nepreskakuje pri lazy-loade.
+           * Kontaktný hárok, nie masonry.
+           *
+           * Predtým tu bola skutočná masonry cez CSS `columns`: každý záber
+           * ostal celý, ale zábery majú pomery od 0,45 (721 × 1600) po 1,54
+           * (600 × 390), takže stĺpce mali rôzne dlhé dlaždice, popisky sa
+           * míňali o desiatky pixelov a stena tridsiatich dvoch fotiek
+           * pôsobila rozhádzane (výtka Petra, 27. 8. 2026).
+           *
+           * Mriežka má preto jeden pomer 4:3 a jednu výšku popisku, takže
+           * riadky sedia na spoločnej linke. Orez je vedomá strata: portrétová
+           * fotka v nej nemá začiatok ani koniec vodiacej línie. Celý záber
+           * ostáva k dispozícii na kliknutie — lightbox ho ukazuje
+           * neorezaný a v plnom rozlíšení, mriežka je len register.
            */
-          <div className="mt-10 columns-1 gap-x-8 sm:columns-2 lg:columns-3">
+          <Stagger krok={45} className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {viditelne.map((r, i) => (
-              <figure key={r.id} className="mb-12 break-inside-avoid">
+              <StaggerItem as="figure" key={r.id} className="min-w-0">
                 <button
                   type="button"
                   ref={(el) => {
@@ -220,7 +237,7 @@ export default function Realizacie() {
                   onClick={() => otvor(i, r.id)}
                   data-dlazdica={r.id}
                   aria-label={`Zväčšiť fotografiu: ${r.alt}`}
-                  className="group block w-full overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className="group block aspect-[4/3] w-full overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                   style={{ borderRadius: 'var(--radius-sm)' }}
                 >
                   <img
@@ -232,11 +249,13 @@ export default function Realizacie() {
                     alt={r.alt}
                     loading="lazy"
                     decoding="async"
-                    className="block h-auto w-full bg-[var(--color-surface)] transition-transform duration-[var(--duration-fast)] motion-safe:group-hover:scale-[1.02]"
+                    className="block h-full w-full bg-[var(--color-surface)] object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-house)] motion-safe:group-hover:scale-[1.04]"
                   />
                 </button>
-                <figcaption className="mt-4 border-t border-[var(--color-border)] pt-4">
-                  <span className="block max-w-[30ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium leading-[var(--leading-normal)] text-[var(--color-text)]">
+                {/* Pevná výška popisku drží spodné hrany riadka na jednej linke
+                    aj pri jedno- a dvojriadkovom názve prvku. */}
+                <figcaption className="mt-4 flex min-h-[3.5rem] flex-col border-t border-[var(--color-border)] pt-3">
+                  <span className="line-clamp-1 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium leading-[var(--leading-normal)] text-[var(--color-text)]">
                     {r.prvok}
                   </span>
                   {/* Pravidlo popisku je v `skupiny.js` — rovnaké tu, v lightboxe aj vo výbere na Domove. */}
@@ -253,9 +272,9 @@ export default function Realizacie() {
                     ))}
                   </span>
                 </figcaption>
-              </figure>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         )}
 
         {/*
@@ -266,7 +285,7 @@ export default function Realizacie() {
           zamiešať ani pri automatickom meraní.
         */}
         {skratene ? (
-          <div className="mt-2">
+          <div className="mt-8">
             <Tlacidlo variant="sekundar" onClick={rozbal} data-rozbalit className="w-full justify-center">
               {`Zobraziť ${dalsieFotografie(filtrovane.length - PRVA_DAVKA)}`}
             </Tlacidlo>
@@ -274,25 +293,6 @@ export default function Realizacie() {
         ) : null}
 
         <MapaRealizacii />
-      </Sekcia>
-
-      <Sekcia pasmo="tmava">
-        <SekciaHlavicka
-          tmava
-          stitok="Zadanie"
-          nadpis="Pošlite zadanie k prvku z galérie"
-          perex="Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup."
-          akcia={
-            <div className="flex flex-wrap gap-4">
-              <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
-                Dohodnúť obhliadku a cenu
-              </Tlacidlo>
-              <Tlacidlo variant="sekundar" tmava to="/kontakt">
-                Kontakt
-              </Tlacidlo>
-            </div>
-          }
-        />
       </Sekcia>
 
       {aktivny !== null && filtrovane[aktivny] ? (
@@ -303,6 +303,6 @@ export default function Realizacie() {
           onPrepni={prepni}
         />
       ) : null}
-    </>
+    </Podstranka>
   )
 }

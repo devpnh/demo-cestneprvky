@@ -1,6 +1,5 @@
-import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { Sekcia, SekciaHlavicka, StranHlavicka, Tlacidlo } from '../../components/kit/index.js'
+import { Podstranka, Sekcia, SekciaHlavicka, Tlacidlo } from '../../components/kit/index.js'
 import { Stagger, StaggerItem } from '../../components/primitives/index.js'
 import { openObhliadka } from '../../lib/obhliadka.js'
 import { SKUPINY, sluzbyPodlaSkupiny } from '../../content/sluzby.js'
@@ -26,14 +25,31 @@ const PASMA = ['biela', 'biela', 'biela']
  */
 export default function Sluzby() {
   return (
-    <>
-      <Seo title={META?.title} description={META?.description} />
-
-      <StranHlavicka stitok="Služby" nadpis="Prvky pozemných komunikácií" perex={META?.description} />
+    <Podstranka
+      meta={META}
+      stitok="Služby"
+      nadpis="Prvky pozemných komunikácií"
+      fakty={['9 služieb', '3 celky', 'Od roku 2012']}
+      /* CTA. Nadpisom bol claim firmy, ktorý takto stál na dvanástich
+         stránkach zo štrnástich a zoslabol na výplň; ostáva na Domove, kde
+         patrí. Perex je druhý krok procesu: prvý sa začína „Napíšete nám…“
+         a vedľa tohto nadpisu znel ako zajakávanie. */
+      vyzva={{
+        stitok: 'Obhliadka',
+        nadpis: 'Napíšte nám, čo potrebujete osadiť',
+        perex: PROCES[1].popis,
+        akcia: (
+          <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+            Dohodnúť obhliadku a cenu
+          </Tlacidlo>
+        ),
+      }}
+    >
 
       {SKUPINY.map((skupina, i) => {
         const sluzby = sluzbyPodlaSkupiny(skupina.id)
         const prvyCelok = i === 0
+        const tretiCelok = i === 2
         const [nosna, ...zvysne] = sluzby
 
         return (
@@ -41,7 +57,7 @@ export default function Sluzby() {
             <SekciaHlavicka nadpis={skupina.nazov} perex={skupina.popis} />
 
             {prvyCelok ? (
-              <Stagger className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-12" staggerChildren={0.07}>
+              <Stagger className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-12">
                 <StaggerItem className="lg:col-span-8">
                   <KartaSluzby sluzba={nosna} variant="nosna" />
                 </StaggerItem>
@@ -55,8 +71,20 @@ export default function Sluzby() {
                   ))}
                 </div>
               </Stagger>
+            ) : tretiCelok ? (
+              /* Tretí celok ide na šírku, nie do tretieho radu dlaždíc:
+                 dva rovnaké rady pod sebou boli najgenerickejší kus tejto
+                 stránky. Rozloženie sa mení, jazyk (fotka, vlasová linka,
+                 „Detail služby“) ostáva rovnaký. */
+              <Stagger className="mt-14">
+                {sluzby.map((s) => (
+                  <StaggerItem key={s.slug}>
+                    <KartaSluzby sluzba={s} variant="riadok" />
+                  </StaggerItem>
+                ))}
+              </Stagger>
             ) : (
-              <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" staggerChildren={0.07}>
+              <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 {sluzby.map((s) => (
                   <StaggerItem key={s.slug} className="h-full">
                     <KartaSluzby sluzba={s} variant="holy" />
@@ -68,23 +96,6 @@ export default function Sluzby() {
         )
       })}
 
-      {/* CTA. Nadpisom bol claim firmy, ktorý takto stál na dvanástich
-          stránkach zo štrnástich a zoslabol na výplň; ostáva na Domove, kde
-          patrí. Perex je druhý krok procesu: prvý sa začína „Napíšete nám…“
-          a vedľa tohto nadpisu znel ako zajakávanie. */}
-      <Sekcia pasmo="tmava">
-        <SekciaHlavicka
-          tmava
-          stitok="Obhliadka"
-          nadpis="Napíšte nám, čo potrebujete osadiť"
-          perex={PROCES[1].popis}
-          akcia={
-            <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
-              Dohodnúť obhliadku a cenu
-            </Tlacidlo>
-          }
-        />
-      </Sekcia>
-    </>
+    </Podstranka>
   )
 }

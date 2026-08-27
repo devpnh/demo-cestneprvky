@@ -11,6 +11,14 @@ import App from './App.jsx'
 // ale bez neho je porovnávanie ciest čitateľnejšie.
 const basename = import.meta.env.BASE_URL.replace(/\/+$/, '') || '/'
 
+// Skrytý východiskový stav vstupných animácií visí na tejto triede
+// (`src/styles/index.css`). Nasadzuje sa pred prvým renderom, a keď
+// JavaScript nebeží alebo prehliadač nemá IntersectionObserver, nenasadí sa
+// vôbec — obsah je potom celý viditeľný, nikdy nie natrvalo skrytý.
+if ('IntersectionObserver' in window) {
+  document.documentElement.classList.add('js-motion')
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter basename={basename}>

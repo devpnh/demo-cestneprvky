@@ -1,9 +1,8 @@
-import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
 import {
+  Podstranka,
   Sekcia,
   SekciaHlavicka,
-  StranHlavicka,
   MonoStitok,
   Tlacidlo,
   Fotka,
@@ -106,15 +105,29 @@ export default function OFirme() {
   const [uvodPerex, ...uvodOdseky] = FIRMA.uvod
 
   return (
-    <>
-      <Seo title={META?.title} description={META?.description} />
-
-      <StranHlavicka
-        stitok="O firme"
-        nadpis="Dopravné stavby od roku 2012"
-        perex={uvodPerex}
-        fakty={FIRMA.fakty}
-      />
+    <Podstranka
+      meta={META}
+      stitok="O firme"
+      nadpis="Dopravné stavby od roku 2012"
+      perex={uvodPerex}
+      fakty={FIRMA.fakty}
+      /* Výzva — text kroku z `PROCES`, akcie sú obhliadka a galéria realizácií. */
+      vyzva={{
+        stitok: 'Ďalší krok',
+        nadpis: 'Dohodneme si obhliadku',
+        perex: PROCES[0].popis,
+        akcia: (
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+              Dohodnúť obhliadku a cenu
+            </Tlacidlo>
+            <Tlacidlo variant="tichy" tmava to="/realizacie">
+              Pozrieť realizácie
+            </Tlacidlo>
+          </div>
+        ),
+      }}
+    >
 
       {/* Firma — úvodné odseky a claim ako výrazné vyhlásenie, vpravo fotka. */}
       <Sekcia id="firma" pasmo="biela">
@@ -387,24 +400,6 @@ export default function OFirme() {
         </Reveal>
       </Sekcia>
 
-      {/* CTA — text krokov z `PROCES`, akcie sú obhliadka a galéria realizácií. */}
-      <Sekcia id="obhliadka" pasmo="tmava">
-        <SekciaHlavicka
-          tmava
-          stitok="Ďalší krok"
-          nadpis="Dohodneme si obhliadku"
-          perex={PROCES[0].popis}
-          sirkaNadpisu="max-w-[14ch]"
-        />
-        <Reveal className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
-          <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
-            Dohodnúť obhliadku a cenu
-          </Tlacidlo>
-          <Tlacidlo variant="tichy" tmava to="/realizacie">
-            Pozrieť realizácie
-          </Tlacidlo>
-        </Reveal>
-      </Sekcia>
-    </>
+    </Podstranka>
   )
 }

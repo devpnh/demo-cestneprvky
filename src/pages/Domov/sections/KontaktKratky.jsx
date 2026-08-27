@@ -41,7 +41,6 @@ export default function KontaktKratky() {
       />
 
       <Stagger
-        staggerChildren={0.07}
         className="mt-14 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3"
       >
         <StaggerItem>

@@ -98,6 +98,147 @@
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * Vstupné animácie: jeden zdieľaný IntersectionObserver (src/lib/
+ * odhalenie.js) prepne `data-odhal` na `in`, zvyšok je tu v CSS.
+ *
+ * Skrytý východiskový stav platí IBA pod triedou `.js-motion`, ktorú
+ * nasadí `main.jsx` na `<html>` pred prvým renderom. Bez JavaScriptu sa
+ * trieda nenasadí a celý obsah je od začiatku viditeľný — animácia nikdy
+ * nemôže obsah schovať natrvalo.
+ * ------------------------------------------------------------------ */
+
+.js-motion [data-odhal] {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity var(--duration-base) var(--ease-house) var(--odhal-oneskorenie, 0s),
+    transform var(--duration-base) var(--ease-house) var(--odhal-oneskorenie, 0s);
+}
+.js-motion [data-odhal-posun='zprava'] {
+  transform: translate3d(28px, 0, 0);
+}
+.js-motion [data-odhal-posun='zlava'] {
+  transform: translate3d(-28px, 0, 0);
+}
+.js-motion [data-odhal-posun='ziadny'] {
+  transform: none;
+}
+.js-motion [data-odhal='in'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Skupina: kontajner má jeden spúšťač, potomkovia nastupujú po `--i`. */
+.js-motion [data-odhal-skupina] {
+  opacity: 1;
+  transform: none;
+}
+.js-motion [data-odhal-dieta] {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity var(--duration-base) var(--ease-house),
+    transform var(--duration-base) var(--ease-house);
+}
+.js-motion [data-odhal-skupina][data-odhal='in'] [data-odhal-dieta] {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * var(--odhal-krok, 70ms));
+}
+
+/* Nadpis po slovách: slovo sa vysúva spod vlastnej masky. */
+.js-motion [data-odhal-slova] {
+  opacity: 1;
+  transform: none;
+}
+.js-motion [data-odhal-slovo] {
+  opacity: 0;
+  transform: translate3d(0, 0.9em, 0);
+  transition:
+    opacity var(--duration-fast) var(--ease-house),
+    transform var(--duration-base) var(--ease-house);
+}
+.js-motion [data-odhal-slova][data-odhal='in'] [data-odhal-slovo] {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * var(--odhal-krok, 45ms));
+}
+
+/* Prerušovaná čiara (`Lajna`) sa kreslí zľava doprava ako značenie. */
+.js-motion [data-lajna] {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--duration-slow) var(--ease-house);
+  opacity: 1;
+}
+.js-motion [data-lajna='in'] {
+  transform: scaleX(1);
+}
+
+/* Prechod medzi stránkami.
+
+   `backwards`, nie `both`. S `both` by si element podržal koncový snímok a
+   `transform` by ostal navždy `matrix(1, 0, 0, 1, 0, 0)` — jednotková
+   matica síce nič neposúva, ale ako každá hodnota okrem `none` robí z
+   elementu obsahujúci blok, takže by sa `position: fixed` potomkovia
+   prilepili na stránku namiesto na okno (STANDARDY C7, audit ROUTEv5).
+   S `backwards` platí prvý snímok len pred štartom a po dobehnutí sa
+   element vráti na vlastný štýl, teda na `transform: none`. */
+@keyframes prechod-strany {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.js-motion [data-prechod-strany] {
+  animation: prechod-strany 0.5s var(--ease-house) backwards;
+}
+
+/* Jazdné pruhy v `ZnacenieMotiv`: značenie uteká k úbežníku. Jediná
+   nekonečná animácia webu okrem objazdu; reduced-motion blok nižšie ju
+   zastaví spolu so všetkým ostatným. */
+@keyframes pruhy-beh {
+  to {
+    stroke-dashoffset: -800;
+  }
+}
+.pruhy-beh {
+  animation: pruhy-beh 34s linear infinite;
+}
+
+/* Položka mobilného menu. Spúšťačom je stav `open` v `Header`, nie
+   viewport, preto CSS animácia a nie odhaľovací observer. */
+@keyframes menu-polozka {
+  from {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-motion [data-odhal],
+  .js-motion [data-odhal-dieta],
+  .js-motion [data-odhal-slovo] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .js-motion [data-lajna] {
+    transform: scaleX(1) !important;
+  }
+  .js-motion [data-prechod-strany] {
+    animation: none !important;
+  }
+}
+
 /* Belt-and-suspenders: primitives already gate their own animation on
    useReducedMotion.js, but this catches any CSS animation/transition that
    isn't otherwise guarded. */

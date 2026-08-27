@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom'
-import Seo from '../../components/Seo.jsx'
 import NotFound from '../NotFound.jsx'
 import {
   Fotka,
@@ -7,7 +6,7 @@ import {
   MonoStitok,
   Sekcia,
   SekciaHlavicka,
-  StranHlavicka,
+  Podstranka,
   Tlacidlo,
 } from '../../components/kit/index.js'
 import { Reveal, Stagger, StaggerItem } from '../../components/primitives/index.js'
@@ -314,26 +313,35 @@ export default function SluzbaDetail() {
   }
 
   return (
-    <>
-      <Seo title={sluzba.seo?.title} description={sluzba.seo?.description} jsonLd={jsonLd} />
-
-      {/* Drobček „Služby“ je v `StranHlavicka` obyčajný textový odkaz a jeho
-          vlastná inline schránka je vysoká 15 px, čo je na dotyk málo (D2).
-          Triedu komponentu zvonku podať nevieme, `label` áno: 44 px vysoký
-          inline-flex vnútri odkazu je celý klikateľný, takže dotyková plocha
-          sedí. Pozor pri meraní: `a.getBoundingClientRect()` aj tak vráti
-          15 px, lebo inline schránka odkazu sa počíta z metriky písma a nie
-          z atomického potomka. Trvalá oprava patrí do kitu (jedna trieda na
-          `<Link>` v `StranHlavicka.jsx`), tam siahať nesmiem. Len do `lg`,
-          desktopové rozloženie ostáva nezmenené (D4). */}
-      <StranHlavicka
-        drobky={[
-          { label: 'Služby', to: '/sluzby' },
-          { label: sluzba.nazovKratky || sluzba.nazov },
-        ]}
-        nadpis={sluzba.nazov}
-        perex={sluzba.perex}
-      />
+    <Podstranka
+      title={sluzba.seo?.title}
+      description={sluzba.seo?.description}
+      jsonLd={jsonLd}
+      drobky={[
+        { label: 'Služby', to: '/sluzby' },
+        { label: sluzba.nazovKratky || sluzba.nazov },
+      ]}
+      nadpis={sluzba.nazov}
+      perex={sluzba.perex}
+      /* Výzva. Nadpis pomenúva túto službu, nie claim firmy: ten istý claim
+         nad každou stránkou zoslabol na výplň. Dialóg si predvyplní typ
+         prvku názvom služby. */
+      vyzva={{
+        stitok: 'Obhliadka',
+        nadpis: `Dohodneme obhliadku na ${(sluzba.nazovKratky || sluzba.nazov).toLowerCase()}`,
+        perex: PROCES[1].popis,
+        akcia: (
+          <div className="flex flex-wrap items-center gap-6">
+            <Tlacidlo variant="primar" onClick={() => openObhliadka(sluzba.nazov)}>
+              Dohodnúť obhliadku a cenu
+            </Tlacidlo>
+            <Tlacidlo variant="tichy" tmava to="/sluzby">
+              Všetky služby
+            </Tlacidlo>
+          </div>
+        ),
+      }}
+    >
 
       {/* 1. Úvod. Dve kompozície podľa toho, čo je v dátach. */}
       {maOdseky ? (
@@ -550,7 +558,6 @@ export default function SluzbaDetail() {
           <div className="mt-12 grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-12">
             <Stagger
               className={`border-t ${vyhodyTmava ? RAM_TMAVA : 'border-[var(--color-border)]'} lg:col-span-8`}
-              staggerChildren={0.06}
             >
               {sluzba.vyhody.map((v) => (
                 <StaggerItem key={v} as="div">
@@ -641,7 +648,7 @@ export default function SluzbaDetail() {
                   {sluzba.navod.titulok}
                 </h3>
               </Reveal>
-              <Stagger as="ol" className="mt-8 max-w-[68ch]" staggerChildren={0.07}>
+              <Stagger as="ol" className="mt-8 max-w-[68ch]">
                 {sluzba.navod.kroky.map((k, i) => (
                   <StaggerItem as="li" key={k.slice(0, 40)} className="flex gap-5 border-t border-[var(--color-border)] py-5">
                     <span className="mt-[0.35em] shrink-0 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] tabular-nums text-[var(--color-accent-deep)]">
@@ -749,7 +756,6 @@ export default function SluzbaDetail() {
           />
           <Stagger
             className={`mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 ${galeria.length > 2 ? 'lg:grid-cols-3' : ''}`}
-            staggerChildren={0.07}
           >
             {galeria.map((f) => (
               <StaggerItem key={f.src}>
@@ -781,7 +787,7 @@ export default function SluzbaDetail() {
               </Tlacidlo>
             }
           />
-          <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" staggerChildren={0.07}>
+          <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {suvisiace.map((s) => (
               <StaggerItem key={s.slug} className="h-full">
                 <KartaSluzby sluzba={s} variant="holy" />
@@ -791,27 +797,6 @@ export default function SluzbaDetail() {
         </Sekcia>
       ) : null}
 
-      {/* 8. CTA. Nadpis pomenúva túto službu, nie claim firmy: ten istý claim
-          nad každou stránkou zoslabol na výplň. Dialóg si predvyplní typ
-          prvku názvom služby. */}
-      <Sekcia pasmo="tmava">
-        <SekciaHlavicka
-          tmava
-          stitok="Obhliadka"
-          nadpis={`Dohodneme obhliadku na ${(sluzba.nazovKratky || sluzba.nazov).toLowerCase()}`}
-          perex={PROCES[1].popis}
-          akcia={
-            <div className="flex flex-wrap items-center gap-6">
-              <Tlacidlo variant="primar" onClick={() => openObhliadka(sluzba.nazov)}>
-                Dohodnúť obhliadku a cenu
-              </Tlacidlo>
-              <Tlacidlo variant="tichy" tmava to="/sluzby">
-                Všetky služby
-              </Tlacidlo>
-            </div>
-          }
-        />
-      </Sekcia>
-    </>
+    </Podstranka>
   )
 }

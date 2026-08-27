@@ -17,6 +17,10 @@ import { altFotky } from './fotky.js'
  * - `holy` — bez rámu: fotka, vlasová linka, text. Druhý a tretí celok a
  *   „Súvisiace služby“ na detailoch, aby orámované boxy neboli na stránke
  *   trikrát po sebe.
+ * - `riadok` — široký riadok cez celú šírku kontajnera: fotka vľavo na
+ *   štyroch stĺpcoch, text vpravo na ôsmich. Dostáva ho tretí celok, aby
+ *   `/sluzby` nekončili druhým riadkom troch rovnakých dlaždíc pod prvým
+ *   (to je presne tvar, po ktorom stránka pôsobí ako vygenerovaná).
  * - `ram` — pôvodná orámovaná karta.
  *
  * Celá karta je jeden `<Link>`: odkaz „Detail služby“ je preto `<span>`, nie
@@ -29,6 +33,42 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
   const nosna = variant === 'nosna'
   const strucna = variant === 'strucna'
   const holy = variant === 'holy'
+  const riadok = variant === 'riadok'
+
+  if (riadok) {
+    return (
+      <Link
+        to={`/sluzby/${sluzba.slug}`}
+        className="group grid grid-cols-1 items-center gap-6 border-t border-[var(--color-border)] py-8 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] sm:grid-cols-12 sm:gap-10"
+      >
+        <Fotka
+          src={d.src}
+          w={d.w}
+          h={d.h}
+          alt={altFotky(d)}
+          pomer="3/2"
+          sizes="(min-width: 640px) 33vw, 100vw"
+          className="overflow-hidden sm:col-span-4"
+          triedaObrazka="motion-safe:transition-transform motion-safe:duration-[var(--duration-slow)] motion-safe:group-hover:scale-[1.03]"
+        />
+        <div className="sm:col-span-8">
+          <h3 className="font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+            {sluzba.nazov}
+          </h3>
+          <p className="mt-3 max-w-[62ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+            {sluzba.perex}
+          </p>
+          <span className="mt-5 flex min-h-[44px] items-center gap-2 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)]">
+            Detail služby
+            <ArrowRight
+              className="h-4 w-4 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[3px]"
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+      </Link>
+    )
+  }
 
   const obal = holy
     ? 'group flex h-full flex-col'

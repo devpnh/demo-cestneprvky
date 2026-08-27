@@ -241,7 +241,7 @@ export default function Hero() {
         data-hero-obsah
         className="relative z-10 mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)] pb-14 pt-[104px] lg:pb-28"
       >
-        <Stagger staggerChildren={0.07}>
+        <Stagger>
           <StaggerItem>
             <p
               data-kontrast="hero-stitok"
@@ -256,7 +256,7 @@ export default function Hero() {
               data-kontrast="hero-h1"
               className="mt-5 max-w-[28ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)] md:text-[length:var(--text-5xl)]"
             >
-              <SplitText as="span" text="Prvky pozemných komunikácií pre mestá a stavebné firmy" staggerChildren={0.05} />
+              <SplitText as="span" text="Prvky pozemných komunikácií pre mestá a stavebné firmy" />
             </h1>
           </StaggerItem>
 

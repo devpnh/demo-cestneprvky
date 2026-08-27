@@ -46,7 +46,6 @@ export default function RealizacieVyber() {
       />
 
       <Stagger
-        staggerChildren={0.06}
         className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3"
       >
         {VYBER.map((r) => (

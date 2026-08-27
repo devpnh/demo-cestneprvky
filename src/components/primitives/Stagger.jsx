@@ -1,70 +1,51 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'motion/react'
-import { fadeUp, staggerContainer, viewportOnce } from '../../lib/motion.js'
-import { useReducedMotion } from '../../lib/useReducedMotion.js'
-
-const supportsIntersectionObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window
+import { Children, cloneElement, isValidElement, useEffect, useRef } from 'react'
+import { sleduj } from '../../lib/odhalenie.js'
 
 /**
- * Staggered children reveal. Wrap a list of elements; give each child
- * `variants={fadeUp}` (or StaggerItem below) and the container fans the
- * reveal out across them. Same "already visible on mount" / no-
- * IntersectionObserver-support handling as Reveal.jsx — see that file for
- * why `animate` (not a re-assigned `initial`) drives the above-the-fold
- * case, and why missing IntersectionObserver support falls back to a plain,
- * fully-visible render instead of a permanently-hidden one.
+ * Odhalenie skupiny: kontajner sleduje viewport, potomkovia nastupujú po
+ * sebe. Oneskorenie nesie CSS premenná `--i` na potomkovi, takže celá
+ * sekvencia stojí na jednom observeri a nie na jednom pre každú dlaždicu.
+ *
+ * Zachovaná je pôvodná dvojica `<Stagger><StaggerItem>`, aby sa nemuseli
+ * prepisovať volania na stránkach.
  */
 export default function Stagger({
-  as = 'div',
-  staggerChildren = 0.08,
-  delayChildren = 0,
-  className,
+  as: Tag = 'div',
+  krok = 70,
+  className = '',
+  style,
   children,
   ...props
 }) {
   const ref = useRef(null)
-  const reduced = useReducedMotion()
-  const [alreadyVisible, setAlreadyVisible] = useState(false)
+  useEffect(() => sleduj(ref.current), [])
 
-  useEffect(() => {
-    if (!ref.current) return
-    const rect = ref.current.getBoundingClientRect()
-    setAlreadyVisible(rect.top < window.innerHeight && rect.bottom > 0)
-  }, [])
-
-  if (reduced || !supportsIntersectionObserver) {
-    const Tag = as
-    return (
-      <Tag ref={ref} className={className} {...props}>
-        {children}
-      </Tag>
-    )
-  }
-
-  const MotionTag = motion[as] || motion.div
+  let i = 0
+  const deti = Children.map(children, (dieta) => {
+    if (!isValidElement(dieta)) return dieta
+    const index = i++
+    return cloneElement(dieta, { style: { ...dieta.props.style, '--i': index } })
+  })
 
   return (
-    <MotionTag
+    <Tag
       ref={ref}
+      data-odhal=""
+      data-odhal-skupina=""
       className={className}
-      initial="hidden"
-      animate={alreadyVisible ? 'visible' : undefined}
-      whileInView={alreadyVisible ? undefined : 'visible'}
-      viewport={viewportOnce}
-      variants={staggerContainer(staggerChildren, delayChildren)}
+      style={{ ...style, '--odhal-krok': `${krok}ms` }}
       {...props}
     >
-      {children}
-    </MotionTag>
+      {deti}
+    </Tag>
   )
 }
 
-/** Convenience child for use inside <Stagger> — plain fadeUp, no own trigger. */
-export function StaggerItem({ as = 'div', className, children, ...props }) {
-  const MotionTag = motion[as] || motion.div
+/** Potomok skupiny. Vlastný spúšťač nemá, riadi ho `<Stagger>` nad ním. */
+export function StaggerItem({ as: Tag = 'div', className = '', style, children, ...props }) {
   return (
-    <MotionTag className={className} variants={fadeUp} {...props}>
+    <Tag data-odhal-dieta="" className={className} style={style} {...props}>
       {children}
-    </MotionTag>
+    </Tag>
   )
 }

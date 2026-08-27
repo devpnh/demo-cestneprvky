@@ -1,7 +1,6 @@
 import { Phone, Mail, MapPin } from 'lucide-react'
-import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { Sekcia, SekciaHlavicka, StranHlavicka, MonoStitok, Tlacidlo } from '../../components/kit/index.js'
+import { Podstranka, Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo } from '../../components/kit/index.js'
 import { Reveal } from '../../components/primitives/index.js'
 import MapaSlovenska from '../../components/MapaSlovenska.jsx'
 import ZadanieForm from '../../components/ZadanieForm.jsx'
@@ -80,15 +79,16 @@ const SPOJENIE = [
  * zobrazí sám).
  */
 export default function Kontakt() {
+  // Bez `vyzva`: záverečný pás výzvy má každá podstránka okrem tejto —
+  // vyzývať na kontakt na kontaktnej stránke je nábytok navyše, formulár
+  // stojí hneď pod hlavičkou.
   return (
-    <>
-      <Seo title={META?.title} description={META?.description} />
-
-      <StranHlavicka
-        stitok="Kontakt"
-        nadpis="Napíšte nám typ prvku, miesto a rozsah"
-        perex="Ozveme sa a dohodneme ďalší postup. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku."
-      />
+    <Podstranka
+      meta={META}
+      stitok="Kontakt"
+      nadpis="Napíšte nám typ prvku, miesto a rozsah"
+      perex="Ozveme sa a dohodneme ďalší postup. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku."
+    >
 
       {/* Spojenie a formulár. Formulár je zámerne na svetlom pásme — jeho polia
           sú navrhnuté ako biele s vlasovým rámom. Malý horný padding preto, že
@@ -214,6 +214,6 @@ export default function Kontakt() {
           </div>
         </div>
       </Sekcia>
-    </>
+    </Podstranka>
   )
 }

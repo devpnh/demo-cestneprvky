@@ -230,3 +230,88 @@ väčšina vstupných animácií na webe dnes v skutočnosti nebeží.
 - **Hero podstránok je tmavé a farebne spracované** (vzor doktorzub.com): eyebrow v `--color-accent-svetly` s prestrkom 0,2 em, biely H1, akcentová linka pod titulom. Nový token `--color-accent-svetly: #ff6a4d` — samotný akcent má na tmavom pásme len 3,61:1, tento 5,17:1. Hlavička webu sa už neriadi cestou, ale **prvým `data-pasmo` v `<main>`**, takže je priehľadná nad každým tmavým pásmom; `main` stratil `pt-[72px]` a odsadenie si drží prvé pásmo samo.
 - **Mapa miest realizácií** na `/realizacie`: vlastné inline SVG, obrys Natural Earth 1:10m zjednodušený na 223 bodov, 15 miest podľa skutočných súradníc, prepojené hoverom so zoznamom. Žiadny externý mapový podklad ani cookies.
 - **Údaje z registra namiesto zástupných textov.** Finstat je za Cloudflare (HTTP 403), preto sa čerpalo z **Obchodného registra SR** (Okresný súd Žilina) a z **RPO Štatistického úradu SR**: IČO 46 875 891, obchodné meno „Cestné prvky, s.r.o.“, deň zápisu 10. 11. 2012, vložka Sro/57757/L, konateľ Ján Lešňovský. Dátum narodenia konateľa register zverejňuje, na web nejde. **DIČ ani IČ DPH tieto registre nezverejňujú**, riadok sa preto vypúšťa, nevymýšľa.
+
+## 2026-08-27 · koreňová príčina: na webe nebežala ANI JEDNA vstupná animácia
+
+Otvorený bod z 26. 8. („to isté treba preveriť pri `Reveal`, `Stagger` a
+`Lajna`“) je uzavretý a odpoveď je horšia, než sa čakalo: `whileInView`
+nespúšťal nič **nikde na webe**, nielen v sekcii Proces.
+
+**Meranie.** Na `/o-firme` je 23 `Reveal`ov. Pred opravou mali všetky prvky
+pod ohybom `opacity: 1` a **žiadny inline `style`**, teda `initial="hidden"`
+sa na ne nikdy nepoužilo. Nešlo o `prefers-reduced-motion` (matchMedia
+vracalo `false`) ani o chýbajúci `IntersectionObserver` — inštrumentovaný
+build ukázal, že komponent išiel správnou vetvou (`data-reveal="motion"`,
+23 z 23).
+
+**Príčina.** Wrapper prechodu routov v `App.jsx`:
+`<AnimatePresence><motion.div key={pathname} initial={{opacity:0,y:12}}>`.
+Ten `motion.div` je rodičom celého stromu stránky, takže si jeho potomkovia
+počiatočný variant neuplatnia — čakajú na propagáciu variantu od rodiča,
+ktorý žiadne varianty nemá. **Dôkaz:** po odstránení toho jedného wrappera
+mali tie isté prvky `opacity: 0; transform: translateY(24px)`.
+
+Web preto od zavedenia routera (v5 kolo 0) vyzeral staticky — komponenty na
+animácie mal, ale cieľový stav bol totožný s tým, čo sa vykreslí bez
+animácie, takže si toho nikto nevšimol. Presne to bola Petrova výtka
+„vyzerá to celé ako cez WordPress, ako vygenerované“.
+
+**Oprava.** Celá odhaľovacia vrstva je preč z knižnice: `src/lib/odhalenie.js`
+je jeden zdieľaný `IntersectionObserver`, ktorý prepne `data-odhal` na `in`,
+a prechody sú v CSS. Nemá rodičovský kontext, ktorý by ju vedel takto
+potichu vypnúť, a rovnaký postup už raz zabral v sekcii Proces. Skrytý
+východiskový stav visí na triede `js-motion`, ktorú nasadí `main.jsx` —
+bez JavaScriptu sa nenasadí a obsah je celý viditeľný.
+
+**Overenie po oprave** (prah 0, rootMargin `-8 %`, meranie na šiestich
+cestách): pred scrollom skrytých 29 `/`, 9 `/sluzby`, 20 `/o-firme`,
+6 `/kontakt`, 5 `/sluzby/cyklotrasy`; po prejdení stránky **0** na každej
+z nich. Prechod routov je dnes CSS animácia na obyčajnom `<div>` s
+`key={pathname}` a `animation-fill-mode: backwards` — s `both` by `transform`
+ostal `matrix(1,0,0,1,0,0)`, čo je síce jednotková matica, ale ako každá
+hodnota okrem `none` tvorí obsahujúci blok pre `position: fixed` (audit to
+zachytil ako ❌ ROUTEv5).
+
+`src/lib/motion.js` (house variants pre `whileInView`) je zmazaný, nemal už
+jediného importéra.
+
+## 2026-08-27 · šablóna podstránok, objazd späť, upratanie galérie
+
+- **Jedna šablóna pre všetky podstránky** — `kit/Podstranka.jsx`. Skladá
+  SEO, tmavú `StranHlavicka`, obsahové pásma a záverečný `PasVyzvy`. Predtým
+  si tú istú kostru skladala každá stránka sama z rovnakých dielov a líšili
+  sa len texty. Na šablónu prešli `/sluzby`, `/realizacie`, `/o-firme`,
+  `/kontakt` aj deväť detailov služby. Jediné pravidlo navonok: posledné
+  pásmo v `children` musí byť svetlé, lebo `PasVyzvy` je tmavý (B5).
+- **Podpisový motív `ZnacenieMotiv`** — jazdné pruhy zbiehajúce sa do
+  úbežníka, ktoré sa pomaly posúvajú (`stroke-dashoffset`, 34 s). Beží pod
+  hlavičkou podstránky a pod pásom výzvy. Nie je to abstraktný gradient, je
+  to to, čo firma reálne robí; červená je v ňom jediná čiara.
+- **Hlavička podstránky je sekvencia, nie jeden fade:** štítok, titul po
+  slovách (`SplitText`), perex, dokreslená akcentová linka, fakty. Pásmo má
+  `min-height` `clamp(22rem, 42vw, 30rem)`, obsah je dorazený k jeho spodku.
+- **Kruhový objazd je späť na Domove** (pokyn Petra). Obe namerané výhrady
+  z kola 4 sú opravené: štvorec objazdu je presne sedem stĺpcov mriežky —
+  namerané **655 px so pravou hranou na 1 304 px**, teda na pravom okraji
+  kontajnera, ľavá na 649 px na osi stĺpca (predtým 717 proti 752). Uzly
+  majú 72 px namiesto 50 px, aktívny 88 px. Mriežka 3 × 3 fotiek zostáva na
+  `/sluzby`; na Domove ju objazd nahradil.
+- **Galéria realizácií je kontaktný hárok, nie masonry.** `columns` so
+  zábermi od pomeru 0,45 po 1,54 robili rozhádzanú stenu (výtka Petra).
+  Dnes je to mriežka s jedným pomerom 4:3 a jednou výškou popisku, takže
+  riadky sedia na spoločnej linke. Orez je vedomá strata; celý neorezaný
+  záber ukazuje lightbox.
+- **`/sluzby` už nemá dva rovnaké rady dlaždíc pod sebou.** Tretí celok má
+  nový variant `riadok` (fotka na štyroch stĺpcoch, text na ôsmich), takže
+  tri celky majú tri rôzne tvary.
+- **Hlavička webu:** podčiarknutie navigácie sa dokresľuje zľava
+  (`scaleX`, `top-full` — na spodnej hrane odkazu ho kontrola kontrastu B7
+  čítala ako pozadie textu, biela na akcente je 4,05:1); pás postupu
+  stránkou je maskovaná prerušovaná čiara, ktorá sa naťahuje ako čerstvé
+  značenie, nie plná linka. Položky mobilného menu nabiehajú po sebe.
+- **Pätička:** `GradientMesh` (červenkastý opar cez spodnú tretinu
+  obrazovky) je preč — bola to jediná plocha na webe bez pôvodu. Nahradila
+  ju prerušovaná akcentová čiara, ktorá sa dokreslí, a stĺpce nabiehajú po
+  sebe.
+- **Audit po zmenách: 254/254 OK, 0 ❌** (15 ciest, 1440 / 768 / 390 px).
+  Horizontálny scroll na 390 px: 0 na `/`, `/realizacie` aj `/sluzby`.

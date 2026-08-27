@@ -32,8 +32,8 @@ export default function KruhovyObjazd({
   active,
   onActive,
   reduced = false,
-  velkost = 600,
-  uzol = 56,
+  velkost = 660,
+  uzol = 72,
   interval = 4000,
 }) {
   const pocet = sluzby.length
