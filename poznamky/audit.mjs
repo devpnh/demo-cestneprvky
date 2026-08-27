@@ -692,7 +692,7 @@ for (const cesta of CESTY) {
     const ok = dvojice.length === 0 && m.sekcieBezPasma.length === 0
     return {
       ok,
-      text: `rytmus pásiem: ${m.pasma.map((p) => p.pasmo[0]).join('')} (${m.pasma.length} pásiem, ${m.vnoreneSekcie} vnorených sekcií sa do rytmu neráta, pätička tiež nie)`,
+      text: `rytmus pásiem: ${m.pasma.map((p) => p.pasmo[0]).join('')} (${m.pasma.length} pásiem vrátane pätičky, ${m.vnoreneSekcie} vnorených sekcií sa do rytmu neráta)`,
       detail: `dve tmavé za sebou: ${dvojice.join(', ') || '—'}; vrchné sekcie bez data-pasmo: ${skratka(m.sekcieBezPasma, 4) || '—'}`,
     }
   })
@@ -1372,7 +1372,7 @@ process.exit(chyb ? 1 : 0)
  *   B2r   V renderi nula prvkov so skutočným `box-shadow` (výnimka DemoBadge).
  *   B4r   V renderi nula viditeľných textových prvkov s `font-weight ≥ 700`.
  *   B3r   Žiadna vypočítaná farba textu, pozadia ani rámu mimo tokenov z tokens.css; povolené sú aj lineárne zmesi dvoch tokenov (color-mix, scrimy), tolerancia ΔRGB ≤ 8 v sRGB.
- *   B5    Poradie `data-pasmo` sekcií v `<main>`: nikde dve `tmava` za sebou; každá vrchná `<section>` musí `data-pasmo` mať (vnorené sekcie ani pätička sa do rytmu nerátajú).
+ *   B5    Poradie pásiem: sekcie `<main>` podľa `data-pasmo` plus pätička podľa jej nameraného pozadia — nikde dve `tmava` za sebou; každá vrchná `<section>` musí `data-pasmo` mať (vnorené sekcie sa do rytmu nerátajú).
  *   ALIGN Ľavý okraj prvého viditeľného potomka kontajnera každej sekcie sa rovná ľavému okraju kontajnera `max-w-[var(--container-max)]`, tolerancia 1 px. Kontajnerom môže byť aj samotná `<section>`; sekcia, ktorá kontajner nesie až vo vnorených sekciách, sa meria cez ne.
  *   B7    Kontrast reálne použitých dvojíc text/pozadie: telo ≥ 4,5:1, veľký text (≥ 24 px, alebo ≥ 19 px pri reze 600+) ≥ 3:1. Nad plnou farbou počíta presne; nad fotkou, gradientom, scrimom a pod `fixed`/`sticky`/`absolute` vrstvou vzorkuje pixely z full-page renderu tesne nad, pod a vedľa glyfov (mediány pásov, z nich najhorší). Rámy a podčiarknutie sa nevzorkujú. Kumulatívna `opacity` predkov sa do farby textu započíta. Rovnaká dvojica farieb a rezov je v hlásení jeden riadok s počtom.
  *   NAVv5 Hlavná navigácia má práve 4 položky, aktívna položka má `aria-current="page"` (na `/sluzby/<slug>` je to „Služby“), a v pätičke nie je mŕtvy odkaz — každý `href` vedie na existujúcu cestu alebo je `tel:`/`mailto:`/absolútny.

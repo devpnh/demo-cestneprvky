@@ -184,6 +184,20 @@ export function meranieStranky(vstup) {
   const sekcieBezPasma = vrchneSekcie.filter((s) => !s.hasAttribute('data-pasmo')).map((s) => s.id || cesta(s))
   const vnoreneSekcie = [...document.querySelectorAll('main section')].length - vrchneSekcie.length
 
+  // Pätička je posledná plocha stránky a do rytmu PATRÍ. Kým sa nerátala,
+  // stálo na trinástich z pätnástich ciest tmavé pásmo výzvy priamo nad
+  // tmavou pätičkou a spodok stránky bol jeden súvislý tmavý blok — kontrola
+  // to nevidela, lebo merala len `<main>` (nález Petra, 27. 8. 2026).
+  //
+  // Pásmo si neberie z atribútu, ale z nameraného pozadia: pätička nie je
+  // `Sekcia` a `data-pasmo` nemá. Prah je jednoduchá luminancia, na rozdiel
+  // bielej #FFFFFF a tmavej #26292C bohato stačí.
+  const patickaPreRytmus = document.querySelector('footer')
+  if (patickaPreRytmus) {
+    const [r, g, b] = (getComputedStyle(patickaPreRytmus).backgroundColor.match(/\d+(?:\.\d+)?/g) || ['255', '255', '255']).map(Number)
+    pasma.push({ id: 'footer', pasmo: 0.2126 * r + 0.7152 * g + 0.0722 * b > 128 ? 'biela' : 'tmava' })
+  }
+
   // ---------------------------------------------------------------- zarovnanie na kontajner
   const zarovnanie = []
   for (const sec of document.querySelectorAll('main section')) {

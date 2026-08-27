@@ -172,7 +172,7 @@
   transition: transform var(--duration-slow) var(--ease-house);
   opacity: 1;
 }
-.js-motion [data-lajna='in'] {
+.js-motion [data-lajna][data-odhal='in'] {
   transform: scaleX(1);
 }
 

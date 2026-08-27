@@ -68,9 +68,16 @@ obrazového prvku sa vracia na prepracovanie.
 | 6 | Realizácie: výber 6 fotiek + odkaz na `/realizacie` | biela | `sections/RealizacieVyber.jsx` |
 | 7 | Ako prebieha spolupráca (4 kroky, spojnica) | sivá | `sections/Proces.jsx` |
 | 8 | Kontakt v skratke + CTA | tmavá | `sections/KontaktKratky.jsx` |
-| — | Footer (spoločný, tmavý) | tmavá | layout |
+| — | Footer (spoločný, **svetlý**) | biela | layout |
 
-Sekcia 8 a footer tvoria zámerne jeden súvislý tmavý blok oddelený vlasovou linkou.
+**Pätička je svetlá a ráta sa do rytmu.** Kým bola tmavá, stálo na trinástich
+z pätnástich ciest tmavé pásmo výzvy priamo nad tmavou pätičkou a spodok
+stránky bol jeden súvislý tmavý blok (pokyn Petra, 27. 8. 2026). Kontrola B5
+meria odo dnes aj pätičku — pásmo si berie z jej nameraného pozadia, lebo
+`data-pasmo` nemá.
+
+Z toho plynie pravidlo pre každú stránku: **posledné pásmo v `<main>` smie byť
+tmavé** (a spravidla je, je to `PasVyzvy`), pätička pod ním je svetlá.
 
 ### `/sluzby`
 `StranHlavicka` (biela) → 3 skupiny služieb, striedavo biela / sivá / biela →

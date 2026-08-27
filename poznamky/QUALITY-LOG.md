@@ -315,3 +315,34 @@ jediného importéra.
   sebe.
 - **Audit po zmenách: 254/254 OK, 0 ❌** (15 ciest, 1440 / 768 / 390 px).
   Horizontálny scroll na 390 px: 0 na `/`, `/realizacie` aj `/sluzby`.
+
+## 2026-08-27 · dve tmavé plochy za sebou: pätička je svetlá a ráta sa do rytmu
+
+Pokyn Petra: „nesmú byť dve tmavé plochy po sebe“. Meranie ukázalo, že
+**vnútri `<main>` bol rytmus v poriadku na všetkých pätnástich cestách**
+(`t b b t b b t`, `t b b b t`, `t b t`, …). Chyba bola na hranici, ktorú
+kontrola nemerala: **tmavé pásmo výzvy + tmavá pätička**, teda jeden súvislý
+tmavý blok na 13 z 15 ciest.
+
+- **Pätička je svetlá** (`--color-bg`, text `--color-text`, vlasové linky
+  `--color-border`, hover odkazov `--color-accent-deep`). Oddeľuje ju
+  prerušovaná akcentová čiara, ktorá sa dokreslí.
+- **Prečo nie naopak svetlá výzva:** `/sluzby` má tri svetlé obsahové pásma
+  za sebou, svetlá výzva by z nich spravila štyri a padlo by pravidlo
+  „nikdy tri rovnaké za sebou“. Tmavá výzva je aj posledný dôraz stránky.
+- **Kontrola B5 odo dnes ráta aj pätičku.** Pásmo si berie z jej nameraného
+  pozadia (luminancia > 128), lebo pätička nie je `Sekcia` a `data-pasmo`
+  nemá. Overené obojstranne: so svetlou pätičkou `/sluzby` = `t b b b t b`
+  ✅, s natvrdo tmavou pätičkou tá istá cesta vráti
+  ❌ `dve tmavé za sebou: section.relative → footer`.
+
+**Vedľajší nález pri tejto oprave:** `Lajna` sa nikdy nedokreslila. CSS
+čítalo stav z `[data-lajna='in']`, ale observer zapisuje `data-odhal`.
+Namerané pred opravou: `data-odhal="in"`, a pritom
+`transform: matrix(0,0,0,1,0,0)` a šírka 0 px. Týkalo sa to všetkých
+deliacich čiar aj akcentovej linky pod titulom každej podstránky. Selektor
+je opravený na `[data-lajna][data-odhal='in']`, po oprave šírka 1 168 px
+a `matrix(1,0,0,1,0,0)`. Je to tá istá trieda chyby, akú mala skupina
+`Stagger` — stav sa píše na jeden atribút, čítal sa z druhého.
+
+Audit po oprave: **254/254 OK, 0 ❌**.
