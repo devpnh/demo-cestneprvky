@@ -172,7 +172,7 @@ export default function Realizacie() {
             <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
               Dohodnúť obhliadku a cenu
             </Tlacidlo>
-            <Tlacidlo variant="sekundar" tmava to="/kontakt">
+            <Tlacidlo variant="sekundar" to="/kontakt">
               Kontakt
             </Tlacidlo>
           </div>

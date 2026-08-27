@@ -395,3 +395,38 @@ lebo uzol stojí na hornom okraji otočeného štvorca — pri pôvodnom
 
 Výška Domova 1440 px: 9 910 → 9 002 px. Na 390 px 10 606 px a stále 0
 horizontálneho scrollu. Audit **254/254 OK, 0 ❌**, 0 chýb v konzole.
+
+## 2026-08-27 · tmavá pätička s pohyblivým oparom, svetlá výzva nad ňou
+
+Peter: „viac sa mi páčil tmavý footer s tým gradientom červeným, to tam
+môžeme nechať a mohol by sa ten gradient nejako zaujímavo hýbať“.
+
+Pätička je teda znova tmavá a opar sa vrátil. Aby popri tom platilo aj
+predošlé zadanie („nesmú byť dve tmavé plochy po sebe“), presunula sa
+svetlosť o pásmo vyššie:
+
+- **`PasVyzvy` je svetlý** (podstránky) a **`Kontakt v skratke` na Domove
+  tiež.** Dôraz výzvy nesie veľkosť titulu a červené tlačidlo, nie farba
+  plochy. `ZnacenieMotiv` dostal variant `svetle` — čiary z inkoustu s
+  krytím zníženým na 0,6 násobku, lebo slabá tmavá čiara je na bielej vidieť
+  silnejšie než slabá biela na tmavej.
+- Namerané rytmy vrátane pätičky: `/` `t b b t b b b t`, `/sluzby`
+  `t b b b b t`, `/realizacie` `t b b t`, `/o-firme` `t b b t b b t`,
+  `/kontakt` `t b b t`, detail `t b b b t`, 404 `b t`. **Nikde dve tmavé.**
+  Štyri svetlé za sebou na `/sluzby` sú vedomé: pásma tam oddeľuje hlavička
+  celku, vlasová linka a tri rôzne sadzby kariet (nosná + dve, tri naprieč,
+  široké riadky), nie odtieň.
+
+**Opar je prestavaný, nie obnovený.** Pôvodný `GradientMesh` posúval jednou
+animáciou celú vrstvu naraz — tri škvrny sa hýbali ako jeden kus tapety.
+Teraz má každá škvrna vlastný `@keyframes` a nesúdeliteľný čas obehu
+(26 s, 34 s, 41 s), takže sa navzájom míňajú a celý obrazec sa nezopakuje
+v čitateľnom takte. Overené: po 3,5 s majú všetky tri vrstvy inú maticu
+a hýbu sa iným smerom aj tempom. Definície sú v `index.css`, nie v inline
+`<style>` — tá sa predtým vkladala znova pri každom použití komponentu.
+
+Krytie oparu je 0,34: pod ním stojí biely text pätičky a červená plocha pod
+bielym 14 px textom má len 4,05 : 1. Kontrola B7 pri tomto krytí prešla na
+všetkých pätnástich cestách.
+
+Audit: **254/254 OK, 0 ❌**.

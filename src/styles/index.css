@@ -211,6 +211,46 @@
   animation: pruhy-beh 34s linear infinite;
 }
 
+/* Farebný opar pätičky (`GradientMesh`). Tri dráhy s nesúdeliteľnými
+   časmi obehu, takže sa celý obrazec neopakuje v čitateľnom takte.
+   Reduced-motion blok nižšie ich zastaví spolu so všetkým ostatným. */
+@keyframes mesh-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(26%, -18%, 0) scale(1.18);
+  }
+}
+@keyframes mesh-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-22%, 24%, 0) scale(0.9);
+  }
+}
+@keyframes mesh-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  50% {
+    transform: translate3d(18%, 16%, 0) scale(1.12);
+  }
+}
+.mesh-a {
+  animation: mesh-a 26s ease-in-out infinite;
+}
+.mesh-b {
+  animation: mesh-b 34s ease-in-out infinite;
+}
+.mesh-c {
+  animation: mesh-c 41s ease-in-out infinite;
+}
+
 /* Položka mobilného menu. Spúšťačom je stav `open` v `Header`, nie
    viewport, preto CSS animácia a nie odhaľovací observer. */
 @keyframes menu-polozka {

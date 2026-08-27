@@ -12,8 +12,8 @@ jeden web.
 | `Kontajner` | ten istý kontajner mimo `Sekcia` (hero, pásma na celú šírku) |
 | `Podstranka` | **šablóna podstránky. Každá podstránka ide cez ňu.** SEO + `StranHlavicka` + obsahové pásma + `PasVyzvy`. Stránka dodáva obsah, nie skladbu. |
 | `StranHlavicka` | hlavička podstránky: štítok alebo drobky, H1 po slovách, perex, dokreslená akcentová linka, voliteľné fakty a akcie; v pozadí `ZnacenieMotiv`. **H1 na stránke je práve tu.** |
-| `PasVyzvy` | záverečné tmavé pásmo výzvy so značkovacím motívom. Jedna definícia pre celý web namiesto piatich ručne poskladaných kópií. |
-| `ZnacenieMotiv` | podpisová dekorácia: jazdné pruhy zbiehajúce sa do úbežníka, pomalý posun `stroke-dashoffset`. Len pod tmavými pásmami. |
+| `PasVyzvy` | záverečné **svetlé** pásmo výzvy so značkovacím motívom (`svetle`). Jedna definícia pre celý web namiesto piatich ručne poskladaných kópií. Svetlé je kvôli rytmu — pod ním je tmavá pätička. |
+| `ZnacenieMotiv` | podpisová dekorácia: jazdné pruhy zbiehajúce sa do úbežníka, pomalý posun `stroke-dashoffset`. `svetle` prepne čiary z bielej na inkoust pre svetlé pásmo. |
 | `SekciaHlavicka` | hlavička sekcie vnútri stránky: štítok + H2 vľavo (col-span-7), perex vpravo dole (col-span-5, `lg:ml-auto`) |
 | `MonoStitok` | mikro-label IBM Plex Mono 12 px / 0,08 em; `tmava` prepne na bielu 72 % + akcentovú čiarku |
 | `Tlacidlo` | `variant="primar" \| "sekundar" \| "tichy"`, `to` (router), `href` alebo `onClick`. Primárne je napevno 19 px/600 kvôli kontrastu bielej na akcente (4,05:1 → platí limit 3:1 pre veľký text). |
@@ -22,7 +22,7 @@ jeden web.
 | `Lajna` | prerušovaná deliaca linka v reči vodorovného značenia; kreslí sa pri vstupe do viewportu, pri reduced-motion je hneď celá |
 
 Doplnkové: `src/components/primitives/` (`Reveal`, `Stagger`/`StaggerItem`,
-`StickySection`, `Parallax`, `SplitText`), `src/components/ui/`
+`StickySection`, `Parallax`, `SplitText`, `GradientMesh`), `src/components/ui/`
 (radix chassis — **nemeniť**), `ZadanieForm`, `ObhliadkaDialog` + `openObhliadka()`.
 
 ### 1a. Pohyb — jedna vrstva, `src/lib/odhalenie.js`
@@ -68,16 +68,22 @@ obrazového prvku sa vracia na prepracovanie.
 | 6 | Realizácie: výber 6 fotiek + odkaz na `/realizacie` | biela | `sections/RealizacieVyber.jsx` |
 | 7 | Ako prebieha spolupráca (4 kroky, spojnica) | sivá | `sections/Proces.jsx` |
 | 8 | Kontakt v skratke + CTA | tmavá | `sections/KontaktKratky.jsx` |
-| — | Footer (spoločný, **svetlý**) | biela | layout |
+| — | Footer (spoločný, **tmavý s červeným oparom**) | tmavá | layout |
 
-**Pätička je svetlá a ráta sa do rytmu.** Kým bola tmavá, stálo na trinástich
-z pätnástich ciest tmavé pásmo výzvy priamo nad tmavou pätičkou a spodok
-stránky bol jeden súvislý tmavý blok (pokyn Petra, 27. 8. 2026). Kontrola B5
-meria odo dnes aj pätičku — pásmo si berie z jej nameraného pozadia, lebo
-`data-pasmo` nemá.
+**Pätička je tmavá a ráta sa do rytmu.** Má v pozadí `GradientMesh` — tri
+rozostrené škvrny s vlastnými dráhami a nesúdeliteľnými časmi obehu (pokyn
+Petra, 27. 8. 2026). Kontrola B5 meria odo dnes aj pätičku; pásmo si berie
+z jej nameraného pozadia, lebo `data-pasmo` nemá.
 
-Z toho plynie pravidlo pre každú stránku: **posledné pásmo v `<main>` smie byť
-tmavé** (a spravidla je, je to `PasVyzvy`), pätička pod ním je svetlá.
+Z toho plynie záväzné pravidlo pre každú stránku: **posledné pásmo v `<main>`
+musí byť SVETLÉ.** Preto je svetlý aj `PasVyzvy` na podstránkach a `Kontakt
+v skratke` na Domove — dôraz výzvy nesie veľkosť titulu a červené tlačidlo,
+nie farba plochy, a tmavá pätička je posledný akord stránky.
+
+Cesta k tomu bola cez oba extrémy a oba boli chybné: najprv tmavá výzva nad
+tmavou pätičkou (jeden súvislý tmavý blok na 13 z 15 ciest), potom svetlá
+pätička (rytmus sedel, ale opar zmizol). Platí tretia možnosť — svetlá
+výzva, tmavá pätička.
 
 ### `/sluzby`
 `StranHlavicka` (biela) → 3 skupiny služieb, striedavo biela / sivá / biela →

@@ -9,32 +9,28 @@ const NAP = GLOBAL.nap
 const TEL_HREF = `tel:${NAP.phone.replace(/\s/g, '')}`
 const ADRESA = `${NAP.street}, ${NAP.postalCode} ${NAP.city}, ${NAP.country}`
 
-/** Vlasová linka na tmavom pásme: biela s nízkou alfou, sivá z tokenov tu nie je vidieť. */
-const JEMNA_LINKA = { borderColor: 'color-mix(in srgb, var(--color-bg) 18%, transparent)' }
+/** Vlasová linka pásma. Odkedy je pásmo svetlé, je to obyčajný token. */
+const JEMNA_LINKA = { borderColor: 'var(--color-border)' }
 
 /**
  * Kontakt v skratke — posledné pásmo domovskej stránky.
  *
- * Je tmavé a plynulo prechádza do rovnako tmavej pätičky: medzi nimi je len
- * vlasová linka na spodnej hrane sekcie, nie svetlá medzera (KOMPOZÍCIA §2).
- * Preto tu nie je `padding="plne"` z kitu, ale menší spodný padding a
- * `border-b` — dolný okraj sekcie je zároveň deliaca linka pätičky.
+ * **Je svetlé.** Bolo tmavé a plynulo prechádzalo do rovnako tmavej pätičky;
+ * odkedy má pätička späť červený opar (pokyn Petra, 27. 8. 2026), musí byť
+ * pásmo nad ňou svetlé, inak sú to dve tmavé plochy za sebou (STANDARDY B5).
+ * Tmavá pätička je tak posledný akord stránky, nie pokračovanie bloku, ktorý
+ * sa začal už o obrazovku vyššie.
  *
  * Texty sú z dát: perex je prvý krok spolupráce (`PROCES`), NAP údaje sú
- * doslova z `global.json`. Mikro-štítky používajú `MonoStitok tmava`
- * (biela 72 % + akcentová čiarka); `--color-muted` na tmavom pásme kontrast nemá.
+ * doslova z `global.json`.
  */
 export default function KontaktKratky() {
   return (
     <Sekcia
       id="kontakt"
-      pasmo="tmava"
-      padding="ziadne"
-      className="border-b pb-[var(--section-padding-y-sm)] pt-[var(--section-padding-y)]"
-      style={JEMNA_LINKA}
+      pasmo="biela"
     >
       <SekciaHlavicka
-        tmava
         stitok="Kontakt"
         nadpis="Pošlite zadanie, dohodneme obhliadku"
         perex={PROCES[0].popis}
@@ -45,11 +41,11 @@ export default function KontaktKratky() {
       >
         <StaggerItem>
           <a href={TEL_HREF} className="flex min-h-[44px] flex-col border-t pt-5" style={JEMNA_LINKA}>
-            <MonoStitok tmava sCiarkou={false} className="flex items-center gap-2">
+            <MonoStitok sCiarkou={false} className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
               Telefón
             </MonoStitok>
-            <span className="mt-3 whitespace-nowrap font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold tabular-nums text-[var(--color-bg)]">
+            <span className="mt-3 whitespace-nowrap font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold tabular-nums text-[var(--color-text)]">
               {NAP.phone}
             </span>
           </a>
@@ -61,11 +57,11 @@ export default function KontaktKratky() {
             className="flex min-h-[44px] flex-col border-t pt-5"
             style={JEMNA_LINKA}
           >
-            <MonoStitok tmava sCiarkou={false} className="flex items-center gap-2">
+            <MonoStitok sCiarkou={false} className="flex items-center gap-2">
               <Mail className="h-4 w-4 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
               E-mail
             </MonoStitok>
-            <span className="mt-3 break-words font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold text-[var(--color-bg)]">
+            <span className="mt-3 break-words font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold text-[var(--color-text)]">
               {NAP.email}
             </span>
           </a>
@@ -73,11 +69,11 @@ export default function KontaktKratky() {
 
         <StaggerItem>
           <div className="flex min-h-[44px] flex-col border-t pt-5" style={JEMNA_LINKA}>
-            <MonoStitok tmava sCiarkou={false} className="flex items-center gap-2">
+            <MonoStitok sCiarkou={false} className="flex items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
               Adresa
             </MonoStitok>
-            <span className="mt-3 max-w-[24ch] font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[var(--leading-tight)] text-[var(--color-bg)]">
+            <span className="mt-3 max-w-[24ch] font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[var(--leading-tight)] text-[var(--color-text)]">
               {ADRESA}
             </span>
           </div>
@@ -88,7 +84,7 @@ export default function KontaktKratky() {
         <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
           {GLOBAL.contact.ctaLabel}
         </Tlacidlo>
-        <Tlacidlo variant="tichy" tmava to="/kontakt">
+        <Tlacidlo variant="tichy" to="/kontakt">
           Celý kontakt
         </Tlacidlo>
       </Reveal>

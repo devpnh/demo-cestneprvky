@@ -335,7 +335,7 @@ export default function SluzbaDetail() {
             <Tlacidlo variant="primar" onClick={() => openObhliadka(sluzba.nazov)}>
               Dohodnúť obhliadku a cenu
             </Tlacidlo>
-            <Tlacidlo variant="tichy" tmava to="/sluzby">
+            <Tlacidlo variant="tichy" to="/sluzby">
               Všetky služby
             </Tlacidlo>
           </div>

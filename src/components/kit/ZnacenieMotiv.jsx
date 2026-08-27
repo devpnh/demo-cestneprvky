@@ -10,8 +10,12 @@
  * v `index.css`, 30 s lineárne). Je to jediná nekonečná animácia na webe
  * okrem objazdu; pri `prefers-reduced-motion` stojí, ako všetko ostatné.
  *
- * Kontrast: čiary majú krytie 0,10 až 0,16 na tmavom pásme, takže text nad
- * nimi drží svoj pomer voči pozadiu pásma a nie voči čiare (B7).
+ * Kontrast: čiary sú takmer priehľadné (0,08 až 0,16), takže text nad nimi
+ * drží svoj pomer voči pozadiu pásma a nie voči čiare (B7).
+ *
+ * `svetle` prepne kresbu na svetlé pásmo: čiary sú potom z inkoustu, nie
+ * z bielej, a majú nižšie krytie — na bielej je aj slabá tmavá čiara vidieť
+ * silnejšie než slabá biela na tmavej.
  */
 
 /** y-ová súradnica čiary na ľavom okraji; úbežník je vpravo hore. */
@@ -25,7 +29,7 @@ const PRUHY = [
 
 const UBEZNIK = { x: 1180, y: 150 }
 
-export default function ZnacenieMotiv({ className = '', krytie = 1 }) {
+export default function ZnacenieMotiv({ className = '', krytie = 1, svetle = false }) {
   return (
     <svg
       aria-hidden="true"
@@ -41,9 +45,9 @@ export default function ZnacenieMotiv({ className = '', krytie = 1 }) {
           y1={p.y}
           x2={UBEZNIK.x}
           y2={UBEZNIK.y}
-          stroke={p.akcent ? 'var(--color-accent)' : 'var(--color-bg)'}
+          stroke={p.akcent ? 'var(--color-accent)' : svetle ? 'var(--color-text)' : 'var(--color-bg)'}
           strokeWidth={p.sirka}
-          strokeOpacity={p.krytie}
+          strokeOpacity={svetle ? p.krytie * 0.6 : p.krytie}
           strokeDasharray="46 34"
           className="pruhy-beh"
         />

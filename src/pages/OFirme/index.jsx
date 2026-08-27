@@ -121,7 +121,7 @@ export default function OFirme() {
             <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
               Dohodnúť obhliadku a cenu
             </Tlacidlo>
-            <Tlacidlo variant="tichy" tmava to="/realizacie">
+            <Tlacidlo variant="tichy" to="/realizacie">
               Pozrieť realizácie
             </Tlacidlo>
           </div>
