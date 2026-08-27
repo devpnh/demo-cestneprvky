@@ -555,7 +555,7 @@ vymieňa po znakoch v tom istom okamihu, keď sa mení aktívny uzol).
 
 ## 2026-08-27 · dynamická pätička a nové prvé pásmo pod hero
 
-### Pätička sa skladá ako hero podstránok
+### Pätička sa skladá ako hero podstránok — VRÁTENÉ, pozri zápis nižšie
 
 Pokyn Petra: „dynamický footer podobne ako hero sekcia na podstránkach“.
 Má teda tie isté štyri veci v tom istom poradí ako `StranHlavicka`: logo,
@@ -596,3 +596,22 @@ opticky tmavá plocha a tesne pod tmavým hero by to boli dve tmavé plochy za
 sebou (B5).
 
 Audit: **254/254 OK, 0 ❌**, 0 chýb v konzole, 390 px bez pretečenia.
+
+## 2026-08-27 · pätička späť na pôvodnú veľkosť, dynamika ostáva v pozadí
+
+Skladba hero podstránok pätičku nafúkla: **1 050 px namiesto 637 px**, teda
+o vyše 300 px, a začala súťažiť s pásmom výzvy nad sebou. Peter to vrátil
+s tým, že „do pozadia patrí animácia, nie ďalšie poschodie“.
+
+Obsah je preto presne taký, aký bol pred tým pokusom: logo a veta, dve
+navigácie, NAP a podpis, `--section-padding-y-sm`. Odišlo len to, čo pribudlo
+navyše — eyebrow, veta v displejovom reze a akcentová linka.
+
+**Dynamika ostala a je celá v pozadí, v dvoch vrstvách:**
+`GradientMesh` (tri rozostrené škvrny, dráhy 26 s, 34 s a 41 s) a nad ním
+`ZnacenieMotiv` (5 jazdných pruhov miznúcich do stratena, posun
+`stroke-dashoffset` 34 s). Opar dáva teplo, pruhy kresbu — samotný opar bol
+mäkký a nemal sa čoho chytiť.
+
+Namerané po vrátení: výška pätičky 637 px, 3 vrstvy oparu, 5 pruhov,
+0 slov v displejovom reze. Audit **254/254 OK, 0 ❌**.
