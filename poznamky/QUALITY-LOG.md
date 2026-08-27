@@ -615,3 +615,54 @@ mäkký a nemal sa čoho chytiť.
 
 Namerané po vrátení: výška pätičky 637 px, 3 vrstvy oparu, 5 pruhov,
 0 slov v displejovom reze. Audit **254/254 OK, 0 ❌**.
+
+## 2026-08-27 · prvé pásmo pod hero je „Kto sme“; celoplošný záber je oddeľovač
+
+Zadanie Petra: „hneď pod hero by malo byť skôr kto sme, čo sme, a nejako to
+zaujať návštevníka niečím zaujímavým. Páči sa mi tá fotka roztiahnutá cez
+celú šírku, môže tam ostať len tá šedobiela, môžeme ju použiť ako oddeľovač
+sekcií.“
+
+### Kto sme
+
+Pásmo „Prečo Cestné prvky“ (claim `Šetríme váš čas aj peniaze`) nahradilo
+pásmo **Kto sme**. Bolo to tvrdenie o prínose ešte predtým, než sa
+návštevník dozvedel, s kým má do činenia. Hero hovorí, ČO firma osádza; toto
+pásmo hovorí, KTO to osádza: značka (`global.brand.tagline`, doteraz
+nepoužitá), rok založenia, sídlo a rozsah (`FIRMA.uvod[0]`).
+
+Zaujať má **trojica čísel vysadených najväčším rezom, ktoré si pri vstupe
+do viewportu dopočítajú hodnotu** (`kit/Cislo.jsx`): 9 služieb, 14 typov
+prvkov, 15 miest realizácií. Všetky tri sa rátajú z dát (`SLUZBY`,
+`TYPY_PRVKOV`, `MIESTA_REALIZACII`), takže nemôže vzniknúť číslo, ktoré by
+na webe nesedelo s obsahom (A3). Rok založenia medzi nimi zámerne nie je —
+dopočítavať sa k letopočtu od nuly je nezmysel a ako jediné nepočítané číslo
+by v rade rušil; rok je v perexe.
+
+Je to jediná odchýlka od slovníka pohybu (E1: fade, slide, stagger, hover) a
+je obmedzená: beží raz, trvá 1,2 s a inde na webe nie je. Odpočet zapisuje
+priamo do DOM cez `ref`, nie cez `useState`; hodnota je pre čítačku
+v `aria-label`, aby nečítala medzistavy. Namerané: `0 0 0` pred vstupom,
+`5 8 8` v polovici, `9 14 15` po dobehnutí.
+
+Štyri tvrdenia firmy ostali ako nadpisy bez odsekov; celé znenie je na
+`/o-firme`.
+
+### Oddeľovač
+
+Celoplošný záber sa osamostatnil do `kit/PasOddelovac.jsx` a stojí medzi
+pásmami ako predel. Jeden záber (šedobiela vodiaca línia), paralaxa, **bez
+popisku** — pokyn Petra; čo je na zábere, nesie `alt` pre čítačku a mono
+riadok pod pásom bol len ďalší text navyše.
+
+Je to `<div>`, nie `<section>` s `data-pasmo`: nie je to obsahové pásmo, ale
+predel, takže do rytmu pásiem nevstupuje. Opticky je tmavý, preto **nesmie
+ísť tesne pod tmavé pásmo** — patrí medzi dve svetlé. Namerané: šírka
+1 440 px, `left = 0`, `scrollWidth` 1 440 (žiadne pretečenie, D1).
+
+Rytmus `/` je `t b b t b b b t` (nezmenený), výška stránky 8 963 px.
+Audit **254/254 OK, 0 ❌**, 0 chýb v konzole.
+
+**Nález pri tom:** popisky čísel nešli cez `sadzba()`, takže riadok končil
+na „typov prvkov v“ a jednopísmenová predložka visela sama (kontrola
+SADZBA). Sadzba platí aj pre texty skladané v komponente, nielen pre dáta.

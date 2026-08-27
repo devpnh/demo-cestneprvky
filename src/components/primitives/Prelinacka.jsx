@@ -100,6 +100,10 @@ export default function Prelinacka({
   }, [parallax, reduced])
 
   const zaber = zabery[aktivny]
+  // Popisok sa kreslí len vtedy, keď je čo písať alebo čo prepínať. Pri
+  // jedinom zábere bez popisu je pás čistý predel a riadok pod ním by bol
+  // len ďalší text navyše (pokyn Petra, 27. 8. 2026).
+  const maPopisok = Boolean(zaber.popis) || pocet > 1
 
   return (
     <figure
@@ -153,35 +157,41 @@ export default function Prelinacka({
         </div>
       </div>
 
+      {maPopisok ? (
       <figcaption className={`mt-4 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-[var(--color-border)] pt-4 ${triedaPopisu}`}>
         <span className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[var(--leading-normal)] tracking-[0.08em] text-[var(--color-muted)]">
-          {sadzba(zaber.popis)}
+          {zaber.popis ? sadzba(zaber.popis) : null}
         </span>
 
         {/* Prepínače v reči odboru: čiarky vodorovného značenia. Tlačidlo má
-            44 px dotykovú plochu, viditeľná je z nej len čiarka (D2). */}
-        <span className="flex items-center">
-          {zabery.map((z, i) => (
-            <button
-              key={z.src}
-              type="button"
-              onClick={() => vyber(i)}
-              aria-label={`Zobraziť fotografiu ${i + 1} z ${pocet}: ${z.popis}`}
-              aria-current={i === aktivny ? 'true' : undefined}
-              className="group flex h-[44px] w-[44px] items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            >
-              <span
-                aria-hidden="true"
-                className={`block h-[2px] w-6 transition-colors duration-[var(--duration-fast)] ${
-                  i === aktivny
-                    ? 'bg-[var(--color-accent)]'
-                    : 'bg-[var(--color-border)] group-hover:bg-[var(--color-muted)]'
-                }`}
-              />
-            </button>
-          ))}
-        </span>
+            44 px dotykovú plochu, viditeľná je z nej len čiarka (D2).
+            Pri jedinom zábere sa nemontujú vôbec — prepínač s jednou
+            polohou je nábytok, nie ovládanie. */}
+        {pocet > 1 ? (
+          <span className="flex items-center">
+            {zabery.map((z, i) => (
+              <button
+                key={z.src}
+                type="button"
+                onClick={() => vyber(i)}
+                aria-label={`Zobraziť fotografiu ${i + 1} z ${pocet}: ${z.popis}`}
+                aria-current={i === aktivny ? 'true' : undefined}
+                className="group flex h-[44px] w-[44px] items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block h-[2px] w-6 transition-colors duration-[var(--duration-fast)] ${
+                    i === aktivny
+                      ? 'bg-[var(--color-accent)]'
+                      : 'bg-[var(--color-border)] group-hover:bg-[var(--color-muted)]'
+                  }`}
+                />
+              </button>
+            ))}
+          </span>
+        ) : null}
       </figcaption>
+      ) : null}
     </figure>
   )
 }
