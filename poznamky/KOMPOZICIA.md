@@ -22,7 +22,7 @@ jeden web.
 | `Lajna` | prerušovaná deliaca linka v reči vodorovného značenia; kreslí sa pri vstupe do viewportu, pri reduced-motion je hneď celá |
 
 Doplnkové: `src/components/primitives/` (`Reveal`, `Stagger`/`StaggerItem`,
-`StickySection`, `Parallax`, `SplitText`, `GradientMesh`), `src/components/ui/`
+`StickySection`, `Parallax`, `SplitText`, `GradientMesh`, `TextRotate`), `src/components/ui/`
 (radix chassis — **nemeniť**), `ZadanieForm`, `ObhliadkaDialog` + `openObhliadka()`.
 
 ### 1a. Pohyb — jedna vrstva, `src/lib/odhalenie.js`
@@ -34,11 +34,24 @@ wrapperom prechodu routov nespúšťal nič a web tak nemal ani jednu vstupnú
 animáciu (QUALITY-LOG, 27. 8. 2026). Kto potrebuje odhalenie, siahne po
 `Reveal`, `Stagger` alebo `SplitText`, nie po vlastnej animácii.
 
-Slovník pohybu má štyri slová a nič viac: **odhalenie** (fade + 22 px zdola),
+Slovník pohybu má päť slov a nič viac: **odhalenie** (fade + 22 px zdola),
 **sekvencia** (to isté s krokom po `--i`), **dokreslenie čiary** (`scaleX`
-zľava — `Lajna`, podčiarknutie navigácie, pás postupu) a **jeden
-sticky-scrub na web** (Debarierizácia). Nekonečne bežia len dve veci:
-značkovací motív a kruhový objazd.
+zľava — `Lajna`, podčiarknutie navigácie, pás postupu), **jeden sticky-scrub
+na web** (Debarierizácia) a **výmena textu po znakoch** (`TextRotate`).
+Nekonečne bežia len dve veci: značkovací motív a kruhový objazd.
+
+**Piate slovo má vlastný mantinel** (pokyn Petra, 27. 8. 2026 — Domov má byť
+prezentačnejší): `TextRotate` **nikdy nebeží vlastným taktom**. Vždy ho riadi
+stav, ktorý na stránke už je, cez `auto={false}` a `ref.jumpTo(index)`. Na
+Domove sú to dva: striedanie záberov hero videa (karta pri videu) a aktívna
+služba na kruhovom objazde (meno služby, celok, miesto). Rotátor s `auto`
+by na stránku pridal tretí nezávislý rytmus a to je presne to prúžkovanie,
+len v čase. Režim je `popLayout`, nie `wait` — pri `wait` odletí starý text
+skôr, než priletí nový, a riadok je 0,6 s prázdny.
+
+Kde `TextRotate` mení veľkosť sadzby podľa dĺžky textu (meno služby na
+Domove), musí mať blok **odmeranú rezervu výšky**, inak sa pri každej výmene
+posunie celý stĺpec.
 
 **Nikto nepridáva farbu, font ani tieň.** Všetko ide cez tokeny v
 `src/styles/tokens.css`. Kto potrebuje nový token, napíše to do odovzdávacej

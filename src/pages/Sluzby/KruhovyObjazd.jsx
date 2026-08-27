@@ -1,234 +1,269 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { altFotky } from './fotky.js'
-
-const BASE = import.meta.env.BASE_URL
+import { Accessibility, Bike, Blocks, Droplets, Eraser, Hand, Route, ShieldCheck, TrafficCone } from 'lucide-react'
 
 /** Geometria SVG vozovky. Uzly aj oblúk počítajú z tých istých čísel. */
 const STRED = 300
 const POLOMER = 240
 const SIRKA_VOZOVKY = 52
-const OBVOD = 2 * Math.PI * POLOMER
-/** Koľko stupňov zaberá akcentový oblúk pod aktívnym uzlom. */
-const OBLUK_STUPNE = 30
+/** Polomer obežnej dráhy ako podiel šírky objazdu — uzly jazdia po strede vozovky. */
+const PODIEL_DRAHY = POLOMER / (STRED * 2)
+/** Uhol, na ktorom stojí „predok“ objazdu: 90° je v súradniciach SVG dole, teda najbližšie k divákovi. */
+const PREDOK = 90
+/** Celá otáčka za 96 s. Pomalšie než v predlohe (60 s): uzol sa musí dať pohodlne kliknúť. */
+const OTACKA_MS = 96000
 
 /**
- * Kruhový objazd služieb: podpisový prvok webu a prvok z odboru klienta.
- * Deväť fotiek stojí na asfaltovom prstenci, v strede je ostrovček s fotkou
- * aktívnej služby a po vozovke k nej obieha akcentový oblúk.
- *
- * ## Prečo uzly NEOBIEHAJÚ
- *
- * Prvá verzia otáčala celý veniec uzlov (`orbit-spin`, 80 s na otáčku) a
- * uzly si protirotáciou držali vzpriamenú fotku. Vyzeralo to dobre a
- * nefungovalo to: uzol sa pod kurzorom hýbe, takže sa naň nedá trafiť, a
- * keď sa trafíte, `onMouseEnter` objazd zastaví — kurzor však medzitým
- * skĺzol vedľa, `onMouseLeave` ho pustí a uzol utečie. To bola Petrova
- * výtka „koleso vôbec nefunguje a glitchuje pri prepínaní“ (27. 8. 2026).
- *
- * Uzly preto stoja. Pohyb nesie **akcentový oblúk**, ktorý po vozovke
- * prebehne k práve aktívnej službe, a prelínačka fotky v strede. Cieľ na
- * kliknutie je tým pádom nehybný a stav sa mení len vtedy, keď to
- * návštevník naozaj chce.
- *
- * Oblúk sa točí po kratšej strane: uhol sa drží ako **spojitá** hodnota a
- * pri zmene sa k nej pripočíta rozdiel normalizovaný do (−180°, 180°]. Bez
- * toho by prechod z deviatej služby na prvú (340° → 0°) obehol dookola.
- *
- * Automatický posun beží, kým nad objazdom nedrží návštevník kurzor ani
- * fokus. `setTimeout` a nie `setInterval`: po ručnej zmene sa odpočet
- * začína odznova, takže vybraná služba nezmizne po zlomku sekundy.
- * Pri `prefers-reduced-motion` sa neposúva nič a oblúk skáče bez prechodu.
+ * Ikona pre každú službu. Kruh nesie ikony, nie fotografie — deväť fotiek
+ * orezaných do 56 px koliesok nekomunikovalo nič a fotografie majú na tejto
+ * stránke vlastné miesto (prelínačka v pásme „Prečo“ a výber realizácií).
  */
-export default function KruhovyObjazd({
-  sluzby,
-  active,
-  onActive,
-  reduced = false,
-  velkost = 660,
-  uzol = 72,
-  interval = 4500,
-}) {
+const IKONY = {
+  'znacenie-pre-nevidiacich': Accessibility,
+  'vodorovne-dopravne-znacenie': Route,
+  'lepene-obrubniky': Blocks,
+  'spomalovace-dopravy': TrafficCone,
+  'zalievkove-a-vyspravkove-hmoty': Droplets,
+  'protismykovy-nater': ShieldCheck,
+  cyklotrasy: Bike,
+  'stitky-braillovo-pismo': Hand,
+  'odstranenie-znacenia': Eraser,
+}
+
+/** Rozdiel dvoch uhlov normalizovaný do (−180°, 180°], teda po kratšej strane. */
+const kratsiaCesta = (z, na) => (((na - z) % 360) + 540) % 360 - 180
+
+/**
+ * Kruhový objazd služieb — orbitálna os v reči tohto webu.
+ *
+ * Deväť uzlov obieha po asfaltovom prstenci. Uzol, ktorý je práve vpredu
+ * (dole, najbližšie k divákovi), je aktívny a stránka vedľa neho vypisuje
+ * jeho celok a názov — objazd teda **beží a ukazuje sám od seba**, bez toho,
+ * aby doň musel niekto kliknúť. Kliknutie uzol pripne: otáčanie zastane,
+ * kliknutý uzol sa po kratšej strane presunie dopredu a uzly z toho istého
+ * celku pulzujú akcentom. Ďalšie kliknutie naň (alebo klik do plochy
+ * objazdu) pripnutie zruší a objazd sa rozbehne.
+ *
+ * ## Čo sa tu už raz pokazilo
+ *
+ * 1. **Ovládať sa dal iba posledný uzol.** Každý uzol visel v priehľadnom
+ *    štvorci cez celú plochu objazdu a tie sa prekrývali, takže myš chytal
+ *    ten posledný v poradí. Obaly sú preto `pointer-events-none` a
+ *    ukazovateľ si zapína späť len samotné tlačidlo.
+ * 2. **Prepínanie sa dialo pod kurzorom.** Aktívnu službu menil `hover`,
+ *    takže pri prechode myšou cez kruh preblikla polovica služieb. Hover
+ *    dnes iba zastaví otáčanie, výber mení klik alebo fokus.
+ * 3. **Otáčanie cez React stav.** Predloha prepisuje uhol `setState`om každých
+ *    50 ms; tu ho drží `useRef` a rAF slučka zapisuje transformácie priamo do
+ *    DOM. React sa prekresľuje len vtedy, keď sa naozaj zmení aktívna služba,
+ *    teda raz za ~10 s namiesto dvadsaťkrát za sekundu.
+ *
+ * Hĺbka je zo `sin` uhla: uzol vpredu má krytie 1 a vyšší `z-index`, uzol za
+ * ostrovčekom bledne na 0,45 a ide pod neho. Vďaka tomu kruh pôsobí ako
+ * priestor a nie ako plochý ciferník.
+ *
+ * Pri `prefers-reduced-motion` sa neotáča nič: uzly stoja na svojich miestach
+ * a výber sa mení len klikom.
+ */
+export default function KruhovyObjazd({ sluzby, active, onActive, reduced = false, velkost = 660, uzol = 56 }) {
   const pocet = sluzby.length
+  const [pripnuta, setPripnuta] = useState(null)
   const [drziKurzor, setDrziKurzor] = useState(false)
-  const [drziFokus, setDrziFokus] = useState(false)
-  const stoji = reduced || drziKurzor || drziFokus
 
-  // Spojitý uhol oblúka. Rastie alebo klesá po kratšej strane, takže sa
-  // nikdy neobrátí dokola.
-  const [uhol, setUhol] = useState(() => (active / pocet) * 360)
-  const uholRef = useRef(uhol)
-  useEffect(() => {
-    const ciel = (active / pocet) * 360
-    const rozdiel = (((ciel - uholRef.current) % 360) + 540) % 360 - 180
-    uholRef.current += rozdiel
-    setUhol(uholRef.current)
-  }, [active, pocet])
+  const uholRef = useRef(0)
+  const uzolRefs = useRef([])
+  const obalRef = useRef(null)
+  /**
+   * Polomer dráhy v pixeloch, meraný zo skutočnej šírky objazdu.
+   *
+   * Percentá by tu boli chyba: `translate` počíta percentá z veľkosti
+   * SAMOTNÉHO prvku (56 px uzla), nie z rodiča, takže by uzly skončili
+   * natlačené na strede. Preto sa šírka meria a prepočítava pri každej
+   * zmene rozmeru.
+   */
+  const polomerRef = useRef(0)
+  const activeRef = useRef(active)
+  activeRef.current = active
 
-  useEffect(() => {
-    if (stoji) return undefined
-    const t = setTimeout(() => onActive((active + 1) % pocet), interval)
-    return () => clearTimeout(t)
-  }, [active, stoji, pocet, interval, onActive])
+  const stoji = reduced || drziKurzor || pripnuta !== null
 
   /**
-   * Predchádzajúca fotka ostrovčeka. Bez nej sa dve fotky prelínali OBE
-   * priesvitné naraz — v polovici prechodu presvitala jedna cez druhú a
-   * vyzeralo to ako porucha, nie ako prelínačka (výtka Petra „glitchuje pri
-   * prepínaní“, 27. 8. 2026).
-   *
-   * Správne prelínanie potrebuje spodnú vrstvu nepriehľadnú: odchádzajúca
-   * fotka ostáva na `opacity: 1` pod prichádzajúcou, kým tá nabehne, a
-   * zhasne až potom — vtedy ju už prekrýva nepriehľadná nová.
+   * Zapíše polohu, hĺbku a poradie všetkých uzlov pre daný uhol natočenia.
+   * Beží v rAF slučke aj pri pripnutí, preto je to `useCallback` bez závislosti
+   * na stave — všetko, čo potrebuje, si berie z refov a z argumentov.
    */
-  const [predchadzajuca, setPredchadzajuca] = useState(active)
+  const nakresli = useCallback(
+    (sPrechodom) => {
+      const u = uholRef.current
+      let predny = 0
+      let najlepsi = -2
+      for (let i = 0; i < pocet; i += 1) {
+        const rad = (((i / pocet) * 360 + u) * Math.PI) / 180
+        const sin = Math.sin(rad)
+        if (sin > najlepsi) {
+          najlepsi = sin
+          predny = i
+        }
+        const el = uzolRefs.current[i]
+        if (!el) continue
+        const hlbka = (1 + sin) / 2
+        el.style.transition = sPrechodom
+          ? 'transform 700ms var(--ease-house), opacity 700ms var(--ease-house)'
+          : 'none'
+        const r = polomerRef.current
+        el.style.transform = `translate3d(calc(${(Math.cos(rad) * r).toFixed(2)}px - 50%), calc(${(
+          Math.sin(rad) * r
+        ).toFixed(2)}px - 50%), 0)`
+        el.style.opacity = String(0.45 + 0.55 * hlbka)
+        el.style.zIndex = String(10 + Math.round(20 * hlbka))
+      }
+      return predny
+    },
+    [pocet],
+  )
+
+  // Meranie šírky a prvé vykreslenie. `ResizeObserver` a nie `resize` na
+  // okne: objazd mení šírku aj vtedy, keď sa mení mriežka okolo neho bez
+  // zmeny okna (STANDARDY C2 — na dotyku sa výška okna mení sama).
   useEffect(() => {
-    if (predchadzajuca === active) return undefined
-    const t = setTimeout(() => setPredchadzajuca(active), 620)
-    return () => clearTimeout(t)
-  }, [active, predchadzajuca])
+    const el = obalRef.current
+    if (!el) return undefined
+    const zmeraj = () => {
+      polomerRef.current = el.getBoundingClientRect().width * PODIEL_DRAHY
+      nakresli(false)
+    }
+    zmeraj()
+    const ro = new ResizeObserver(zmeraj)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [nakresli])
 
-  const vyber = useCallback((i) => () => onActive(i), [onActive])
+  // Otáčanie. rAF s reálnym delta časom, takže rýchlosť nezávisí od
+  // snímkovej frekvencie a po prepnutí karty prehliadača nepreskočí.
+  useEffect(() => {
+    if (stoji) return undefined
+    let raf = 0
+    let posledny = 0
+    const krok = (t) => {
+      if (posledny) {
+        uholRef.current = (uholRef.current + ((t - posledny) / OTACKA_MS) * 360) % 360
+        const predny = nakresli(false)
+        if (predny !== activeRef.current) onActive(predny)
+      }
+      posledny = t
+      raf = requestAnimationFrame(krok)
+    }
+    raf = requestAnimationFrame(krok)
+    return () => cancelAnimationFrame(raf)
+  }, [stoji, nakresli, onActive])
 
-  const dlzkaObluka = (OBVOD * OBLUK_STUPNE) / 360
+  /** Pripne službu: otáčanie zastane a uzol sa po kratšej strane presunie dopredu. */
+  const pripni = useCallback(
+    (i) => {
+      if (pripnuta === i) {
+        setPripnuta(null)
+        return
+      }
+      const ciel = PREDOK - (i / pocet) * 360
+      uholRef.current += kratsiaCesta(uholRef.current, ciel)
+      setPripnuta(i)
+      onActive(i)
+      // Prechod sa musí zapísať do štýlu ešte pred novým transformom, inak
+      // by prehliadač oba zlúčil do jedného snímku a uzol by skočil.
+      requestAnimationFrame(() => nakresli(!reduced))
+    },
+    [pripnuta, pocet, onActive, nakresli, reduced],
+  )
+
+  const skupinaAktivnej = sluzby[active]?.skupina
 
   return (
     <div
+      ref={obalRef}
       data-objazd=""
       className="relative mx-auto aspect-square w-full select-none"
       style={{ maxWidth: `${velkost}px` }}
       onMouseEnter={() => setDrziKurzor(true)}
       onMouseLeave={() => setDrziKurzor(false)}
-      onFocusCapture={() => setDrziFokus(true)}
-      onBlurCapture={() => setDrziFokus(false)}
     >
-      <svg viewBox="0 0 600 600" className="absolute inset-0 h-full w-full" aria-hidden="true">
-        {/* Vozovka: asfaltový prstenec, vlasové krajnice, prerušovaná stredová čiara */}
+      {/* Klik do plochy objazdu (nie na uzol) pripnutie zruší. Je to `div`,
+          nie `button`: klávesnica má na zrušenie Escape a pre čítačku by tu
+          bolo deviate zbytočné tlačidlo bez obsahu. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        onClick={() => setPripnuta(null)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setPripnuta(null)
+        }}
+      />
+
+      <svg viewBox="0 0 600 600" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
         <circle cx={STRED} cy={STRED} r={POLOMER} fill="none" stroke="var(--color-surface-2)" strokeWidth={SIRKA_VOZOVKY} />
         <circle cx={STRED} cy={STRED} r={POLOMER + SIRKA_VOZOVKY / 2} fill="none" stroke="var(--color-border)" strokeWidth="1" />
         <circle cx={STRED} cy={STRED} r={POLOMER - SIRKA_VOZOVKY / 2} fill="none" stroke="var(--color-border)" strokeWidth="1" />
-        <circle
-          cx={STRED}
-          cy={STRED}
-          r={POLOMER}
-          fill="none"
-          stroke="var(--color-bg)"
-          strokeWidth="2.5"
-          strokeDasharray="16 14"
-        />
-
-        {/* Akcentový oblúk pod aktívnym uzlom. Vnútorný `rotate` ho posadí
-            pod uzol na dvanástej hodine, vonkajší ho vedie k aktívnemu. */}
-        <g
-          data-objazd-oblúk=""
-          style={{
-            transform: `rotate(${uhol}deg)`,
-            transformOrigin: `${STRED}px ${STRED}px`,
-            transition: reduced ? 'none' : 'transform 700ms var(--ease-house)',
-          }}
-        >
-          <circle
-            cx={STRED}
-            cy={STRED}
-            r={POLOMER}
-            fill="none"
-            stroke="var(--color-accent)"
-            strokeWidth={SIRKA_VOZOVKY}
-            strokeOpacity="0.92"
-            strokeDasharray={`${dlzkaObluka} ${OBVOD}`}
-            transform={`rotate(${-90 - OBLUK_STUPNE / 2} ${STRED} ${STRED})`}
-          />
-        </g>
+        <circle cx={STRED} cy={STRED} r={POLOMER} fill="none" stroke="var(--color-bg)" strokeWidth="2.5" strokeDasharray="16 14" />
       </svg>
 
-      {/* Stredový ostrovček: fotka aktívnej služby presne v mieste pozornosti.
-          Neaktívne fotky majú prázdny `alt` zámerne, sú to vrstvy jedného
-          prelínania, do prístupnostného stromu patrí len tá viditeľná. */}
-      <div
-        data-hub=""
-        className="absolute left-1/2 top-1/2 h-[52.7%] w-[52.7%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]"
-      >
-        {sluzby.map((s, i) => {
-          const jeAktivna = i === active
-          const jePredchadzajuca = i === predchadzajuca
-          return (
-            <img
-              key={s.slug}
-              src={`${BASE}assets/${s.dlazdica.src}`}
-              width={s.dlazdica.w}
-              height={s.dlazdica.h}
-              alt={jeAktivna ? altFotky(s.dlazdica) : ''}
-              aria-hidden={jeAktivna ? undefined : 'true'}
-              loading="lazy"
-              decoding="async"
-              className={`absolute inset-0 h-full w-full object-cover ${
-                reduced ? '' : 'transition-[opacity,transform] duration-[var(--duration-base)] ease-[var(--ease-house)]'
-              } ${jeAktivna ? 'scale-100 opacity-100' : jePredchadzajuca ? 'scale-100 opacity-100' : 'scale-[1.04] opacity-0'}`}
-              style={{ zIndex: jeAktivna ? 2 : jePredchadzajuca ? 1 : 0 }}
+      {/* Ostrovček: dve rozbiehajúce sa akcentové kružnice a počet služieb.
+          Je to jediné miesto na webe s pulzom — kruh je podpisový prvok a
+          pulz mu dáva stred, ku ktorému sa doprava vzťahuje. */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--color-surface-2)]">
+        {!reduced && (
+          <>
+            <span aria-hidden="true" className="ostrovcek-pulz absolute inset-0 rounded-full border border-[var(--color-accent)]" />
+            <span
+              aria-hidden="true"
+              className="ostrovcek-pulz absolute inset-0 rounded-full border border-[var(--color-accent)]"
+              style={{ animationDelay: '1.6s' }}
             />
-          )
-        })}
+          </>
+        )}
+        <p className="relative text-center font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[1.6] tracking-[0.2em] text-[rgba(255,255,255,0.72)]">
+          {pocet}
+          <br />
+          služieb
+        </p>
       </div>
 
-      {/* Nehybné uzly. Polohy sú v percentách, nie v pixeloch odvodených od
-          `velkost`: SVG vozovka sa škáluje cez `viewBox`, takže pixelový
-          polomer by sa od nej odtrhol na každej inej šírke stĺpca. Uzol sedí
-          na kružnici s polomerom 40 % vďaka `inset-[10%]` na otočenom bode a
-          protirotácia drží fotku vzpriamenú. */}
-      {/*
-        Obaly uzlov MUSIA byť `pointer-events-none`. Každý z deviatich je
-        priehľadný štvorec cez celú plochu objazdu a prekrývajú sa; bez toho
-        chytal všetky pohyby myši ten posledný v poradí a na uzly 1 až 8 sa
-        nedalo ani kliknúť, ani na ne nabehnúť kurzorom. Playwright to hlási
-        doslova: „div.absolute.inset-[10%] intercepts pointer events“.
-        Bola to hlavná časť výtky „koleso vôbec nefunguje“ (27. 8. 2026).
-        Ukazovateľ si zapína späť až samotný odkaz.
-      */}
+      {/* Obaly uzlov MUSIA byť `pointer-events-none` — pozri bod 1 v doku
+          komponentu. Ukazovateľ si zapína späť len samotné tlačidlo. */}
       <div className="pointer-events-none absolute inset-0">
         {sluzby.map((s, i) => {
-          // Uzol stojí na hornom okraji otočeného štvorca, teda na −90° jeho
-          // vlastnej sústavy. Výsledný uhol na kružnici je preto
-          // `−90 + i · (360 / počet)` a nula uzlov sedí na dvanástej hodine —
-          // presne tam, kde ju hľadá akcentový oblúk.
-          const uholUzla = (i / pocet) * 360
+          const Ikona = IKONY[s.slug] || Route
           const jeAktivna = i === active
+          const jePripnuta = i === pripnuta
+          // „Príbuzné“ nie sú vymyslený vzťah: je to ten istý celok služieb
+          // zo `sluzby.js`. Zvýrazňujú sa len vtedy, keď je niečo pripnuté.
+          const jePribuzna = pripnuta !== null && !jePripnuta && s.skupina === skupinaAktivnej
+
           return (
-            <div key={s.slug} className="absolute inset-[10%]" style={{ transform: `rotate(${uholUzla}deg)` }}>
-              <div
-                className="absolute left-1/2 top-0"
-                style={{
-                  height: `${uzol}px`,
-                  width: `${uzol}px`,
-                  marginLeft: `${-uzol / 2}px`,
-                  marginTop: `${-uzol / 2}px`,
-                  transform: `rotate(${-uholUzla}deg)`,
-                }}
+            <div
+              key={s.slug}
+              ref={(el) => {
+                uzolRefs.current[i] = el
+              }}
+              className="absolute left-1/2 top-1/2"
+              style={{ width: `${uzol}px`, height: `${uzol}px` }}
+            >
+              <button
+                type="button"
+                data-uzol={i}
+                aria-pressed={jePripnuta}
+                // Čiarka, nie pomlčka: kontrola A1 nepovoľuje pomlčky v copy
+                // a `aria-label` je copy — číta ho čítačka nahlas.
+                aria-label={`${s.nazov}, ${jePripnuta ? 'zrušiť výber' : 'vybrať službu'}`}
+                onClick={() => pripni(i)}
+                onFocus={() => onActive(i)}
+                className={`pointer-events-auto flex h-full w-full items-center justify-center rounded-full border-2 transition-[background-color,border-color,transform,color] duration-[var(--duration-fast)] ease-[var(--ease-house)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)] ${
+                  jeAktivna
+                    ? 'scale-125 border-[var(--color-bg)] bg-[var(--color-accent)] text-[var(--color-on-accent)]'
+                    : jePribuzna
+                      ? 'uzol-pulz border-[var(--color-accent)] bg-[var(--color-bg)] text-[var(--color-text)]'
+                      : 'border-[var(--color-bg)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'
+                }`}
               >
-                <Link
-                  to={`/sluzby/${s.slug}`}
-                  aria-label={s.nazov}
-                  onMouseEnter={vyber(i)}
-                  onFocus={vyber(i)}
-                  className={`pointer-events-auto block overflow-hidden rounded-full ${
-                    reduced ? '' : 'transition-[transform,border-color] duration-[var(--duration-fast)] ease-[var(--ease-house)]'
-                  } ${
-                    jeAktivna
-                      ? 'scale-[1.18] border-[3px] border-[var(--color-bg)]'
-                      : 'border-2 border-[var(--color-bg)] hover:scale-[1.08]'
-                  }`}
-                  style={{ height: `${uzol}px`, width: `${uzol}px` }}
-                >
-                  <img
-                    src={`${BASE}assets/${s.dlazdica.src}`}
-                    width={s.dlazdica.w}
-                    height={s.dlazdica.h}
-                    alt={altFotky(s.dlazdica)}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                  />
-                </Link>
-              </div>
+                <Ikona className="h-5 w-5" aria-hidden="true" />
+              </button>
             </div>
           )
         })}

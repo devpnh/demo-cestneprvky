@@ -164,6 +164,7 @@ function PopisokZaberu({ idx }) {
           ref={prvokRef}
           texts={MENA_PRVKOV}
           auto={false}
+          animatePresenceMode="popLayout"
           staggerFrom="first"
           staggerDuration={0.008}
           splitLevelClassName="overflow-hidden pb-[0.08em]"
@@ -175,6 +176,7 @@ function PopisokZaberu({ idx }) {
           ref={miestoRef}
           texts={MIESTA_ZABEROV}
           auto={false}
+          animatePresenceMode="popLayout"
           splitBy="words"
           staggerDuration={0.012}
           splitLevelClassName="overflow-hidden"

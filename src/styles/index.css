@@ -310,6 +310,38 @@
   animation: dialog-pop var(--duration-fast) var(--ease-house);
 }
 
+/* Ostrovček objazdu: dve akcentové kružnice sa rozbiehajú od stredu a
+   miznú. Jediný pulz na celom webe — kruh je podpisový prvok a pulz mu dáva
+   stred, ku ktorému sa doprava vzťahuje. */
+@keyframes ostrovcek-pulz {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.ostrovcek-pulz {
+  animation: ostrovcek-pulz 3.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Uzol z toho istého celku ako pripnutá služba. Pulzuje rám, nie veľkosť —
+   meniaca sa veľkosť by po dráhe posúvala aj susedov. */
+@keyframes uzol-pulz {
+  0%,
+  100% {
+    border-color: var(--color-accent);
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+}
+.uzol-pulz {
+  animation: uzol-pulz 1.7s ease-in-out infinite;
+}
+
 /* Detail aktívnej služby vedľa objazdu: pri prepnutí sa prelinie, nie
    preskočí. Kľúčom je index služby, takže React blok premontuje a animácia
    beží od začiatku. */

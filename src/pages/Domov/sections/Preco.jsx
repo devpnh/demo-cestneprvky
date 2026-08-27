@@ -1,5 +1,6 @@
-import { Sekcia, SekciaHlavicka, Fotka, Tlacidlo } from '../../../components/kit/index.js'
-import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { Sekcia, SekciaHlavicka, Tlacidlo } from '../../../components/kit/index.js'
+import { Prelinacka, Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
+import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { FIRMA } from '../../../content/firma.js'
 import { GALERIA } from '../../../content/realizacie.js'
 import { castiPopisu } from '../../Realizacie/skupiny.js'
@@ -18,13 +19,25 @@ import { castiPopisu } from '../../Realizacie/skupiny.js'
  * argumentov nezmizlo z webu, stojí na `/o-firme`** v pásme „Technológie bez
  * zásahu do pôvodných konštrukcií“, kam odtiaľto vedie odkaz.
  *
- * Fotka je jedna a veľká namiesto troch malých: tri dokladové zábery po
- * 368 px sa na Domove bili s deviatimi fotkami objazdu a šiestimi
- * realizáciami hneď pod nimi.
+ * Fotky sú veľké a striedajú sa. **Prelínačka sem prišla zo stredu
+ * kruhového objazdu** (pokyn Petra, 27. 8. 2026): tam mala priemer ~230 px
+ * a menila sa pod prstencom ikon, takže sa na ňu nedalo poriadne pozerať.
+ * Tu má celú šírku kontajnera a je to jediná vec v pásme, na ktorú sa oko
+ * sústredí. Objazd tým pádom nesie ikony a fotografie majú svoje miesto.
  */
 
-/** Záber sekcie. Vodiaca línia pozdĺž cesty je presne ten prvok, ktorý vyhlášky predpisujú. */
-const ZABER = GALERIA.find((r) => r.id === 'vodiaca-linia-pozdlz-cesty') || null
+/**
+ * Štyri zábery, štyri rôzne typy prvkov — pásmo tak neukáže štyrikrát to
+ * isté. Vyberá sa podľa `id`, takže doplnenie fotky do `realizacie.js` výber
+ * nepremieša, a žiadny z nich nestojí inde na Domove (objazd je dnes bez
+ * fotiek, Debarierizácia a výber realizácií majú vlastné).
+ */
+const ZABERY_ID = [
+  'vodiaca-linia-pozdlz-cesty', // Vodiaca línia — prvok, ktorý vyhlášky predpisujú
+  'protismykovy-nater-nastupiste', // Protišmykový náter
+  'nerezove-indikatory-detail', // Nerezové indikátory
+  'signalny-pas-vstup', // Signálny pás
+]
 
 /**
  * Jediné číslo sekcie. Nie je vymyslené ani zaokrúhlené pre efekt — stojí
@@ -32,7 +45,14 @@ const ZABER = GALERIA.find((r) => r.id === 'vodiaca-linia-pozdlz-cesty') || null
  */
 const CISLO = { hodnota: '30 min', popis: '100 % pevnosti lepeného obrubníka' }
 
+/** Popisok pod fotkou je fakt; pravidlo, čo sa smie napísať, žije v `skupiny.js`. */
+const ZABERY = ZABERY_ID.map((id) => GALERIA.find((r) => r.id === id))
+  .filter(Boolean)
+  .map((r) => ({ src: r.src, w: r.w, h: r.h, alt: r.alt, popis: `${r.prvok} · ${castiPopisu(r)[0]}` }))
+
 export default function Preco() {
+  const reduced = useReducedMotion()
+
   return (
     <Sekcia id="preco" pasmo="biela">
       <SekciaHlavicka
@@ -42,18 +62,9 @@ export default function Preco() {
         sirkaNadpisu="max-w-[14ch]"
       />
 
-      {ZABER ? (
+      {ZABERY.length ? (
         <Reveal className="mt-14 lg:mt-20">
-          <Fotka
-            src={ZABER.src}
-            w={ZABER.w}
-            h={ZABER.h}
-            alt={ZABER.alt}
-            pomer="16/9"
-            popis={`${ZABER.prvok} · ${castiPopisu(ZABER)[0]}`}
-            sizes="(min-width: 1280px) 1168px, 100vw"
-            maxSirka={Infinity}
-          />
+          <Prelinacka zabery={ZABERY} pomer="16/9" reduced={reduced} maxSirka={Infinity} />
         </Reveal>
       ) : null}
 

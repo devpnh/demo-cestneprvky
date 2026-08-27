@@ -19,6 +19,23 @@ const MENA_SKUPIN = SLUZBY.map((s) => SKUPINY.find((k) => k.id === s.skupina)?.n
 const MIESTA = SLUZBY.map((s) => s.dlazdica.miesto)
 
 /**
+ * Optická veľkosť mena služby. Deväť názvov má od 10 do 52 znakov a v jednej
+ * veľkosti sa rozsah rozliezol od jedného riadku po päť (54 až 270 px na
+ * 1 440 px). Stĺpec je centrovaný na os objazdu, takže s každou zmenou dĺžky
+ * poskočil aj celý text — pri rotátore to bije do očí dvojnásobne.
+ *
+ * Krátke meno preto sadzíme väčšie a dlhé menšie, takže každé zaberie dva až
+ * tri riadky a má rovnakú optickú váhu. Sú to tri existujúce tokeny, žiadna
+ * nová hodnota. Merané na 1 024, 1 280 a 1 440 px: pri tomto zaradení sa
+ * žiadne meno nedostane nad 162 px, teda nad rezervu bloku.
+ */
+function velkostMena(nazov) {
+  if (nazov.length <= 16) return 'var(--text-5xl)'
+  if (nazov.length <= 35) return 'var(--text-4xl)'
+  return 'var(--text-3xl)'
+}
+
+/**
  * Sleduje šírku okna, nie výšku (STANDARDY C2: výšku na dotykových
  * zariadeniach mení lišta prehliadača). Počiatočný stav sa číta priamo z
  * `matchMedia`, takže desktop vykreslí mriežku hneď pri prvom rendere a
@@ -132,6 +149,7 @@ export default function SluzbyPrehlad() {
                   ref={stitokRef}
                   texts={MENA_SKUPIN}
                   auto={false}
+                  animatePresenceMode="popLayout"
                   splitBy="words"
                   staggerDuration={0.012}
                   splitLevelClassName="overflow-hidden"
@@ -141,11 +159,20 @@ export default function SluzbyPrehlad() {
                   exit={{ opacity: 0, y: '-60%' }}
                 />
               </MonoStitok>
-              <h3 className="mt-4 max-w-[14ch] font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+              {/* Šírka riadku je v `rem`, nie v `ch`: `ch` sa počíta z veľkosti
+                  písma, takže by sa s ňou menila aj šírka sadzby a meranie
+                  riadkov by neplatilo. `min-h` je rezerva na tri riadky —
+                  vďaka nej má blok stále tú istú výšku a objazd vedľa neho
+                  stojí. */}
+              <h3
+                className="mt-4 min-h-[10.5rem] max-w-[26rem] font-[family-name:var(--font-display)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]"
+                style={{ fontSize: velkostMena(sluzba.nazov) }}
+              >
                 <TextRotate
                   ref={menoRef}
                   texts={MENA_SLUZIEB}
                   auto={false}
+                  animatePresenceMode="popLayout"
                   staggerFrom="first"
                   staggerDuration={0.006}
                   splitLevelClassName="overflow-hidden pb-[0.08em]"
@@ -160,6 +187,7 @@ export default function SluzbyPrehlad() {
                   ref={miestoRef}
                   texts={MIESTA}
                   auto={false}
+                  animatePresenceMode="popLayout"
                   splitBy="words"
                   staggerDuration={0.012}
                   splitLevelClassName="overflow-hidden"

@@ -454,3 +454,101 @@ Overené v prehliadači: `circle` v motíve 0, `x2 = 1560`, ťah
 `footer [data-lajna]` 0. Zároveň preverené, že sa nič nerozbilo: objazd po
 hoveri na siedmy uzol prepne na `7 / 9`, opar sa po 2,5 s posunul, 0 chýb
 v konzole na šiestich cestách. Audit **254/254 OK, 0 ❌**.
+
+## 2026-08-27 · kinetický text: služba sa píše, nie preblikne
+
+Pokyn Petra: Domov má byť prezentačnejší a moderný a má stáť na tom, čo firma
+naozaj robí; ako podklad prišiel komponent `TextRotate` (21st.dev, `motion`),
+kde text skáče na to, čo má návštevník práve pred očami.
+
+Prenesený je do `src/components/primitives/TextRotate.jsx` (JSX, `cn`
+zo `src/lib/utils.js`) s tromi domácimi zmenami: pri `prefers-reduced-motion`
+nevzniká ani `AnimatePresence`, ani vrstva znakov (riadok sa len prepíše),
+vetu nesie `sr-only` kópia a animovaná vrstva je `aria-hidden`, a rotátor
+nesmie bežať vlastným taktom — vždy ho riadi `ref.jumpTo(index)`.
+
+Riadia ho preto dva stavy, ktoré na Domove už boli:
+
+- **Hero** — karta pri videu. Meno prvku a miesto sa prepisujú s prelínačkou
+  vo videu, teda s tým, čo je práve na plátne. Meno je odteraz v displejovom
+  reze 22 px, aby karta bola popisok a nie poznámka pod čiarou.
+- **Služby** — celok, meno služby a miesto sa menia spolu s oblúkom na
+  kruhovom objazde. Jedna udalosť, nie tri animácie vedľa seba.
+
+Dve veci vyšli až z merania:
+
+1. **`mode="wait"` nechal riadok 0,6 s prázdny** (starý text odletí a až
+   potom priletí nový). Prvá snímka po prepnutí bola doslova prázdny stĺpec.
+   Platí `popLayout`; zmerané na 40 snímkach cez celý prechod: 0 snímok bez
+   jediného viditeľného znaku.
+2. **Meno služby skákalo od jedného riadku po päť** (54 až 270 px na 1440 px)
+   a stĺpec centrovaný na os objazdu sa s ním posúval. Veľkosť sa preto berie
+   z dĺžky mena (≤ 16 znakov `--text-5xl`, ≤ 35 `--text-4xl`, inak
+   `--text-3xl`), šírka sadzby je v `rem`, nie v `ch` (`ch` sa počíta
+   z veľkosti písma, takže by sa menila s ňou), a blok má rezervu
+   `min-h-[10.5rem]`. Namerané na 1024/1280/1440 px: blok má 203 až 210 px
+   pri všetkých deviatich službách, horná hrana sa hýbe o 4 px namiesto 47.
+
+Audit na `/`: **21/21 OK** (súborové kontroly 19/19), 0 chýb v konzole na
+1440/768/390, B7 zmeral 382 textových prvkov (znaky rotátora sa merajú
+jednotlivo), RMv5 bez nálezu. Celý web sa neauditoval — na pätičke a `PasVyzvy`
+súbežne pracuje druhá ruka a beh by meral rozrobené pásma.
+
+## 2026-08-27 · objazd je orbitálna os, fotky sa presunuli do pásma Prečo
+
+Peter: kruh nech funguje samostatne, podobne ako v predlohe
+(`radial-orbital-timeline`), a animácia fotiek nech ide inde, kde sa hodí.
+
+### Objazd
+
+Prepísaný na orbitálnu os s mechanikou predlohy, ale v palete a v pravidlách
+tohto webu (žiadne fialovo-tyrkysové gradienty, žiadne tiene, **žiadne
+vymyslené `status` a `energy`** — to by padlo na A3):
+
+- Deväť uzlov obieha po asfaltovom prstenci, otáčka 96 s. Uzol vpredu (dole,
+  najbližšie k divákovi) je aktívny a stĺpec vedľa neho vypisuje jeho celok
+  a názov, takže **kruh ukazuje sám od seba a nečaká na klik**.
+- Hĺbka je zo `sin` uhla: krytie 0,45 vzadu až 1 vpredu a `z-index` podľa
+  toho istého, takže kruh pôsobí ako priestor, nie ako plochý ciferník.
+- Klik uzol pripne: otáčanie zastane, uzol sa po **kratšej strane** presunie
+  dopredu a uzly z toho istého celku pulzujú akcentom. Príbuznosť nie je
+  vymyslený vzťah, je to `skupina` zo `sluzby.js`.
+- Uzly nesú **ikony**, nie fotografie: deväť fotiek orezaných do 56 px
+  koliesok nekomunikovalo nič.
+- Otáčanie nejde cez React stav ako v predlohe (`setState` každých 50 ms),
+  ale cez `useRef` + rAF s reálnym delta časom; transformácie sa zapisujú
+  priamo do DOM. React sa prekresľuje len pri zmene aktívnej služby, teda
+  raz za ~10,7 s namiesto dvadsaťkrát za sekundu.
+- Polomer dráhy sa **meria v pixeloch** cez `ResizeObserver`. Percentá by
+  boli chyba: `translate` počíta percentá z veľkosti samotného prvku (56 px
+  uzla), nie z rodiča, takže by uzly skončili natlačené na strede.
+
+Overené: uzly obiehajú, aktívna sa mení sama (2/9 → 1/9 za 9 s), pod
+kurzorom otáčanie stojí, klik na piaty uzol dá `5 / 9` a rozpulzuje dva
+príbuzné, pripnutie drží aj po odchode kurzora, 0 chýb v konzole.
+
+### Fotky
+
+Prelínačka zo stredu objazdu sa presťahovala do pásma **Prečo** ako
+`primitives/Prelinacka.jsx`: štyri zábery cez celú šírku kontajnera v pomere
+16 : 9, popisok sa mení so záberom, prepínače sú čiarky vodorovného
+značenia. V strede kruhu mala fotka ~230 px a menila sa pod prstencom ikon;
+tu je to jediná vec v pásme, na ktorú sa oko sústredí. Zachovaná je
+mechanika správneho prelínania — odchádzajúca vrstva ostáva nepriehľadná
+pod prichádzajúcou a zhasne až po dobehnutí.
+
+### Tri nálezy z auditu na vlastnom novom kóde
+
+- **A1:** pomlčka v `aria-label` uzla. `aria-label` je copy, číta ho čítačka
+  nahlas, takže platí zákaz pomlčiek — nahradená čiarkou.
+- **F5:** prvá fotka prelínačky mala `loading="eager"`, hoci stojí pod
+  ohybom a LCP prvkom je nadpis. Všetky sú `lazy`.
+- **D2:** prepínače prelínačky mali 34 × 44 px. Majú 44 × 44 px, viditeľná
+  je z nich len 24 px čiarka.
+
+Audit po opravách: **254/254 OK, 0 ❌**.
+
+**Poznámka k autorstvu:** `primitives/TextRotate.jsx` a jeho zapojenie do
+ľavého stĺpca sekcie Služby a do hero nie sú z tohto behu — objavili sa
+v pracovnom strome súbežne. Ostávajú, sedia k objazdu (meno služby sa
+vymieňa po znakoch v tom istom okamihu, keď sa mení aktívny uzol).
