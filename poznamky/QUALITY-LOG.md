@@ -666,3 +666,23 @@ Audit **254/254 OK, 0 ❌**, 0 chýb v konzole.
 **Nález pri tom:** popisky čísel nešli cez `sadzba()`, takže riadok končil
 na „typov prvkov v“ a jednopísmenová predložka visela sama (kontrola
 SADZBA). Sadzba platí aj pre texty skladané v komponente, nielen pre dáta.
+
+## 2026-08-27 · sekcia Služby nemala ani jednu fotku
+
+Nález Petra: „Čo realizujeme na pozemných komunikáciách — táto sekcia vôbec
+nezobrazuje fotky.“ Sedelo to. Pri prestavbe objazdu na orbitálnu os
+dostali uzly ikony (deväť fotiek orezaných do 56 px koliesok
+nekomunikovalo nič) a prelínačka fotiek sa presťahovala do pásma Prečo,
+neskôr do oddeľovača. V sekcii tak ostali len ikony a text.
+
+Fotografia je späť **v ostrovčeku**, nie na prstenci: má priemer 42 %
+objazdu, teda **275 px** na 1 440 px, kým v prstenci by mala 56 px. Delí sa
+tak práca: prstenec nesie ikony, ktoré sú čitateľné aj v malom, ostrovček
+nesie skutočnú prácu vo veľkosti, na ktorú sa dá pozerať.
+
+Prelínanie je to isté, aké sa raz už opravovalo: odchádzajúca vrstva ostáva
+nepriehľadná pod prichádzajúcou a zhasne až po dobehnutí. Namerané: 9 fotiek
+v sekcii, v každom okamihu **práve jedna** viditeľná (žiadne presvitanie),
+`alt` sa mení s aktívnou službou.
+
+Audit **254/254 OK, 0 ❌**.

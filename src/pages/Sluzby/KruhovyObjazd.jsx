@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Accessibility, Bike, Blocks, Droplets, Eraser, Hand, Route, ShieldCheck, TrafficCone } from 'lucide-react'
+import { altFotky } from './fotky.js'
+
+const BASE = import.meta.env.BASE_URL
 
 /** Geometria SVG vozovky. Uzly aj oblúk počítajú z tých istých čísel. */
 const STRED = 300
@@ -13,9 +16,9 @@ const PREDOK = 90
 const OTACKA_MS = 96000
 
 /**
- * Ikona pre každú službu. Kruh nesie ikony, nie fotografie — deväť fotiek
- * orezaných do 56 px koliesok nekomunikovalo nič a fotografie majú na tejto
- * stránke vlastné miesto (prelínačka v pásme „Prečo“ a výber realizácií).
+ * Ikona pre každú službu. **Na prstenci** sú ikony, nie fotografie: deväť
+ * fotiek orezaných do 56 px koliesok nekomunikovalo nič. Fotografia je
+ * v ostrovčeku, kde má priemer vyše 280 px a naozaj sa na ňu dá pozerať.
  */
 const IKONY = {
   'znacenie-pre-nevidiacich': Accessibility,
@@ -139,6 +142,17 @@ export default function KruhovyObjazd({ sluzby, active, onActive, reduced = fals
 
   // Otáčanie. rAF s reálnym delta časom, takže rýchlosť nezávisí od
   // snímkovej frekvencie a po prepnutí karty prehliadača nepreskočí.
+  /**
+   * Predchádzajúca fotka ostrovčeka. Drží spodnú vrstvu nepriehľadnú, kým
+   * nová nenabehne; bez nej sú v polovici prechodu priesvitné obe.
+   */
+  const [predchadzajuca, setPredchadzajuca] = useState(active)
+  useEffect(() => {
+    if (predchadzajuca === active) return undefined
+    const t = setTimeout(() => setPredchadzajuca(active), 620)
+    return () => clearTimeout(t)
+  }, [active, predchadzajuca])
+
   useEffect(() => {
     if (stoji) return undefined
     let raf = 0
@@ -204,10 +218,25 @@ export default function KruhovyObjazd({ sluzby, active, onActive, reduced = fals
         <circle cx={STRED} cy={STRED} r={POLOMER} fill="none" stroke="var(--color-bg)" strokeWidth="2.5" strokeDasharray="16 14" />
       </svg>
 
-      {/* Ostrovček: dve rozbiehajúce sa akcentové kružnice a počet služieb.
-          Je to jediné miesto na webe s pulzom — kruh je podpisový prvok a
-          pulz mu dáva stred, ku ktorému sa doprava vzťahuje. */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--color-surface-2)]">
+      {/*
+        Ostrovček: fotografia práve aktívnej služby.
+
+        Bez nej celá sekcia neukázala ani jednu fotku (výtka Petra,
+        27. 8. 2026) — prstenec nesie ikony a ľavý stĺpec text, takže ostrovček
+        je jediné miesto v sekcii, kde je vidieť skutočnú prácu. Má priemer
+        42 % objazdu, teda vyše 280 px na 1 440 px; v prstenci by tá istá
+        fotka mala 56 px.
+
+        Prelína sa tak, že odchádzajúca vrstva ostáva **nepriehľadná** pod
+        prichádzajúcou a zhasne až po dobehnutí. Keby boli v polovici
+        prechodu priesvitné obe, presvitali by cez seba a vyzeralo by to ako
+        porucha — to bol pôvodný „glitch pri prepínaní“.
+
+        Okolo bežia dve akcentové kružnice. Je to jediné miesto na webe
+        s pulzom: kruh je podpisový prvok a pulz mu dáva stred, ku ktorému sa
+        doprava vzťahuje.
+      */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[42%] w-[42%] -translate-x-1/2 -translate-y-1/2">
         {!reduced && (
           <>
             <span aria-hidden="true" className="ostrovcek-pulz absolute inset-0 rounded-full border border-[var(--color-accent)]" />
@@ -218,11 +247,29 @@ export default function KruhovyObjazd({ sluzby, active, onActive, reduced = fals
             />
           </>
         )}
-        <p className="relative text-center font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase leading-[1.6] tracking-[0.2em] text-[rgba(255,255,255,0.72)]">
-          {pocet}
-          <br />
-          služieb
-        </p>
+
+        <div data-hub="" className="absolute inset-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]">
+          {sluzby.map((s, i) => {
+            const jeAktivna = i === active
+            const bolaAktivna = i === predchadzajuca
+            return (
+              <img
+                key={s.slug}
+                src={`${BASE}assets/${s.dlazdica.src}`}
+                width={s.dlazdica.w}
+                height={s.dlazdica.h}
+                alt={jeAktivna ? altFotky(s.dlazdica) : ''}
+                aria-hidden={jeAktivna ? undefined : 'true'}
+                loading="lazy"
+                decoding="async"
+                className={`absolute inset-0 h-full w-full object-cover ${
+                  reduced ? '' : 'transition-[opacity,transform] duration-[var(--duration-base)] ease-[var(--ease-house)]'
+                } ${jeAktivna || bolaAktivna ? 'scale-100 opacity-100' : 'scale-[1.04] opacity-0'}`}
+                style={{ zIndex: jeAktivna ? 2 : bolaAktivna ? 1 : 0 }}
+              />
+            )
+          })}
+        </div>
       </div>
 
       {/* Obaly uzlov MUSIA byť `pointer-events-none` — pozri bod 1 v doku
