@@ -54,7 +54,7 @@ const CISLA = CISLA_FIRMY.map((c) =>
 export default function KtoSme() {
   return (
     <Sekcia id="kto-sme" pasmo="biela">
-      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12 lg:gap-16">
         {/* Namiesto fotografie schéma vozovky, na ktorú sa scrollom nastrieka
             značenie (`CestaSchema`). Fotka tu bola a 28. 8. 2026 padla:
             fotografií je na Domove päť ďalších a šiesta už nič nové
@@ -67,8 +67,8 @@ export default function KtoSme() {
             v mono riadku faktov vpravo — je to najsilnejšie číslo firmy
             a nemá zo stránky zmiznúť len preto, že zmizol jeho rámček. */}
         <Reveal className="lg:col-span-6">
-          <div className="relative">
-            <CestaSchema />
+          <div className="relative h-full">
+            <CestaSchema className="h-full" />
           </div>
         </Reveal>
 
