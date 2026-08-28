@@ -41,7 +41,7 @@ export default function Marquee({ children, className, durationS = 30, pauseOnHo
             would still be keyboard-focusable here, landing screen-reader and
             keyboard users on a "phantom" duplicate with nothing announced.
             `inert` additionally removes it from focus and interaction. */}
-        <div style={{ display: 'flex' }} aria-hidden="true" inert="">
+        <div style={{ display: 'flex' }} aria-hidden="true" inert>
           {children}
         </div>
       </div>

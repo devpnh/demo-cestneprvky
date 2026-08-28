@@ -686,3 +686,75 @@ v sekcii, v každom okamihu **práve jedna** viditeľná (žiadne presvitanie),
 `alt` sa mení s aktívnou službou.
 
 Audit **254/254 OK, 0 ❌**.
+
+## 2026-08-28 · „Ako to robíme“ — všetko stálo a bolo to rozhádzané
+
+Nález Petra, doslova: „prerob Ako to robíme sekciu lebo je otrasna vsetko tam
+len stoji a je to take rozhadzane“. Sedelo oboje a boli to **dve rôzne chyby**,
+nie jedna.
+
+**Stálo to.** Jediná animácia sekcie bol 6 % posun fotky vnútri rámu — pohyb
+pod prahom všímavosti — a nad ním `Reveal`, ktorý celý riadok naraz posunul
+o 22 px. Hýbal sa obal, nie obsah.
+
+**Rozhádzané** to bolo od `items-center`: textový stĺpec niesol čiarku, meno
+a popisok, dokopy ~150 px, vycentrovaných v stĺpci vysokom 437 px. Tri riadky
+= tri malé ostrovčeky plávajúce zakaždým inde, striedavo vľavo a vpravo.
+
+**Skladba.** `items-start` + `lg:h-full`, popisok na `mt-auto`. Prvý pokus
+nechal medzi menom a popiskom 330 px diery — presne tá chyba, ktorú Peter
+odmietol už pri druhom pokuse o túto sekciu („prázdno nie je vzduch“). Dieru
+drží **zvislá akcentová lajna cez celú výšku záberu**: prázdno pozdĺž
+nakreslenej čiary je odstup, nie diera. Nahradila vodorovnú čiarku `w-12`.
+Namerané na 1440: horná hrana mena = horná hrana záberu, spodná hrana popisku
+= spodná hrana záberu, **delta 0 px vo všetkých troch riadkoch** (predtým
+26 / 48 px hore a 0 / −22 px dole).
+
+**Choreografia.** Riadok je jedna `Stagger` skupina (krok 90 ms), tri doby:
+záber sa **položí** cez `clip-path: inset()` od vonkajšej hrany riadku dovnútra
+(0,9 s, `--ease-house`, smer sa strieda s riadkom — cikcak dostal takt),
+zvislá lajna sa kreslí zhora nadol, meno (+90 ms) a popisok (+180 ms)
+nastupujú zdola. Všetko cez zdieľaný `data-odhal` observer, teda CSS mimo
+hlavného vlákna; animujú sa len `opacity`, `transform` a `clip-path`.
+Pri `prefers-reduced-motion` stojí fotka aj výter (`clip-path: none`).
+
+Pozn. k `Stagger`: **ref sa naň dať nesmie** — spreaduje `{...props}` až za
+svoj vlastný `ref`, takže cudzí ref prepíše ten interný, `sleduj()` dostane
+null a riadok ostane navždy neviditeľný. Cieľ parallaxu je preto rám fotky.
+
+Audit **254/254 OK, 0 ❌**, horizontálny overflow 0 na 1440 aj 390.
+
+## 2026-08-28 (2) · „Ako to robíme“ — štvrtý pokus, stoh kariet
+
+Peter po treťom pokuse: „vyzerá jak wordpress pičovina, prerob to na niečo
+modernejšie a použi 21 dev“. Mal pravdu a je to presné: **striedavé riadky
+obrázok-vľavo / obrázok-vpravo sú default každého Elementor a Divi templatu.**
+Navyše ju držala pri živote len zvislá lajna, ktorá vypĺňala 330 px prázdneho
+stĺpca — keď skladbu drží výplň medzery, skladba je zlá.
+
+**21st.dev:** MCP server preň v session pripojený NIE JE (nie je v zozname),
+ale `@21st-dev/cli` áno, účet `simko` prihlásený. `21st get` neprešlo —
+**denný limit 0/2 stiahnutí kódu**, ten istý, čo zablokoval túto sekciu už
+minule. Použitý teda `21st search` (metadata sú zadarmo) a vzor
+`danielpetho/stacking-cards` (id 25275) prekreslený na tokenoch projektu.
+
+**Stoh kariet.** Každá technológia = celoplošná karta: fotka cez celú plochu,
+meno a popisok na nej. Karty sa pripínajú pod hlavičku (`top` 96/112/128) a
+nová sa nasúva na predošlú, ktorá ide na `scale` 0,94 / 0,97 a stmieva sa
+prekryvom 0 → 0,55. Prázdny stĺpec zanikol (fotka a text sú na jednej ploche).
+
+**Dva nálezy pri ladení, oba merané:**
+1. `transform-origin` musí byť **`top center`**, nie default `center`. Pri
+   strede karta pri zmenšení klesne o (1−scale)·výška/2 ≈ 19 px — presne
+   toľko, koľko je odstup `top`, a stoh sa zbehne do jednej hrany. Namerané
+   pred: top 115 / 119 / 219 px. Po: 96 / 112 / 219, teda presne zadané `top`.
+2. Prvý scrim bol pod textom slabý (spodná tretina len 82 %). Prekreslený na
+   plný `--color-accent-2` do 18 % výšky.
+
+Jedna vetva kódu pre všetky šírky — `position: sticky` je responzívne samo
+o sebe, na rozdiel od prvého pokusu (`StickySection`), ktorý mal pod 1024 px
+druhý layout. Toto je ten jeden sticky-scrub na stránku, ktorý E1 povoľuje.
+Pri `prefers-reduced-motion` sa sticky ani scrub nemontuje, karty sú stĺpec.
+
+Namerané 1440 aj 390: 3 karty, scale 1 → 0,94 / 0,97 / 1, prekryv 0 → 0,55,
+horizontálny overflow 0, 0 chýb v konzole. Audit **254/254 OK, 0 ❌**.

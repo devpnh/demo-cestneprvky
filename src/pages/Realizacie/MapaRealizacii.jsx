@@ -49,7 +49,7 @@ export default function MapaRealizacii() {
               key={m}
               onMouseEnter={() => setAktivne(m)}
               onMouseLeave={() => setAktivne(null)}
-              className={`border-b border-[var(--color-border)] py-2 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] transition-colors duration-[var(--duration-fast)] ${
+              className={`border-b border-[var(--color-border)] py-2 font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] transition-colors duration-[var(--duration-hover)] ${
                 aktivne === m ? 'text-[var(--color-text)]' : 'text-[var(--color-muted)]'
               }`}
             >

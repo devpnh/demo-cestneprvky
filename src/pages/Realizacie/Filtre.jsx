@@ -17,7 +17,7 @@ function Cip({ aktivny, onClick, children }) {
       type="button"
       onClick={onClick}
       aria-pressed={aktivny}
-      className={`inline-flex min-h-[44px] items-center gap-2.5 border px-4 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] transition-colors duration-[var(--duration-fast)] ${
+      className={`inline-flex min-h-[44px] items-center gap-2.5 border px-4 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] transition-colors duration-[var(--duration-hover)] ${
         aktivny
           ? 'border-[var(--color-accent)] bg-[var(--color-surface)] font-medium text-[var(--color-text)]'
           : 'border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]'
@@ -52,7 +52,7 @@ function Vyber({ id, stitok, hodnota, onZmena, prazdnyPopis, moznosti }) {
           id={id}
           value={hodnota}
           onChange={(e) => onZmena(e.target.value)}
-          className={`min-h-[44px] w-full appearance-none border bg-[var(--color-bg)] py-2 pl-4 pr-11 font-[family-name:var(--font-mono)] text-[length:var(--text-base)] text-[var(--color-text)] transition-colors duration-[var(--duration-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:w-auto ${
+          className={`min-h-[44px] w-full appearance-none border bg-[var(--color-bg)] py-2 pl-4 pr-11 font-[family-name:var(--font-mono)] text-[length:var(--text-base)] text-[var(--color-text)] transition-colors duration-[var(--duration-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:w-auto ${
             hodnota ? 'border-[var(--color-accent)] font-medium' : 'border-[var(--color-border)] hover:border-[var(--color-text)]'
           }`}
           style={{ borderRadius: 'var(--radius-sm)' }}

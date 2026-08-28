@@ -1,88 +1,119 @@
-import { Cislo, Sekcia, SekciaHlavicka, Tlacidlo } from '../../../components/kit/index.js'
-import { Reveal, Stagger, StaggerItem } from '../../../components/primitives/index.js'
-import { FIRMA } from '../../../content/firma.js'
-import { SLUZBY } from '../../../content/sluzby.js'
-import { MIESTA_REALIZACII, TYPY_PRVKOV } from '../../../content/realizacie.js'
-import GLOBAL from '../../../content/global.json'
+import { Check } from 'lucide-react'
+import { Sekcia, MonoStitok, PasFaktov, Tlacidlo } from '../../../components/kit/index.js'
+import { CestaSchema, Reveal } from '../../../components/primitives/index.js'
+import { CISLA_FIRMY, FIRMA } from '../../../content/firma.js'
+import { MIESTA_REALIZACII } from '../../../content/realizacie.js'
 
 /**
- * Prvé pásmo pod hero: kto sme a čo robíme.
+ * Prvé pásmo pod hero: kto sme a čo za nami stojí.
  *
- * Zadanie (Peter, 27. 8. 2026): „hneď pod hero by malo byť skôr kto sme, čo
- * sme, a nejako to zaujať návštevníka niečím zaujímavým“.
+ * ## Zjednodušené 28. 8. 2026
  *
- * Hero hovorí, ČO firma osádza. Toto pásmo hovorí, KTO to osádza: značka,
- * rok založenia, sídlo a rozsah pôsobenia. Nie je to druhý perex — je to
- * identita a čísla, ktoré sa dajú overiť.
+ * Pásmo narástlo na štyri bloky textu (nadpis, perex, štyri čísla, štyri
+ * tvrdenia s odsekmi, bežiaci pás miest) a bolo z neho druhé „o firme".
+ * Peter vypýtal menej textu a návrat bližšie k tomu, čo mal pôvodný web
+ * v sekcii O NÁS — tri krátke vety a claim.
  *
- * ## Čo má zaujať
+ * Ostal preto claim ako nadpis, jedna veta pod ním, štyri čísla vedľa a
+ * štyri prednosti ako **holé mená bez odsekov**. Celé znenie predností je
+ * na `/o-firme`, kam odtiaľto vedie odkaz.
  *
- * Tri čísla vysadené najväčším rezom stránky, ktoré si pri vstupe do
- * viewportu **dopočítajú svoju hodnotu**. Sú to jediné počítadlá na webe a
- * všetky tri sa rátajú z dát (`SLUZBY`, `TYPY_PRVKOV`, `MIESTA_REALIZACII`),
- * takže nemôže vzniknúť číslo, ktoré by na webe nesedelo s obsahom (A3).
+ * ## Prečo tu nie sú veľké čísla
  *
- * Pod nimi stoja štyri tvrdenia firmy — len nadpisy, bez odsekov. Celé
- * znenie je na `/o-firme`, kam odtiaľto vedie odkaz.
+ * Štyri údaje tu chvíľu stáli vysadené v `--text-6xl` s akcentovou jednotkou
+ * a dopočítavali sa od nuly. Je to najrozšírenejší útvar generovaného webu —
+ * „veľké číslo, malý popisok pod ním, štyrikrát vedľa seba" — a Peter ho
+ * 28. 8. 2026 pomenoval presne tak. Rovnaké slová má aj podklad k dizajnu,
+ * ktorý sme si k tejto práci načítali: veľké číslo s malým popiskom je
+ * šablónová odpoveď.
  *
- * ## Čo tu bolo predtým
+ * Fakty ostávajú, lebo sú to tie správne fakty. Zmenil sa ich útvar: sú to
+ * riadky `údaj — čo znamená` na vlasovej mriežke, sadzba údaja je `--text-xl`
+ * (teda ako meno prednosti nižšie, nie trojnásobok nadpisu) a nič sa
+ * nedopočítava. Číslo, ktoré si pýta pozornosť veľkosťou, tu nemá čo robiť;
+ * pozornosť si má pýtať claim.
  *
- * Pásmo „Prečo Cestné prvky“ s claimom „Šetríme váš čas aj peniaze“. Bolo
- * to tvrdenie o prínose ešte predtým, než sa návštevník dozvedel, s kým má
- * do činenia. Claim ostáva firme, prínosy sú v štyroch tvrdeniach nižšie.
+ * ## Odkiaľ je claim
  *
- * Celoplošný záber, ktorý tu stál, sa osamostatnil do `PasOddelovac` a
- * stojí hneď pod týmto pásmom ako predel — tak si ho Peter vypýtal.
+ * `FIRMA.claim` — „Šetríme váš čas aj peniaze" je doslova nadpis pôvodnej
+ * sekcie O NÁS. Doteraz nebol na webe nikde a pásmo namiesto neho nieslo
+ * `GLOBAL.brand.tagline`, čo je popis odboru, nie tvrdenie firmy.
+ *
+ * Vetu pôvodného webu „Spolupracujeme s významnými európskymi spoločnosťami"
+ * sem zámerne NEBERIEME v tomto znení: je to superlatív o tretích stranách
+ * bez ich mien a `firma.js` ho pre celý web zakazuje. To isté hovorí
+ * `FIRMA.technologie.zaver` overiteľne — „Materiály a technológie odoberáme
+ * od európskych výrobcov" — a v tomto znení stojí v pásme Technológie.
  */
 
-/**
- * Tri čísla o rozsahu práce. Rátajú sa z dát, nevypisujú sa ručne.
- * Rok založenia medzi nimi zámerne nie je: dopočítavať sa k letopočtu od
- * nuly je nezmysel a ako jediné nepočítané číslo by v rade rušil. Rok je
- * v perexe pásma, kde aj patrí.
- */
-const CISLA = [
-  { hodnota: SLUZBY.length, popis: 'služieb v troch celkoch' },
-  { hodnota: TYPY_PRVKOV.length, popis: 'typov prvkov v galérii' },
-  { hodnota: MIESTA_REALIZACII.length, popis: 'miest realizácií na Slovensku' },
-]
+/** Miesta sa doplnia do čísla až tu — `firma.js` o galérii nevie a vedieť nemá. */
+const CISLA = CISLA_FIRMY.map((c) =>
+  c.id === 'miesta' ? { ...c, hodnota: MIESTA_REALIZACII.length } : c,
+)
 
 export default function KtoSme() {
   return (
     <Sekcia id="kto-sme" pasmo="biela">
-      <SekciaHlavicka
-        stitok="Kto sme"
-        nadpis={GLOBAL.brand.tagline}
-        perex={FIRMA.uvod[0]}
-        sirkaNadpisu="max-w-[16ch]"
-        className="[&_h2]:text-[length:var(--text-5xl)]"
-      />
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        {/* Namiesto fotografie schéma vozovky, na ktorú sa scrollom nastrieka
+            značenie (`CestaSchema`). Fotka tu bola a 28. 8. 2026 padla:
+            fotografií je na Domove päť ďalších a šiesta už nič nové
+            nehovorila. Schéma naproti tomu ukáže poradie prác firmy —
+            okraje, deliaca čiara, priečna čiara, priechod a nakoniec
+            varovné pásy v akcente.
 
-      {/* Čísla stoja na vlasovej mriežke, nie v orámovaných dlaždiciach:
-          hierarchiu tu robí veľkosť, nie rám (STANDARDY B6). */}
-      <Stagger className="mt-16 grid grid-cols-1 gap-x-12 gap-y-10 sm:grid-cols-3 lg:mt-20">
-        {CISLA.map((c) => (
-          <StaggerItem key={c.popis} className="border-t border-[var(--color-border)] pt-6">
-            <Cislo hodnota={c.hodnota} popis={c.popis} />
-          </StaggerItem>
-        ))}
-      </Stagger>
+            Plaketa s údajom „do 30 min", ktorá tu chvíľu ležala cez roh
+            schémy, je preč (pokyn Petra, 28. 8. 2026). Samotný údaj ostáva
+            v mono riadku faktov vpravo — je to najsilnejšie číslo firmy
+            a nemá zo stránky zmiznúť len preto, že zmizol jeho rámček. */}
+        <Reveal className="lg:col-span-6">
+          <div className="relative">
+            <CestaSchema />
+          </div>
+        </Reveal>
 
-      <Stagger className="mt-16 grid grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4">
-        {FIRMA.pristup.map((argument) => (
-          <StaggerItem key={argument.nazov} className="border-t border-[var(--color-border)] pt-5">
-            <h3 className="max-w-[20ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-              {argument.nazov}
-            </h3>
-          </StaggerItem>
-        ))}
-      </Stagger>
+        <Reveal className="lg:col-span-6">
+          <MonoStitok>Kto sme</MonoStitok>
+          <h2 className="mt-5 max-w-[13ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)] md:text-[length:var(--text-5xl)]">
+            {FIRMA.claim}
+          </h2>
+          <p className="mt-6 max-w-[46ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[var(--color-muted)]">
+            {FIRMA.uvod[0]}
+          </p>
 
-      <Reveal className="mt-14 lg:mt-16">
-        <Tlacidlo variant="tichy" to="/o-firme">
-          Ako pracujeme
-        </Tlacidlo>
-      </Reveal>
+          {/* Odškrtaný zoznam predností. Sú to tie isté štyri tvrdenia, len
+              namiesto štvorstĺpcovej mriežky nadpisov je z nich zoznam, ktorý
+              sa dá prečítať za sekundu. Fajka je akcentová a 16 px — je to
+              značka, nie ikona so vlastným významom, preto `aria-hidden`. */}
+          <ul className="mt-8 grid grid-cols-1 gap-y-4">
+            {FIRMA.pristup.map((argument) => (
+              <li key={argument.nazov} className="flex items-start gap-3">
+                <Check
+                  aria-hidden="true"
+                  className="mt-[0.2em] h-4 w-4 shrink-0 text-[var(--color-accent)]"
+                  strokeWidth={3}
+                />
+                <span className="font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-text)]">
+                  {argument.nazov}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Zvyšné údaje ako jeden mono riadok, nie ako blok veľkých čísel:
+              ten útvar Peter 28. 8. 2026 odmietol ako typicky generovaný. */}
+          <PasFaktov
+            className="mt-8"
+            fakty={CISLA_FIRMY.map((c) =>
+              [c.predpona, c.hodnota ?? MIESTA_REALIZACII.length, c.jednotka].filter(Boolean).join(' '),
+            )}
+          />
+
+          <Tlacidlo variant="primar" to="/o-firme" className="mt-8">
+            Ako pracujeme
+          </Tlacidlo>
+        </Reveal>
+      </div>
     </Sekcia>
   )
 }

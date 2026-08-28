@@ -81,7 +81,7 @@ export default function KontaktKratky() {
       </Stagger>
 
       <Reveal className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
-        <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+        <Tlacidlo variant="primar" data-cta-obhliadka onClick={() => openObhliadka()}>
           {GLOBAL.contact.ctaLabel}
         </Tlacidlo>
         <Tlacidlo variant="tichy" to="/kontakt">

@@ -39,7 +39,7 @@ export default function Sluzby() {
         nadpis: 'Napíšte nám, čo potrebujete osadiť',
         perex: PROCES[1].popis,
         akcia: (
-          <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+          <Tlacidlo variant="primar" data-cta-obhliadka onClick={() => openObhliadka()}>
             Dohodnúť obhliadku a cenu
           </Tlacidlo>
         ),
@@ -49,7 +49,6 @@ export default function Sluzby() {
       {SKUPINY.map((skupina, i) => {
         const sluzby = sluzbyPodlaSkupiny(skupina.id)
         const prvyCelok = i === 0
-        const tretiCelok = i === 2
         const [nosna, ...zvysne] = sluzby
 
         return (
@@ -70,18 +69,6 @@ export default function Sluzby() {
                     </StaggerItem>
                   ))}
                 </div>
-              </Stagger>
-            ) : tretiCelok ? (
-              /* Tretí celok ide na šírku, nie do tretieho radu dlaždíc:
-                 dva rovnaké rady pod sebou boli najgenerickejší kus tejto
-                 stránky. Rozloženie sa mení, jazyk (fotka, vlasová linka,
-                 „Detail služby“) ostáva rovnaký. */
-              <Stagger className="mt-14">
-                {sluzby.map((s) => (
-                  <StaggerItem key={s.slug}>
-                    <KartaSluzby sluzba={s} variant="riadok" />
-                  </StaggerItem>
-                ))}
               </Stagger>
             ) : (
               <Stagger className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

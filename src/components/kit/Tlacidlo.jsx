@@ -12,8 +12,13 @@ import { ArrowRight } from 'lucide-react'
 // Tailwind v4 nerozhoduje podľa poradia tried v reťazci, ale podľa poradia
 // pravidiel v CSS, takže `px-7` zo základu vyhralo nad `px-0` a tichý odkaz
 // začínal o 28 px vpravo od mriežky (nález Staviteľa Domov).
+// `active:scale-[0.98]`: web nemal doteraz ŽIADNU odozvu na stlačenie —
+// tlačidlo reagovalo až tým, že sa prekreslila stránka. Na dotyku, kde hover
+// neexistuje, to znamenalo ťuknutie do prvku, ktorý nedá najavo, že ťuknutie
+// zaznamenal. Škála je zámerne plytká (0,98) a rýchla, aby to bola odozva,
+// nie animácia; `transform` je už v zozname prechodov kvôli hover posunu.
 const ZAKLAD =
-  'inline-flex min-h-[52px] items-center gap-3 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold transition-[transform,background-color,border-color] duration-[var(--duration-fast)]'
+  'inline-flex min-h-[52px] items-center gap-3 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold transition-[transform,background-color,border-color] duration-[var(--duration-hover)] active:scale-[0.98]'
 
 export default function Tlacidlo({
   variant = 'primar',

@@ -908,13 +908,13 @@ async function reducedMotionDomov() {
       await page.evaluate(() => ({
         video: !!(document.querySelector('[data-hero-video]') || document.querySelector('main video')),
         progres: !!document.querySelector('[data-scroll-progress]'),
-        sticky: !!document.querySelector('[data-sticky], #debarierizacia'),
+        sticky: !!document.querySelector('[data-sticky], #technologie'),
       })),
     )
     // sticky sekcia: H2 musí byť po scrolle na ňu vo viewporte
     out.h2 = await page.evaluate(async () => {
-      const sec = document.querySelector('[data-sticky]') || document.getElementById('debarierizacia')
-      if (!sec) return { ok: false, dovod: 'sticky sekcia sa nenašla ([data-sticky] ani #debarierizacia)' }
+      const sec = document.querySelector('[data-sticky]') || document.getElementById('technologie')
+      if (!sec) return { ok: false, dovod: 'sticky sekcia sa nenašla ([data-sticky] ani #technologie)' }
       window.scrollTo(0, sec.getBoundingClientRect().top + window.scrollY + 100)
       await new Promise((r) => setTimeout(r, 600))
       const h2 = sec.querySelector('h2')
@@ -1014,9 +1014,12 @@ await skontrolujAsync('DIALOGv5', maCestu('/') ? '/' : CESTY[0], async () => {
     await page.waitForTimeout(900)
     await prebudStranku(page)
     const otvoreny = () => page.evaluate(() => !!document.querySelector('[role="dialog"][data-state="open"]'))
-    const spustace = page.locator('button:visible').filter({ hasText: /obhliadk/i })
+    // Podľa `data-cta-obhliadka`, nie podľa textu: filter na /obhliadk/i
+    // chytal aj krok Postupu „Dopyt a obhliadka“, ktorý je prepínač kroku a
+    // dialóg otvárať NEMÁ — kontrola potom hlásila 3/4 na fungujúcom webe.
+    const spustace = page.locator('[data-cta-obhliadka]:visible')
     const pocet = await spustace.count()
-    if (pocet === 0) zlyBod.push('na stránke nie je ani jedno tlačidlo s textom „obhliadk…“')
+    if (pocet === 0) zlyBod.push('na stránke nie je ani jedno tlačidlo s `data-cta-obhliadka`')
     let otvorilo = 0
     for (let i = 0; i < pocet; i += 1) {
       const t = spustace.nth(i)

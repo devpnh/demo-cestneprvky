@@ -50,6 +50,11 @@
 
   /* Motion */
   --ease-house: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Odozva na kurzor a fokus. Je oddelená od `--duration-fast` zámerne:
+     `fast` (0,4 s) je trvanie PRÍCHODU obsahu, nie odozvy na ukazovateľ.
+     Prefarbenie odkazu za 400 ms sa už číta ako oneskorenie rozhrania, nie
+     ako prechod — ruka je na mieste dávno predtým, než sa stav dokreslí. */
+  --duration-hover: 0.16s;
   --duration-fast: 0.4s;
   --duration-base: 0.6s;
   --duration-slow: 0.9s;

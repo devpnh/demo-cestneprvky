@@ -80,7 +80,7 @@ export default function Footer() {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className="inline-flex min-h-[44px] items-center font-[family-name:var(--font-body)] text-[length:var(--text-base)] text-[var(--color-bg)] opacity-85 transition-opacity duration-[var(--duration-fast)] hover:opacity-100"
+                    className="inline-flex min-h-[44px] items-center font-[family-name:var(--font-body)] text-[length:var(--text-base)] text-[var(--color-bg)] opacity-85 transition-opacity duration-[var(--duration-hover)] hover:opacity-100"
                   >
                     {item.label}
                   </Link>
@@ -98,7 +98,7 @@ export default function Footer() {
                 <li key={s.slug}>
                   <Link
                     to={`/sluzby/${s.slug}`}
-                    className="inline-flex min-h-[44px] items-center pr-4 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-85 transition-opacity duration-[var(--duration-fast)] hover:opacity-100"
+                    className="inline-flex min-h-[44px] items-center pr-4 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-85 transition-opacity duration-[var(--duration-hover)] hover:opacity-100"
                   >
                     {s.nazovKratky || s.nazov}
                   </Link>

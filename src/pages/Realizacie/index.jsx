@@ -169,7 +169,7 @@ export default function Realizacie() {
         perex: 'Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup.',
         akcia: (
           <div className="flex flex-wrap gap-4">
-            <Tlacidlo variant="primar" onClick={() => openObhliadka()}>
+            <Tlacidlo variant="primar" data-cta-obhliadka onClick={() => openObhliadka()}>
               Dohodnúť obhliadku a cenu
             </Tlacidlo>
             <Tlacidlo variant="sekundar" to="/kontakt">
@@ -237,7 +237,7 @@ export default function Realizacie() {
                   onClick={() => otvor(i, r.id)}
                   data-dlazdica={r.id}
                   aria-label={`Zväčšiť fotografiu: ${r.alt}`}
-                  className="group block aspect-[4/3] w-full overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className="group block aspect-[4/3] w-full overflow-hidden border border-[var(--color-border)] transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                   style={{ borderRadius: 'var(--radius-sm)' }}
                 >
                   <img

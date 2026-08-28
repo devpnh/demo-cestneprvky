@@ -236,7 +236,15 @@ export default function KruhovyObjazd({ sluzby, active, onActive, reduced = fals
         s pulzom: kruh je podpisový prvok a pulz mu dáva stred, ku ktorému sa
         doprava vzťahuje.
       */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[42%] w-[42%] -translate-x-1/2 -translate-y-1/2">
+      {/* Ostrovček je 54 % šírky objazdu, nie 42 %. Fotografia je jediné
+          miesto celého kruhu, kde vidno samotný prvok — pri 42 % mala na
+          1440 px len 275 px a tvar prvku sa v nej strácal (výtka Petra,
+          28. 8. 2026). Strop dáva geometria vozovky: prstenec je na r = 240
+          so šírkou 52, teda jeho vnútorná hrana je na r = 214 zo 600. Pri
+          54 % má ostrovček polomer 162, takže medzi ním a vozovkou ostáva
+          52 jednotiek bieleho medzikružia — dosť na to, aby kruh ostal
+          čitateľný ako objazd a nie ako terč. */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[54%] w-[54%] -translate-x-1/2 -translate-y-1/2">
         {!reduced && (
           <>
             <span aria-hidden="true" className="ostrovcek-pulz absolute inset-0 rounded-full border border-[var(--color-accent)]" />
@@ -301,7 +309,7 @@ export default function KruhovyObjazd({ sluzby, active, onActive, reduced = fals
                 aria-label={`${s.nazov}, ${jePripnuta ? 'zrušiť výber' : 'vybrať službu'}`}
                 onClick={() => pripni(i)}
                 onFocus={() => onActive(i)}
-                className={`pointer-events-auto flex h-full w-full items-center justify-center rounded-full border-2 transition-[background-color,border-color,transform,color] duration-[var(--duration-fast)] ease-[var(--ease-house)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)] ${
+                className={`pointer-events-auto flex h-full w-full items-center justify-center rounded-full border-2 transition-[background-color,border-color,transform,color] duration-[var(--duration-hover)] ease-[var(--ease-house)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)] ${
                   jeAktivna
                     ? 'scale-125 border-[var(--color-bg)] bg-[var(--color-accent)] text-[var(--color-on-accent)]'
                     : jePribuzna

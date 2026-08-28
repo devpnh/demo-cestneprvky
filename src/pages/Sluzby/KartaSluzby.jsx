@@ -39,7 +39,7 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
     return (
       <Link
         to={`/sluzby/${sluzba.slug}`}
-        className="group grid grid-cols-1 items-center gap-6 border-t border-[var(--color-border)] py-8 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] sm:grid-cols-12 sm:gap-10"
+        className="group grid grid-cols-1 items-center gap-6 border-t border-[var(--color-border)] py-8 transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)] sm:grid-cols-12 sm:gap-10"
       >
         <Fotka
           src={d.src}
@@ -61,7 +61,7 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
           <span className="mt-5 flex min-h-[44px] items-center gap-2 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)]">
             Detail služby
             <ArrowRight
-              className="h-4 w-4 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[3px]"
+              className="h-4 w-4 text-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] group-hover:translate-x-[3px]"
               aria-hidden="true"
             />
           </span>
@@ -72,7 +72,7 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
 
   const obal = holy
     ? 'group flex h-full flex-col'
-    : `group flex h-full flex-col border border-[var(--color-border)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] focus-visible:border-[var(--color-accent)] ${
+    : `group flex h-full flex-col border border-[var(--color-border)] transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)] focus-visible:border-[var(--color-accent)] ${
         nosna ? 'p-5 sm:p-7' : 'p-5'
       }`
 
@@ -87,7 +87,7 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
       {/* Bez rámu drží text pohromade vlasová linka nad ním; v akcente sa
           prekresľuje pri hoveri rovnako, ako inde rám karty. */}
       <div
-        className={`${holy ? 'mt-6 border-t border-[var(--color-border)] pt-5 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]' : ''} flex flex-1 flex-col`}
+        className={`${holy ? 'mt-6 border-t border-[var(--color-border)] pt-5 transition-colors duration-[var(--duration-hover)] group-hover:border-[var(--color-accent)]' : ''} flex flex-1 flex-col`}
       >
         <h3
           className={`font-[family-name:var(--font-display)] ${
@@ -119,7 +119,7 @@ export default function KartaSluzby({ sluzba, variant = 'ram' }) {
         <span className="mt-auto flex min-h-[44px] items-center gap-2 pt-6 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)]">
           Detail služby
           <ArrowRight
-            className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
+            className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] group-hover:translate-x-[2px]"
             aria-hidden="true"
           />
         </span>

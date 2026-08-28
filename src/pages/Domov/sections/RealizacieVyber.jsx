@@ -21,6 +21,7 @@ const VYBER_ID = [
   'zubacka-nastupiste', // Vodiaca línia · Zubačka
   'signalny-pas-priechod-ba', // Signálny pás · Bratislava
   'nivy-interier-vstup', // Vodiaca línia v interiéri · Bratislava Nivy
+  'protismykovy-nater-nastupiste', // Protišmykový náter · nástupište
 ]
 
 const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Boolean)
@@ -33,7 +34,23 @@ const VYBER = VYBER_ID.map((id) => GALERIA.find((r) => r.id === id)).filter(Bool
  */
 const popis = (r) => `${r.prvok} · ${castiPopisu(r)[0]}`
 
-const [VEDUCI, ...VEDLAJSIE] = VYBER
+/**
+ * Štyri zábery: vedúci a doplnkový v ľavom stĺpci, dva v pravom.
+ *
+ * Štvrtý pribudol 28. 8. 2026 (pokyn Petra: doplniť fotku na vyplnenie
+ * priestoru). Priestor bol meraný, nie odhadnutý — ľavý stĺpec mal 553 px
+ * (jeden záber 4 : 3 s popiskom), pravý 760 px (dva zábery 3 : 2), takže pod
+ * vedúcou fotkou ostávalo 207 px prázdna.
+ *
+ * S doplnkovým záberom 3 : 2 má ľavý stĺpec 1082 px; aby ho pravý dobehol,
+ * jeho zábery sú štvorcové (2 × 520 + 32 = 1072 px). Rozdiel je 10 px, teda
+ * oba stĺpce končia opticky spolu a diera nevznikne ani na jednej strane.
+ *
+ * `protismykovy-nater-nastupiste` je zvolený aj obsahovo: prvé tri zábery sú
+ * dvakrát vodiaca línia a raz signálny pás, štvrtý pridáva štvrtý typ prvku
+ * (protišmykový náter), takže výber ukazuje rozsah, nie tri varianty jedného.
+ */
+const [VEDUCI, DRUHY, ...VEDLAJSIE] = VYBER
 
 export default function RealizacieVyber() {
   return (
@@ -65,7 +82,23 @@ export default function RealizacieVyber() {
           </StaggerItem>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+        {DRUHY ? (
+          <StaggerItem className="lg:col-span-7 lg:row-start-2">
+            <Fotka
+              src={DRUHY.src}
+              w={DRUHY.w}
+              h={DRUHY.h}
+              alt={DRUHY.alt}
+              pomer="3/2"
+              popis={popis(DRUHY)}
+              sizes="(min-width: 1024px) 58vw, 100vw"
+              maxSirka={Infinity}
+              className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"
+            />
+          </StaggerItem>
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:col-span-5 lg:row-span-2 lg:row-start-1 lg:grid-cols-1">
           {VEDLAJSIE.map((r) => (
             <StaggerItem key={r.id}>
               <Fotka
@@ -73,7 +106,7 @@ export default function RealizacieVyber() {
                 w={r.w}
                 h={r.h}
                 alt={r.alt}
-                pomer="3/2"
+                pomer="1/1"
                 popis={popis(r)}
                 sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
                 className="[&_figcaption]:border-t [&_figcaption]:border-[var(--color-border)] [&_figcaption]:pt-4"

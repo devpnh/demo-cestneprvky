@@ -9,7 +9,7 @@ import { castiPopisu } from './skupiny.js'
 const BASE = import.meta.env.BASE_URL
 
 const TRIEDA_TLACIDLA =
-  'inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center border border-[rgba(255,255,255,0.28)] text-[var(--color-bg)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]'
+  'inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center border border-[rgba(255,255,255,0.28)] text-[var(--color-bg)] transition-[colors,transform] active:scale-[0.96] duration-[var(--duration-hover)] hover:border-[var(--color-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]'
 
 /**
  * Veľký náhľad jednej realizácie.

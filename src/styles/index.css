@@ -4,6 +4,28 @@
 @import "./tokens.css";
 @import "tailwindcss";
 
+/* `hover:` len na zariadeniach, ktoré naozaj vedia hoverovať.
+   Tailwind v4 túto bránu ŠTANDARDNE NEDÁVA (overené: v `dist/assets/*.css`
+   nebol ani jeden `@media (hover: hover)`), takže na dotyku sa `:hover`
+   spustí ťuknutím a ostane visieť, kým používateľ neťukne inam. Prakticky:
+   primárne CTA sa po ťuknutí natrvalo posunulo o 2 px a stmavlo na
+   `--color-accent-deep`, dlaždice realizácií ostali s akcentovým rámom.
+   Jedno pravidlo tu ošetrí všetkých ~60 `hover:` utilít naraz — lepšie než
+   `[@media(hover:hover)]:` dopisované po jednom a zabúdané pri ďalšej
+   utilite. Špecificitu to nemení, len zabalí pravidlo do media query.
+
+   POZOR na zápis: skrátená forma `@custom-variant hover (…)` vnorenú media
+   query nezvládne — s ňou Tailwind nevygeneroval ANI JEDNO `:hover` pravidlo
+   (overené: 0 výskytov `:hover` v `dist/assets/*.css`) a všetky hover stavy
+   ticho zmizli. Blokový zápis so `@slot` je jediný správny. */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* Tailwind 4 is used utility-first with arbitrary values reading tokens
    directly, e.g. bg-[var(--color-bg)] — there is no @theme mapping here on
    purpose: tokens.css is the single file the generator rewrites, and a
@@ -357,4 +379,27 @@
 }
 .js-motion [data-objazd-detail] {
   animation: objazd-detail var(--duration-fast) var(--ease-house) both;
+}
+
+/*
+ * Viditeľný fokus z klávesnice — jedno pravidlo pre celý web.
+ *
+ * Doteraz na webe nebol ŽIADNY globálny štýl fokusu a jednotlivé komponenty
+ * si ho riešili samy alebo vôbec: kroky Postupu, položky objazdu a väčšina
+ * odkazov nemali pri prechode tabulátorom nijaký viditeľný stav. Pre
+ * dodávateľa debarierizačných prvkov je to obzvlášť zlá vizitka.
+ *
+ * `:where()` drží špecificitu na nule, takže komponent, ktorý má vlastný
+ * (výraznejší) fokus, toto pravidlo prebije bez `!important`.
+ *
+ * `:focus-visible`, nie `:focus`: prsteň dostane len ten, kto naozaj
+ * navigoval klávesnicou. Po kliknutí myšou sa nezobrazí.
+ *
+ * Akcent má voči obom pásmam webu (biele #ffffff aj tmavé #26292c) kontrast
+ * nad 3:1, teda spĺňa WCAG 1.4.11 pre negrafický prvok na oboch.
+ */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }

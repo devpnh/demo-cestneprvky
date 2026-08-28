@@ -38,8 +38,8 @@ export default function NotFound() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <button
                 type="button"
-                onClick={() => openObhliadka()}
-                className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-accent-deep)]"
+                data-cta-obhliadka onClick={() => openObhliadka()}
+                className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-[colors,transform] active:scale-[0.98] duration-[var(--duration-hover)] hover:bg-[var(--color-accent-deep)]"
                 style={{ borderRadius: 'var(--radius-sm)' }}
               >
                 Dohodnúť obhliadku a cenu
@@ -47,7 +47,7 @@ export default function NotFound() {
               </button>
               <Link
                 to="/"
-                className="inline-flex min-h-[52px] items-center justify-center border border-[var(--color-border)] px-7 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-text)]"
+                className="inline-flex min-h-[52px] items-center justify-center border border-[var(--color-border)] px-7 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium text-[var(--color-text)] transition-[colors,transform] active:scale-[0.98] duration-[var(--duration-hover)] hover:border-[var(--color-text)]"
                 style={{ borderRadius: 'var(--radius-sm)' }}
               >
                 Späť na úvod
@@ -61,7 +61,7 @@ export default function NotFound() {
                 <li key={o.path}>
                   <Link
                     to={o.path}
-                    className="group flex min-h-[44px] items-center justify-between gap-6 border-b border-[var(--color-border)] py-5 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)]"
+                    className="group flex min-h-[44px] items-center justify-between gap-6 border-b border-[var(--color-border)] py-5 transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)]"
                   >
                     <span>
                       <span className="block font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold text-[var(--color-text)]">
@@ -72,7 +72,7 @@ export default function NotFound() {
                       </span>
                     </span>
                     <ArrowUpRight
-                      className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
+                      className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] group-hover:translate-x-[2px]"
                       aria-hidden="true"
                     />
                   </Link>

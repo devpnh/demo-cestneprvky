@@ -180,7 +180,7 @@ export default function Prelinacka({
               >
                 <span
                   aria-hidden="true"
-                  className={`block h-[2px] w-6 transition-colors duration-[var(--duration-fast)] ${
+                  className={`block h-[2px] w-6 transition-colors duration-[var(--duration-hover)] ${
                     i === aktivny
                       ? 'bg-[var(--color-accent)]'
                       : 'bg-[var(--color-border)] group-hover:bg-[var(--color-muted)]'

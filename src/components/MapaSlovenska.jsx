@@ -104,7 +104,9 @@ export default function MapaSlovenska({
               fill="var(--color-accent)"
               stroke="var(--color-bg)"
               strokeWidth={LEM}
-              className="transition-all duration-[var(--duration-fast)]"
+              // Mení sa iba polomer — `transition-all` by prechádzalo aj
+              // `fill`, `stroke` a `stroke-width`, ktoré sú konštantné.
+              className="transition-[r] duration-[var(--duration-hover)]"
             />
             <title>{b.nazov}</title>
           </g>

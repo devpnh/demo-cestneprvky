@@ -20,7 +20,7 @@ import { sadzba } from '../../lib/sadzba.js'
  *
  * Pri `prefers-reduced-motion` sa číslo rovno vypíše.
  */
-export default function Cislo({ hodnota, popis, trvanie = 1200, className = '' }) {
+export default function Cislo({ hodnota, popis, jednotka = null, predpona = null, trvanie = 1200, className = '' }) {
   const cisloRef = useRef(null)
 
   useEffect(() => {
@@ -63,17 +63,43 @@ export default function Cislo({ hodnota, popis, trvanie = 1200, className = '' }
     }
   }, [hodnota, trvanie])
 
+  // Popis pre čítačku aj pre `aria-label` musí obsahovať jednotku, inak
+  // odznie „30 a lepený obrubník má 100 % pevnosti" — veta bez rozmeru.
+  const cele = [predpona, `${hodnota}`, jednotka, popis].filter(Boolean).join(' ')
+
   return (
     <div className={className}>
       {/* Prístupnostne je hodnota v `aria-label`, aby čítačka nečítala
           medzistavy odpočtu; vizuálna vrstva je pre ňu skrytá. */}
       <p
-        aria-label={`${hodnota} ${popis}`}
-        className="font-[family-name:var(--font-display)] text-[length:var(--text-6xl)] font-semibold leading-none tracking-[var(--tracking-tight)] text-[var(--color-text)]"
+        aria-label={cele}
+        className="flex items-baseline gap-[0.18em] font-[family-name:var(--font-display)] text-[length:var(--text-6xl)] font-semibold leading-none tracking-[var(--tracking-tight)] text-[var(--color-text)]"
       >
+        {/* Predpona („do 30 min") je menšia a tlmená: je to spojka vo vete,
+            nie údaj. Bez nej by sa „30 min" čítalo ako trvanie práce. */}
+        {predpona ? (
+          <span
+            aria-hidden="true"
+            className="font-[family-name:var(--font-body)] text-[length:var(--text-xl)] font-normal text-[var(--color-muted)]"
+          >
+            {predpona}
+          </span>
+        ) : null}
         <span ref={cisloRef} aria-hidden="true" className="tabular-nums">
           {hodnota}
         </span>
+        {/* Jednotka je súčasťou čísla, nie popisku pod ním: „30" nad popiskom
+            sa číta ako poradie, „30 min" ako údaj. Je preto na tej istej
+            účiarie, len v menšom stupni a v akcente — aby ju oko vzalo naraz
+            s číslom a nie ako ďalší riadok. */}
+        {jednotka ? (
+          <span
+            aria-hidden="true"
+            className="text-[length:var(--text-2xl)] text-[var(--color-accent)]"
+          >
+            {jednotka}
+          </span>
+        ) : null}
       </p>
       <p
         aria-hidden="true"

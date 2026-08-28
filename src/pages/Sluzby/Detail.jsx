@@ -332,7 +332,7 @@ export default function SluzbaDetail() {
         perex: PROCES[1].popis,
         akcia: (
           <div className="flex flex-wrap items-center gap-6">
-            <Tlacidlo variant="primar" onClick={() => openObhliadka(sluzba.nazov)}>
+            <Tlacidlo variant="primar" data-cta-obhliadka onClick={() => openObhliadka(sluzba.nazov)}>
               Dohodnúť obhliadku a cenu
             </Tlacidlo>
             <Tlacidlo variant="tichy" to="/sluzby">

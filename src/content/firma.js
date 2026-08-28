@@ -131,6 +131,56 @@ export const FIRMA = sadzbaHlboko({
 })
 
 /**
+ * Štyri čísla o firme na Domov.
+ *
+ * Predtým tu boli tri čísla o WEBE: „9 služieb v troch celkoch", „14 typov
+ * prvkov v galérii", „15 miest realizácií". Prvé dve sú metriky obsahu tejto
+ * stránky — mesto ani stavebná firma nekupuje podľa toho, koľko fotiek má
+ * dodávateľ v galérii. Nahradené sú štyrmi údajmi, na ktoré sa naozaj pýtajú:
+ * ako dlho to robíme, ako dlho po nás trvá obmedzenie, kde pracujeme a podľa
+ * čoho navrhujeme.
+ *
+ * Každý je dohľadateľný v podkladoch, žiadny nie je odhad:
+ *  - roky: `rokZalozenia` (2012), počítané k aktuálnemu roku, nie zapísané
+ *    ručne — inak číslo o rok zostarne a nikto si nevšimne;
+ *  - 30 minút: `sluzby.js`, lepené obrubníky, výhody aj perex; je to najsilnejší
+ *    údaj firmy a doteraz bol zahrabaný v odseku na podstránke;
+ *  - miesta: dĺžka `MIESTA_REALIZACII` z `realizacie.js`, dopĺňa ju sekcia;
+ *  - vyhlášky: `normy` nižšie, dve položky.
+ *
+ * `jednotka` je súčasťou čísla, nie popisku pod ním. „30" nad popiskom
+ * „minút do plnej pevnosti" sa číta ako poradové číslo; „30 min" sa číta ako
+ * údaj. Rozdiel je celý zmysel tohto pásma.
+ */
+export const CISLA_FIRMY = [
+  {
+    id: 'roky',
+    hodnota: new Date().getFullYear() - 2012,
+    jednotka: 'rokov',
+    popis: 'na pozemných komunikáciách, od roku 2012',
+  },
+  {
+    id: 'pevnost',
+    hodnota: 30,
+    jednotka: 'min',
+    predpona: 'do',
+    popis: 'a lepený obrubník má 100 % pevnosti',
+  },
+  {
+    id: 'miesta',
+    hodnota: null, // dopĺňa sekcia z `MIESTA_REALIZACII`
+    jednotka: 'miest',
+    popis: 'realizácií od Bratislavy po Tornaľu',
+  },
+  {
+    id: 'vyhlasky',
+    hodnota: 2,
+    jednotka: 'vyhlášky',
+    popis: 'podľa ktorých navrhujeme debarierizačné prvky',
+  },
+]
+
+/**
  * Zápis v registroch. Verejné údaje z Obchodného registra SR (Okresný súd
  * Žilina) a z Registra právnických osôb Štatistického úradu SR, overené
  * 26. 8. 2026. Nahrádzajú zástupné texty, ktoré tu boli predtým.

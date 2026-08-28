@@ -118,7 +118,7 @@ export default function Kontakt() {
                       {href ? (
                         <a
                           href={href}
-                          className="flex min-h-[44px] flex-col py-6 transition-colors duration-[var(--duration-fast)] hover:text-[var(--color-accent-deep)]"
+                          className="flex min-h-[44px] flex-col py-6 transition-colors duration-[var(--duration-hover)] hover:text-[var(--color-accent-deep)]"
                         >
                           {stitok}
                           <span className={hodnotaTrieda}>{hodnota}</span>

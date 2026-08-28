@@ -16,7 +16,7 @@ export const TYPY_PRVKOV = [
 ]
 
 const POLE =
-  'w-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 font-[family-name:var(--font-body)] text-[16px] leading-[var(--leading-normal)] text-[var(--color-text)] outline-none transition-colors duration-[var(--duration-fast)] focus:border-[var(--color-accent)]'
+  'w-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 font-[family-name:var(--font-body)] text-[16px] leading-[var(--leading-normal)] text-[var(--color-text)] outline-none transition-colors duration-[var(--duration-hover)] focus:border-[var(--color-accent)]'
 
 const LABEL =
   'block font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-muted)]'
@@ -155,7 +155,7 @@ export default function ZadanieForm({ predvolenyTyp = '' }) {
       <button
         type="submit"
         disabled={posiela}
-        className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-accent-deep,#C5250D)] disabled:opacity-60"
+        className="inline-flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-7 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-[colors,transform] active:scale-[0.98] duration-[var(--duration-hover)] hover:bg-[var(--color-accent-deep,#C5250D)] disabled:opacity-60"
         style={{ borderRadius: 'var(--radius-sm)' }}
       >
         {posiela ? 'Posiela sa…' : 'Poslať zadanie'}

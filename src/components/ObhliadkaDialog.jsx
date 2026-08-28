@@ -60,7 +60,7 @@ export default function ObhliadkaDialog() {
               </div>
               <DialogPrimitive.Close
                 aria-label="Zavrieť"
-                className="flex h-[44px] w-[44px] shrink-0 items-center justify-center border border-[var(--color-border)] text-[var(--color-text)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-text)]"
+                className="flex h-[44px] w-[44px] shrink-0 items-center justify-center border border-[var(--color-border)] text-[var(--color-text)] transition-[colors,transform] active:scale-[0.96] duration-[var(--duration-hover)] hover:border-[var(--color-text)]"
                 style={{ borderRadius: 'var(--radius-sm)' }}
               >
                 <XIcon className="h-5 w-5" aria-hidden="true" />

@@ -46,23 +46,18 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const reduced = useReducedMotion()
   const tlacidloRef = useRef(null)
-  const postupRef = useRef(null)
 
-  // Jedno meranie scrollu pre dve veci: prah 24 px pre farbu hlavičky a
-  // podiel prejdenej stránky pre značkovací pás pod ňou. Podiel ide priamo
-  // do štýlu elementu, nie cez `setState` — pri každom rámci by prekreslenie
-  // celej hlavičky bola zbytočná práca.
+  // Meranie scrollu pre prah 24 px, po ktorom hlavička zbelie.
+  //
+  // Merala sa tu aj druhá vec: podiel prejdenej stránky pre značkovací pás
+  // pod hlavičkou. Pás bol odstránený (pokyn Petra, 28. 8. 2026), s ním aj
+  // jeho výpočet — `scrollHeight` pri každom rámci je nútené prepočítanie
+  // rozloženia a nemá sa počítať pre nič.
   useEffect(() => {
     let raf = 0
     const measure = () => {
       raf = 0
       setScrolled(window.scrollY > 24)
-      const el = postupRef.current
-      if (el) {
-        const dokopy = document.documentElement.scrollHeight - window.innerHeight
-        const podiel = dokopy > 0 ? Math.min(1, Math.max(0, window.scrollY / dokopy)) : 0
-        el.style.width = `${podiel * 100}%`
-      }
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure)
@@ -121,34 +116,6 @@ export default function Header() {
           color: light ? 'var(--color-bg)' : 'var(--color-text)',
         }}
       >
-        {/*
-          Postup stránkou ako čerstvo natiahnuté vodorovné značenie: pás
-          rastie zľava a odkrýva prerušovanú čiaru. Vzor je na vnútornej
-          vrstve so `100vw` šírkou a maskuje ho vonkajší `overflow-hidden`,
-          takže sa dĺžka čiarok pri raste nemení — pri `transform: scaleX`
-          by sa naťahovali a z prerušovanej čiary by sa stala guma.
-
-          Pri `prefers-reduced-motion` sa element vôbec nemontuje; audit RMv5
-          kontroluje práve to, že pod týmto nastavením `[data-scroll-progress]`
-          na stránke nie je.
-        */}
-        {!reduced && (
-          <div
-            ref={postupRef}
-            aria-hidden="true"
-            data-scroll-progress
-            className="absolute bottom-0 left-0 h-[3px] w-0 overflow-hidden"
-          >
-            <div
-              className="h-full w-[100vw]"
-              style={{
-                backgroundImage:
-                  'repeating-linear-gradient(90deg, var(--color-accent) 0 14px, transparent 14px 24px)',
-              }}
-            />
-          </div>
-        )}
-
         <div className="mx-auto flex h-full max-w-[var(--container-max)] items-center justify-between gap-6 px-[var(--container-padding-x)]">
           <Link to="/" className="flex min-h-[44px] shrink-0 items-center" aria-label="Cestné prvky s.r.o., domov">
             <img
@@ -182,7 +149,7 @@ export default function Header() {
                     {item.label}
                     <span
                       aria-hidden="true"
-                      className={`absolute inset-x-0 top-full h-[2px] origin-left bg-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-house)] ${
+                      className={`absolute inset-x-0 top-full h-[2px] origin-left bg-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] ease-[var(--ease-house)] ${
                         isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                       }`}
                     />
@@ -196,7 +163,7 @@ export default function Header() {
             <a
               href={PHONE_HREF}
               aria-label={`Zavolať ${PHONE}`}
-              className={`flex h-[44px] min-w-[44px] items-center justify-center gap-2 border px-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-medium transition-colors duration-[var(--duration-fast)] sm:px-4 ${
+              className={`flex h-[44px] min-w-[44px] items-center justify-center gap-2 border px-3 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-medium transition-colors duration-[var(--duration-hover)] sm:px-4 ${
                 light
                   ? 'border-[rgba(255,255,255,0.35)] hover:border-[var(--color-bg)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-text)]'
@@ -209,8 +176,8 @@ export default function Header() {
 
             <button
               type="button"
-              onClick={() => openObhliadka()}
-              className={`hidden h-[44px] items-center px-5 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-semibold transition-colors duration-[var(--duration-fast)] md:flex ${
+              data-cta-obhliadka onClick={() => openObhliadka()}
+              className={`hidden h-[44px] items-center px-5 font-[family-name:var(--font-body)] text-[length:var(--text-sm)] font-semibold transition-colors duration-[var(--duration-hover)] md:flex ${
                 light
                   ? 'bg-[var(--color-bg)] text-[var(--color-text)] hover:bg-[var(--color-surface)]'
                   : 'bg-[var(--color-surface-2)] text-[var(--color-bg)] hover:bg-[var(--color-accent)]'
@@ -275,11 +242,12 @@ export default function Header() {
 
           <button
             type="button"
+            data-cta-obhliadka
             onClick={() => {
               zavri(false)
               openObhliadka()
             }}
-            className="mt-8 flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-6 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)]"
+            className="mt-8 flex min-h-[52px] items-center justify-center gap-3 bg-[var(--color-accent)] px-6 font-[family-name:var(--font-body)] text-[1.1875rem] font-semibold text-[var(--color-on-accent)] transition-transform duration-[var(--duration-hover)] active:scale-[0.98]"
             style={{ borderRadius: 'var(--radius-sm)' }}
           >
             Dohodnúť obhliadku a cenu

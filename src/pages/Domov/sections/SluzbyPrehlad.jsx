@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { Sekcia, SekciaHlavicka, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
+import { Sekcia, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
 import { Reveal, Stagger, StaggerItem, TextRotate } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { SKUPINY, SLUZBY, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
@@ -9,9 +9,6 @@ import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
 import { altFotky } from '../../Sluzby/fotky.js'
 
 const BASE = import.meta.env.BASE_URL
-
-/** Perex sa skladá z názvov celkov v dátach, aby na webe nevznikla nová veta o klientovi. */
-const PEREX = `Deväť služieb v troch celkoch: ${SKUPINY.map((s) => s.nazov.toLowerCase()).join(', ')}.`
 
 /** Texty rotátorov. Sú to celé polia z dát, nie vety poskladané v JSX. */
 const MENA_SLUZIEB = SLUZBY.map((s) => s.nazov)
@@ -104,21 +101,39 @@ export default function SluzbyPrehlad() {
   const sluzba = SLUZBY[aktivna]
 
   return (
-    <Sekcia id="sluzby" pasmo="biela">
-      <SekciaHlavicka
-        stitok="Služby"
-        nadpis="Čo realizujeme na pozemných komunikáciách"
-        perex={PEREX}
-        akcia={
-          <Tlacidlo variant="tichy" to="/sluzby">
-            Všetkých deväť služieb
-          </Tlacidlo>
-        }
-      />
-
+    // Spodné odsadenie je jeden a pol násobku a je to inline štýl zámerne
+    // (`Sekcia` nemá asymetrické odsadenie; trieda `pb-*` by sa s
+    // `py-[var(...)]` bila o rovnakú špecificitu).
+    //
+    // Dôvod je meraný: štvorec objazdu má 660 px, textový stĺpec vedľa neho
+    // ~450 px a stĺpce sú centrované na spoločnú os, takže koleso prečnieva
+    // dole o ~105 px. Od jeho spodnej hrany po tmavé pásmo Technológií ostávalo
+    // 108 px — a keďže je to kruh, jeho optická hmota siaha ďalej než jeho box.
+    // Koleso tak vyzeralo, akoby zasahovalo do nasledujúcej sekcie (výtka
+    // Petra, 28. 8. 2026). S 1,5× odsadením je odstup ~300 px a objazd sa
+    // uzatvára v svojom pásme.
+    <Sekcia id="sluzby" pasmo="biela" style={{ paddingBottom: 'calc(var(--section-padding-y) * 1.5)' }}>
       {siroke ? (
-        <div className="mt-16 grid grid-cols-12 items-center gap-16">
+        // Odstup od hlavičky je väčší, než býva medzi hlavičkou a obsahom
+        // pásma. Dôvod je tvar: objazd je kruh a jeho box sa dotýka jeho
+        // najvyššieho bodu, takže pri bežných 64 px sa okraj kruhu tlačil
+        // k perexu a opticky vstupoval do hlavičky (výtka Petra, 28. 8. 2026).
+        // So 144 px má kruh okolo seba dych a hlavička ostáva samostatným blokom.
+        <div className="grid grid-cols-12 items-center gap-16">
           <Reveal className="col-span-5">
+            {/* Nadpis stojí TU, v stĺpci vedľa objazdu, nie nad celým pásmom.
+                Samostatná hlavička sekcie („Čo realizujeme na pozemných
+                komunikáciách" s perexom, potom krátke „Čo osádzame" s odkazom
+                na deväť služieb) bola nad kruhom oddelená medzerou a čítala sa
+                ako nadpis stránky, nie ako popis toho, čo sa točí vedľa.
+                Odkaz „Všetkých deväť služieb" je preč — pod nadpisom stojí
+                „Detail služby", ktorý vedie na práve vybraný prvok, a to je
+                z tohto miesta užitočnejšia cesta ďalej (pokyn Petra, 28. 8. 2026). */}
+            <MonoStitok sCiarkou={false}>Služby</MonoStitok>
+            <h2 className="mb-10 mt-4 max-w-[12ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+              Čo osádzame
+            </h2>
+
             {/* Postup po deviatich službách ako značenie: dokreslená časť je
                 akcentová, zvyšok vlasový. Nahrádza číslovanie 01/02/03, ktoré
                 sem podľa STANDARDY B1 nepatrí. */}
@@ -212,7 +227,11 @@ export default function SluzbyPrehlad() {
           </Reveal>
         </div>
       ) : (
-        <div className="mt-12">
+        <div>
+          <MonoStitok sCiarkou={false}>Služby</MonoStitok>
+          <h2 className="mb-10 mt-4 max-w-[12ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+            Čo osádzame
+          </h2>
           {SKUPINY.map((skupina, si) => (
             <div key={skupina.id} className={si === 0 ? '' : 'mt-12'}>
               <MonoStitok sCiarkou={false}>{skupina.nazov}</MonoStitok>
@@ -221,7 +240,7 @@ export default function SluzbyPrehlad() {
                   <StaggerItem as="li" key={s.slug}>
                     <Link
                       to={`/sluzby/${s.slug}`}
-                      className="group flex items-center gap-5 border-b border-[var(--color-border)] py-4 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)]"
+                      className="group flex items-center gap-5 border-b border-[var(--color-border)] py-4 transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)]"
                     >
                       <img
                         src={`${BASE}assets/${s.dlazdica.src}`}
@@ -242,7 +261,7 @@ export default function SluzbyPrehlad() {
                         </h3>
                       </div>
                       <ArrowRight
-                        className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-[2px]"
+                        className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] group-hover:translate-x-[2px]"
                         aria-hidden="true"
                       />
                     </Link>
