@@ -16,7 +16,7 @@ const META = routaPodlaCesty('/novinky')
  *
  * Pôvodný web mal `Novinky` ako samostatnú položku v menu
  * (`https://www.cestneprvky.sk/novinky/`, výpis WordPress príspevkov) a
- * pätička ho opakovala pod nadpisom NOVINKY / Recent Posts. Pri prerábke
+ * pätička ho opakovala vo vlastnom stĺpci. Pri prerábke
  * skončil jediný článok ako predposledné pásmo `O firme`, kde ho nikto
  * nehľadal: tá stránka odpovedá na otázku „kto ste a ako pracujete“ a výpis
  * článkov na ňu neodpovedá. Presunom sa `O firme` zbavila pásma, ktoré k jej
@@ -86,12 +86,11 @@ export default function Novinky() {
       }}
     >
       <Sekcia id="vypis" pasmo="biela">
-        <SekciaHlavicka
-          stitok="Výpis"
-          nadpis="Písali o nás"
-          perex="Máme jeden článok a uvádzame z neho presne to, čo o ňom vieme — titulok a rok. Telo ani médium nedopĺňame."
-          sirkaNadpisu="max-w-[14ch]"
-        />
+        {/* Bez perexu. Veta o tom, že máme jeden článok a nedopĺňame telo,
+            je poznámka pre klienta, nie pre návštevníka — ten vidí, koľko
+            položiek vo výpise je, a vysvetľovať mu to je ospravedlňovanie sa
+            (pokyn Petra, 4. 9. 2026). Hlavička je tým jednostĺpcová. */}
+        <SekciaHlavicka stitok="Výpis" nadpis="Písali o nás" sirkaNadpisu="max-w-[14ch]" />
 
         {clanky.length ? (
           <Reveal className="mt-14 lg:mt-20">

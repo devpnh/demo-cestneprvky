@@ -57,7 +57,7 @@ export const ROUTY = sadzbaHlboko([
     vNavigacii: true,
     title: 'Novinky | Cestné prvky s.r.o.',
     description:
-      'Čo sa u nás udialo a kde o nás písali. Bezpečnostné ostrovčeky v Žilinskom kraji a služby, ktorými ich staviame.',
+      'Čo sa u nás udialo a kde o nás písali. Bezpečnostné ostrovčeky Žilinskej župy a ďalšie novinky firmy Cestné prvky s.r.o.',
   },
   {
     path: '/kontakt',
