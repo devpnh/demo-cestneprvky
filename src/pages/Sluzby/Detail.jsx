@@ -327,7 +327,6 @@ export default function SluzbaDetail() {
          nad každou stránkou zoslabol na výplň. Dialóg si predvyplní typ
          prvku názvom služby. */
       vyzva={{
-        stitok: 'Obhliadka',
         nadpis: `Dohodneme obhliadku na ${(sluzba.nazovKratky || sluzba.nazov).toLowerCase()}`,
         perex: PROCES[1].popis,
         akcia: (

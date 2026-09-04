@@ -186,7 +186,10 @@ export default function Kontakt() {
       <Sekcia id="sidlo" pasmo="biela">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
           <Reveal className="lg:col-span-7">
-            <MapaSlovenska popis={`Mapa Slovenska so sídlom firmy v Žiline, ${ADRESA}`} />
+            {/* `sidloAkcent`: Žilina je tu jediná značka na mape, takže smie
+                niesť značkovú červenú — na `/realizacie` je červená vyhradená
+                bodom realizácií a sídlo tam ostáva atramentové. */}
+            <MapaSlovenska sidloAkcent popis={`Mapa Slovenska so sídlom firmy v Žiline, ${ADRESA}`} />
           </Reveal>
 
           <div className="lg:col-span-5">

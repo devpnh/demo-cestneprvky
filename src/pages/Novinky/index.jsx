@@ -70,7 +70,6 @@ export default function Novinky() {
       nadpis="Čo sa u nás udialo"
       /* Výzva — rovnaká ako na „O firme“: text prvého kroku z `PROCES`. */
       vyzva={{
-        stitok: 'Ďalší krok',
         nadpis: 'Dohodneme si obhliadku',
         perex: PROCES[0].popis,
         akcia: (

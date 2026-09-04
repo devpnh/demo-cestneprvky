@@ -1,7 +1,5 @@
 import Seo from '../../components/Seo.jsx'
 import { routaPodlaCesty } from '../../components/layout/routy.js'
-import { PasOddelovac } from '../../components/kit/index.js'
-import { useReducedMotion } from '../../lib/useReducedMotion.js'
 import Hero from './sections/Hero.jsx'
 import KtoSme from './sections/KtoSme.jsx'
 import SluzbyPrehlad from './sections/SluzbyPrehlad.jsx'
@@ -32,20 +30,18 @@ const META = routaPodlaCesty('/')
  *
  * Súbor zrušenej sekcie ostáva v `poznamky/removed/`.
  *
- * `PasOddelovac` je fotografia cez celú šírku okna medzi dvomi pásmami.
- * Nie je to obsahové pásmo a `data-pasmo` nemá, takže do rytmu nevstupuje;
- * opticky je však tmavý, preto stojí medzi dvomi svetlými a nikdy nie tesne
- * pod hero.
+ * Celoplošná fotografia medzi `KtoSme` a `SluzbyPrehlad` (`PasOddelovac`)
+ * padla 4. 9. 2026 na pokyn majiteľa: bol to predel bez obsahu a paralaxa
+ * v ňom pri krajných polohách scrollu odhaľovala svetlý pruh pozadia rámu.
+ * Pásma na seba nadväzujú priamo; odstup drží polovičné spodné odsadenie
+ * `KtoSme` (rovnaký spoj ako `Proces` → `KontaktKratky`).
  */
 export default function Domov() {
-  const reduced = useReducedMotion()
-
   return (
     <>
       <Seo title={META?.title} description={META?.description} />
       <Hero />
       <KtoSme />
-      <PasOddelovac id="vodiaca-linia-pozdlz-cesty" reduced={reduced} />
       <SluzbyPrehlad />
       <Technologie />
       <RealizacieVyber />

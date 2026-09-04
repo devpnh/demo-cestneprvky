@@ -7,6 +7,10 @@ import { sadzba } from '../../lib/sadzba.js'
  * spodnú hranu nadpisu. Dvojstĺpcová verzia je odpoveď na starý nález
  * „perex visí vo vzduchu vedľa H2“ — perex má vlastný stĺpec dorazený na
  * pravý okraj kontajnera, nie voľne plávajúci text.
+ *
+ * Spodné zarovnanie platí, kým je vpravo TEXT. Pásmo, kde vpravo stojí
+ * tlačidlo, si skladá stĺpce samo (`PasVyzvy`) — tam je pravý stĺpec iný
+ * útvar a spodná hrana ho k nadpisu neviaže.
  */
 export default function SekciaHlavicka({
   stitok,
@@ -25,7 +29,10 @@ export default function SekciaHlavicka({
         <div className={jednoStlpec ? '' : 'lg:col-span-7'}>
           {stitok ? <MonoStitok tmava={tmava}>{sadzba(stitok)}</MonoStitok> : null}
           <Ako
-            className={`mt-5 text-balance font-[family-name:var(--font-display)] ${
+            /* Horný odstup patrí štítku, nie nadpisu: bez štítku by nad
+               nadpisom ostalo 20 px prázdna, ktorá pri stredovom zarovnaní
+               posunie celý stĺpec nadol. */
+            className={`${stitok ? 'mt-5 ' : ''}text-balance font-[family-name:var(--font-display)] ${
               Ako === 'h1' ? 'text-[length:var(--text-5xl)]' : 'text-[length:var(--text-4xl)]'
             } font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] ${sirkaNadpisu} ${
               tmava ? 'text-[var(--color-bg)]' : 'text-[var(--color-text)]'

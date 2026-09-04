@@ -84,7 +84,6 @@ export default function OFirme() {
       nadpis="Dopravné stavby od roku 2012"
       /* Výzva — text prvého kroku z `PROCES`, akcie sú obhliadka a galéria. */
       vyzva={{
-        stitok: 'Ďalší krok',
         nadpis: 'Dohodneme si obhliadku',
         perex: PROCES[0].popis,
         akcia: (

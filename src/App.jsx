@@ -1,7 +1,6 @@
 import { useRef } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { useLenis } from './lib/useLenis.js'
-import DemoBadge from './components/DemoBadge.jsx'
 import ObhliadkaDialog from './components/ObhliadkaDialog.jsx'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
@@ -86,7 +85,6 @@ export default function App() {
       </main>
       <Footer />
       <ObhliadkaDialog />
-      <DemoBadge />
     </>
   )
 }

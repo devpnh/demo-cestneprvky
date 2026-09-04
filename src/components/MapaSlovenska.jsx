@@ -22,6 +22,7 @@ import { MAPA_OBRYS, MAPA_SIDLO, MAPA_VIEWBOX } from '../content/mapa.js'
  * @param {string|null} [props.aktivne] názov zvýrazneného bodu (drží ho stránka)
  * @param {(nazov: string|null) => void} [props.naNajazd] hlásenie nájazdu myšou
  * @param {boolean} [props.sidlo] kresliť prstenec a menovku sídla
+ * @param {boolean} [props.sidloAkcent] kresliť značku sídla značkovou červenou
  * @param {string} props.popis obsah `aria-label`
  * @param {string} [props.className] trieda na `<svg>`
  */
@@ -30,6 +31,7 @@ export default function MapaSlovenska({
   aktivne = null,
   naNajazd = null,
   sidlo = true,
+  sidloAkcent = false,
   popis,
   className = 'w-full',
 }) {
@@ -60,7 +62,19 @@ export default function MapaSlovenska({
         strokeLinejoin="round"
       />
 
-      {/* Sídlo: prstenec, aby sa nepomýlilo s realizáciou. */}
+      {/*
+        Sídlo: prstenec, aby sa nepomýlilo s realizáciou.
+
+        `sidloAkcent` prepne značku do značkovej červenej. Kreslí ju tak
+        `/kontakt`, kde je sídlo jediná značka na mape a atramentový prstenec
+        pôsobil ako cudzí prvok v inak červeno-atramentovej stránke (Peter).
+        `/realizacie` ostáva atramentové zámerne — tam je červená rezervovaná
+        pre body realizácií a červené sídlo by medzi ne splynulo.
+
+        Prstenec a bod sú grafika (limit 3:1), menovka je 18 px text (limit
+        4,5:1). Preto dva odtiene: `--color-accent` má na ploche mapy 3,71:1 a
+        na text by nestačil, `--color-accent-deep` má 5,28:1 (STANDARDY B7).
+      */}
       {sidlo ? (
         <g>
           <circle
@@ -68,10 +82,15 @@ export default function MapaSlovenska({
             cy={MAPA_SIDLO.y}
             r={uzke ? 20 : 11}
             fill="none"
-            stroke="var(--color-text)"
+            stroke={sidloAkcent ? 'var(--color-accent)' : 'var(--color-text)'}
             strokeWidth={uzke ? 5 : 3}
           />
-          <circle cx={MAPA_SIDLO.x} cy={MAPA_SIDLO.y} r={uzke ? 6 : 3} fill="var(--color-text)" />
+          <circle
+            cx={MAPA_SIDLO.x}
+            cy={MAPA_SIDLO.y}
+            r={uzke ? 6 : 3}
+            fill={sidloAkcent ? 'var(--color-accent)' : 'var(--color-text)'}
+          />
           {/* Jediná menovka na mape. Bez nej by prstenec nikto neprečítal
               ako sídlo a mapa by nemala orientačný bod. */}
           <text
@@ -80,7 +99,7 @@ export default function MapaSlovenska({
             fontFamily="var(--font-mono)"
             fontSize={uzke ? 30 : 18}
             letterSpacing={uzke ? 2.4 : 1.4}
-            fill="var(--color-text)"
+            fill={sidloAkcent ? 'var(--color-accent-deep)' : 'var(--color-text)'}
           >
             ŽILINA
           </text>

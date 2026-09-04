@@ -53,7 +53,13 @@ const CISLA = CISLA_FIRMY.map((c) =>
 
 export default function KtoSme() {
   return (
-    <Sekcia id="kto-sme" pasmo="biela">
+    // Spodné odsadenie je polovičné a je to inline štýl zámerne (`Sekcia`
+    // nemá asymetrické odsadenie a trieda by sa s jej vlastnou bila o rovnakú
+    // špecificitu). Pod týmto pásmom stál do 4. 9. 2026 celoplošný
+    // fotografický predel; po jeho zrušení sedia dve svetlé pásma na sebe
+    // a plné odsadenie z oboch strán by z toho spoja urobilo prázdnu dieru.
+    // S polovičným je spoj rovnako široký ako `Proces` → `KontaktKratky`.
+    <Sekcia id="kto-sme" pasmo="biela" style={{ paddingBottom: 'calc(var(--section-padding-y) / 2)' }}>
       <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12 lg:gap-16">
         {/* Namiesto fotografie schéma vozovky, na ktorú sa scrollom nastrieka
             značenie (`CestaSchema`). Fotka tu bola a 28. 8. 2026 padla:

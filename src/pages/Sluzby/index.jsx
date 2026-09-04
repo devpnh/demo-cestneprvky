@@ -34,7 +34,6 @@ export default function Sluzby() {
          patrí. Perex je druhý krok procesu: prvý sa začína „Napíšete nám…“
          a vedľa tohto nadpisu znel ako zajakávanie. */
       vyzva={{
-        stitok: 'Obhliadka',
         nadpis: 'Napíšte nám, čo potrebujete osadiť',
         perex: PROCES[1].popis,
         akcia: (

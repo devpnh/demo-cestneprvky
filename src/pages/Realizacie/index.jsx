@@ -160,7 +160,6 @@ export default function Realizacie() {
       stitok="Realizácie"
       nadpis="Fotografie realizovaných prvkov"
       vyzva={{
-        stitok: 'Zadanie',
         nadpis: 'Pošlite zadanie k prvku z galérie',
         perex: 'Napíšte nám typ prvku, miesto a rozsah prác. Ozveme sa a dohodneme ďalší postup.',
         akcia: (
@@ -176,12 +175,18 @@ export default function Realizacie() {
       }}
     >
       {/*
-        `padding="ziadne"` + vlastný spodný padding z toho istého tokenu: medzi
-        lajnou `StranHlavicka` a filtračnou lištou inak stáli dva spodné/horné
-        paddingy nad sebou (2 × 79 px) a prvá fotka spadla pod ohyb. Rytmus
-        drží spodná hrana pásma, ktorá ostáva na `--section-padding-y`.
+        Vlastné paddingy namiesto `padding="plne"`. Plný horný padding (79 px)
+        nad spodným paddingom `StranHlavicka` dával 2 × 79 px a prvá fotka
+        spadla pod ohyb; nula ich naopak zlepila a filtračná lišta sedela
+        priamo na hrane tmavého pásma (výtka Petra). Horná hrana preto beží na
+        malom tokene — lišta má nad sebou vzduch, ale mriežka ostáva nad
+        ohybom. Spodná hrana drží rytmus pásma na `--section-padding-y`.
       */}
-      <Sekcia pasmo="biela" padding="ziadne" className="pb-[var(--section-padding-y)]">
+      <Sekcia
+        pasmo="biela"
+        padding="ziadne"
+        className="pt-[var(--section-padding-y-sm)] pb-[var(--section-padding-y)]"
+      >
         <Reveal>
           <Filtre
             skupiny={SKUPINY_PRVKOV}

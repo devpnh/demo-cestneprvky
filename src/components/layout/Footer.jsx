@@ -58,7 +58,7 @@ export default function Footer() {
         <Stagger className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           <StaggerItem className="lg:col-span-4">
             <img
-              src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
+              src={`${import.meta.env.BASE_URL}assets/92-logo-cestne-prvky-clean.png`}
               width={145}
               height={86}
               alt="Cestné prvky s.r.o."

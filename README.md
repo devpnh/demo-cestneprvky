@@ -30,9 +30,6 @@ alone.
 - `.github/workflows/deploy.yml`.
 - `src/components/Seo.jsx` — reads `global.json` at runtime; never needs
   editing itself.
-- `src/components/DemoBadge.jsx` — the "Nezáväzný návrh — PNH Media" mark.
-  A demo carries the client's logo and must never be mistakable for their
-  live site (PLAN.md §4).
 - `src/components/primitives/**` — the technique library sections are built
   from. Sections *use* these; they don't reimplement them.
 - `src/lib/**` — the motion vocabulary (`motion.js`), the reduced-motion

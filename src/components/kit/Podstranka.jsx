@@ -55,7 +55,7 @@ export default function Podstranka({
       {children}
 
       {vyzva ? (
-        <PasVyzvy stitok={vyzva.stitok} nadpis={vyzva.nadpis} perex={vyzva.perex} akcia={vyzva.akcia} />
+        <PasVyzvy nadpis={vyzva.nadpis} perex={vyzva.perex} akcia={vyzva.akcia} />
       ) : null}
     </>
   )

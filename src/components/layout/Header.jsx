@@ -119,7 +119,7 @@ export default function Header() {
         <div className="mx-auto flex h-full max-w-[var(--container-max)] items-center justify-between gap-6 px-[var(--container-padding-x)]">
           <Link to="/" className="flex min-h-[44px] shrink-0 items-center" aria-label="Cestné prvky s.r.o., domov">
             <img
-              src={`${import.meta.env.BASE_URL}assets/91-logo-cestne-prvky-alpha.png`}
+              src={`${import.meta.env.BASE_URL}assets/92-logo-cestne-prvky-clean.png`}
               width={145}
               height={86}
               alt="Cestné prvky s.r.o."
