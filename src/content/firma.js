@@ -15,8 +15,12 @@ export const FIRMA = sadzbaHlboko({
   rokZalozenia: 2012,
   claim: 'Šetríme váš čas aj peniaze',
 
+  /**
+   * Veta o založení firmy a sídle sa nepoužíva (Peter, 28. 8. 2026): rok
+   * 2012 stojí v titule stránky O firme aj v čísle „od roku 2012“, Žilina je
+   * v pätičke a na kontakte. Úvod začína tým, čo firma osádza.
+   */
   uvod: [
-    'Firma Cestné prvky s.r.o. bola založená v roku 2012. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku.',
     'Osádzame značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a spomaľovače dopravy. Pracujeme na cestách, chodníkoch, priechodoch, parkoviskách aj vo vnútorných priestoroch.',
   ],
 

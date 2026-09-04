@@ -42,6 +42,13 @@
   --container-max: 78rem;
   --container-padding-x: clamp(1.25rem, 4vw, 2.5rem);
 
+  /* Výška hlavičky podstránky. Fullscreen je len hero Domova; podstránky
+     majú všetky rovnaké pásmo bez ohľadu na dĺžku titulu (Peter, 28. 8.
+     2026). Hodnota je pevná, nie clamp: dve podstránky vedľa seba v jednom
+     okne musia mať hlavičku na milimeter rovnakú. Kroky sú tri, lebo na
+     390 px sa titul láme na viac riadkov než na 1440 px. */
+  --hlavicka-vyska: 34rem;
+
   /* Radius — ostrý základ */
   --radius-sm: 2px;
   --radius-md: 6px;
@@ -84,6 +91,20 @@ h3 {
 ::selection {
   background-color: var(--color-accent);
   color: var(--color-on-accent);
+}
+
+/* Kroky výšky hlavičky podstránky. Breakpointy sú `md` a `lg` Tailwindu,
+   aby sa zhodovali s bodom, kde titul a perex prechádzajú do dvoch stĺpcov. */
+@media (min-width: 768px) {
+  :root {
+    --hlavicka-vyska: 33rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --hlavicka-vyska: 35rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

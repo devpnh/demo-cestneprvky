@@ -87,7 +87,7 @@ export default function Kontakt() {
       meta={META}
       stitok="Kontakt"
       nadpis="Napíšte nám typ prvku, miesto a rozsah"
-      perex="Ozveme sa a dohodneme ďalší postup. Sídlime v Žiline a realizujeme prvky pozemných komunikácií po celom Slovensku."
+      perex="Ozveme sa a dohodneme ďalší postup."
     >
 
       {/* Spojenie a formulár. Formulár je zámerne na svetlom pásme — jeho polia

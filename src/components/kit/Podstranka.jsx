@@ -13,6 +13,12 @@ import PasVyzvy from './PasVyzvy.jsx'
  * Rytmus pásiem vnútri `children` si stráži stránka (STANDARDY B5: nikdy dve
  * tmavé za sebou). Keďže `PasVyzvy` je tmavý, POSLEDNÉ pásmo v `children`
  * musí byť svetlé — to je jediné pravidlo, ktoré šablóna kladie navonok.
+ *
+ * `perex` a `fakty` sú nepovinné a hlavička bez nich stojí. Perex NEDEDÍ
+ * `meta.description`: popis pre vyhľadávače je písaný pre výsledok hľadania
+ * („Pozrite si rozsah prác…“, „Filtrujte podľa prvku a miesta.“) a nad
+ * titulom podstránky znel ako marginália (výtka Petra, 28. 8. 2026). Kto
+ * chce perex, napíše ho stránke priamo.
  */
 export default function Podstranka({
   meta = null,
@@ -35,7 +41,7 @@ export default function Podstranka({
         stitok={stitok}
         drobky={drobky}
         nadpis={nadpis}
-        perex={perex ?? meta?.description}
+        perex={perex}
         fakty={fakty}
         akcie={akcie}
       />

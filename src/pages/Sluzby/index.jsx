@@ -29,7 +29,6 @@ export default function Sluzby() {
       meta={META}
       stitok="Služby"
       nadpis="Prvky pozemných komunikácií"
-      fakty={['9 služieb', '3 celky', 'Od roku 2012']}
       /* CTA. Nadpisom bol claim firmy, ktorý takto stál na dvanástich
          stránkach zo štrnástich a zoslabol na výplň; ostáva na Domove, kde
          patrí. Perex je druhý krok procesu: prvý sa začína „Napíšete nám…“

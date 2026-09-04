@@ -26,12 +26,19 @@ import { sadzba } from '../../lib/sadzba.js'
  * Hlavička webu je nad týmto pásmom priehľadná s bielym textom — rieši to
  * `Header` podľa prvého `data-pasmo` v `<main>`. Preto si horné odsadenie
  * pod fixnú lištu drží toto pásmo samo.
+ *
+ * Výška je PEVNÁ (`--hlavicka-vyska`), nie odvodená od obsahu. Celú obrazovku
+ * zaberá len hero Domova; podstránky majú jedno pásmo rovnakej veľkosti, aby
+ * prechod medzi nimi nemenil miesto, kde začína obsah (Peter, 28. 8. 2026).
+ * Titul preto stojí o stupeň nižšie než hero (`--text-5xl`) a má širšiu mieru
+ * (22ch): najdlhší názov služby má 51 znakov a pri 16ch a `--text-6xl` sa lámal
+ * na štyri riadky, ktoré sa do pevnej výšky nezmestili.
  */
 export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fakty = null, akcie = null }) {
   return (
     <section
       data-pasmo="tmava"
-      className="relative isolate flex min-h-[clamp(22rem,42vw,30rem)] items-end overflow-hidden bg-[var(--color-surface-2)] pb-[var(--section-padding-y-sm)] pt-[calc(72px+var(--section-padding-y-sm))]"
+      className="relative isolate flex h-[var(--hlavicka-vyska)] items-end overflow-hidden bg-[var(--color-surface-2)] pb-[var(--section-padding-y-sm)] pt-[calc(72px+var(--section-padding-y-sm))]"
     >
       <ZnacenieMotiv />
 
@@ -79,13 +86,13 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
             <SplitText
               as="h1"
               text={String(sadzba(nadpis))}
-              className="max-w-[16ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-6xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)] lg:col-span-7"
+              className="max-w-[22ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-4xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)] md:text-[length:var(--text-5xl)] lg:col-span-7"
             />
             {perex ? (
               <Reveal
                 as="p"
                 oneskorenie={220}
-                className="max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-lg)] leading-[var(--leading-normal)] text-[rgba(255,255,255,0.78)] lg:col-span-5 lg:ml-auto"
+                className="max-w-[52ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[rgba(255,255,255,0.78)] md:text-[length:var(--text-lg)] lg:col-span-5 lg:ml-auto"
               >
                 {sadzba(perex)}
               </Reveal>

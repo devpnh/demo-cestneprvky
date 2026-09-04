@@ -758,3 +758,95 @@ Pri `prefers-reduced-motion` sa sticky ani scrub nemontuje, karty sú stĺpec.
 
 Namerané 1440 aj 390: 3 karty, scale 1 → 0,94 / 0,97 / 1, prekryv 0 → 0,55,
 horizontálny overflow 0, 0 chýb v konzole. Audit **254/254 OK, 0 ❌**.
+
+## 2026-08-28 (3) · `/o-firme` postavená nanovo: šesť tém v troch pásmach
+
+**Výtka Petra:** „bordel v tom texte, nie je to dobre rozložené“. Merateľne:
+stránka bola jeden súbor na 482 riadkov, v ktorom tri pásma niesli šesť tém.
+Pásmo „Firma“ malo naraz identitu firmy, výpočet technológií so zoznamom
+a záverečnú vetu o dodávateľoch; tmavé pásmo malo konzultácie, dve vyhlášky
+a päť značiek materiálov (1 469 px súvislého textu). Nad tým všetkým mriežka
+štyroch veľkých dopočítavaných čísel — ten istý útvar, ktorý Peter deň
+predtým odmietol na Domove ako typicky generovaný.
+
+**Rozobrané na sekcie ako Domov** (`src/pages/OFirme/sections/`), jedno
+pásmo = jedna otázka: `Profil` (kto sme a čo osádzame) → `Technologie` (čím
+pracujeme) → `Pristup` (čo z toho plynie) → `PasOddelovac` → `Legislativa`
+(podľa čoho a kam po konzultáciu) → `Materialy` (z čoho) → `Aktuality`.
+Rytmus b-t-b-[predel]-b-t-b-b, nikdy dve tmavé za sebou, posledné svetlé.
+Hlavička a pätička sa nedotkli — sú spoločné pre celý web.
+
+**Fakty ostali, útvar sa zmenil.** Veľké čísla nahradil technický list
+v `Profil` (založená / sídlo / pôsobnosť / miesta, všetko počítané z dát) a
+jeden údaj vysadený veľký v `Pristup` — „do 30 min“ je jediné číslo firmy,
+ktoré rozhoduje o zákazke, a doteraz bolo zahrabané v odseku.
+
+**Pohyb (`FotkaVyter`).** Fotografia sa pri vstupe do okna vytiera zdola
+`clip-path`om — ten istý pohyb, akým `ObrazokSmerovy` mení zábery pri
+nájazde, ale použitý ako príchod obsahu. V triptychu technológií sa tri
+výtery reťazia po 110 ms a každý stĺpec má inú rýchlosť paralaxy (0,10 /
+0,18 / 0,13); pri rovnakých hodnotách sa rámy hýbu unisono a paralax je
+cítiť ako trhanie. Vlastný `IntersectionObserver` (ako v `Cislo`), lebo
+zdieľaná vrstva `data-odhal` má stavy napevno v CSS a piaty variant kvôli
+jednej stránke by sa o týždeň použil inde.
+
+**Dva nálezy z merania na vlastnom novom kóde:**
+1. Mono popisky v triptychu stáli v troch rôznych výškach (mená postupov
+   majú 2 aj 3 riadky). Opravené `flex h-full flex-col` + `mt-auto`.
+2. Portrétový rám 3/4 bral z fotky retardérov (600×390) pruh 292 px a ťahal
+   ho na 380 px — mäkká fotka predstierajúca rozlíšenie (F2). Triptych je
+   preto štvorec: tá istá fotka si berie 390 px a ostáva ostrá.
+
+Grounding: `21st search` (metadata zadarmo, kód sa neťahal) — `rolling-list`
+a `hover-list-with-sticky-image` potvrdili, že rovnaký útvar už v projekte
+je (`ObrazokSmerovy`, `Stagger`), takže sa nič nepridávalo.
+
+Namerané 1440 aj 390: výter ide `inset(0% 0% 100%)` → `inset(0%)`, po
+scrolle 0 neodhalených prvkov, pri `prefers-reduced-motion` je všetko rovno
+viditeľné, 0 chýb v konzole. Audit celého webu **254/254 OK, 0 ❌**.
+
+## 2026-08-28 (4) · `/o-firme`: jedna mriežka, hlavička bez marginálií, video
+
+**Výtka Petra:** „ten alignment toho textu ma zabíja na niektorých miestach“,
+„odstráň marginálie z hero sekcie napravo“, „implementuj video z Desktopu“.
+
+**Zmerané, nie odhadnuté.** Ľavé hrany všetkých textových blokov na 1440 px
+boli pred opravou na jedenástich rôznych osiach:
+
+    136 · 176 · 438 · 536 · 547 · 677 · 740 · 752 · 855 · 936 · 1042
+
+Príčina: každé pásmo si delilo dvanásťstĺpcovú mriežku inak — hlavička sekcie
+7/5 (perex na 855), tvrdenia 5/7 plus odrážkové odsadenie (677), vyhlášky
+a aktuality 4/8 (547), značky 6/6 (752). Väčšina osí je od seba ~100 px, teda
+dosť na to, aby oko videlo nesúlad, a málo na to, aby vyzeral zámerne.
+
+**Oprava:** stránka má **jediné delenie — polovica a polovica**
+(`OFirme/HlavickaPasma.jsx`, os 136 a 752) a stĺpce sú zarovnané na vrch, nie
+na spodnú hranu nadpisu. Akcentová značka pri tvrdeniach je nad menom, nie
+pred ním, takže text začína presne na osi stĺpca. Technický list v Profile je
+`col-span-3` v dvanástich stĺpcoch, aby tretia bunka padla na 752, nie na 740.
+
+Po oprave: **136 a 752** vo všetkých pásmach; navyše len bunky rovnakých
+mriežok (triptych 536/936, list 444/1060) a zdieľaný `PasVyzvy` (855), ktorý
+je spoločný pre celý web a nemenil sa.
+
+**Hlavička podstránky** na `/o-firme` nedostáva `perex` — napravo od titulu
+nestojí nič. Veta „Osádzame značenie…“ tým pádom na stránke stojí raz, v
+Profile. Kit sa nemenil, `perex` je nepovinný.
+
+**Video.** `~/Desktop/video.mp4` (8 s, 1280×720, 18,7 MB) prekódované na
+`public/video/znacenie.mp4` — H.264 crf 31, bez zvuku, faststart, **2 758 kB**
+(limit hero videa je 3 MB) + poster 116 kB a 960px poster 76 kB. Nasadené ako
+`PasVideo` na mieste fotografického oddeľovača, teda medzi dvomi svetlými
+pásmami (opticky je tmavé). Pravidlá sú tie isté ako pri hero na Domove:
+poster je vždy v DOM, video sa naň prelína po `canplay`, vzniká len nad
+1024 px, nie pri `prefers-reduced-motion` ani `Save-Data`, `muted playsInline
+loop`, `tabIndex={-1}`.
+
+Prvá verzia bola pruh `clamp(18rem,46vh,32rem)` a orezala 40 % obrazu; na
+pokyn Petra („nekropni to tak veľmi“) je pás v natívnom pomere **16:9 cez celú
+šírku okna**, teda bez orezu (poistka `max-h-[92svh]` pre ultraširoké
+monitory). `alt` popisuje, čo je na zábere, a netvrdí, že je to realizácia
+klienta — v katalógu `REALIZACIE` tento súbor nie je.
+
+Audit celého webu **254/254 OK, 0 ❌**.

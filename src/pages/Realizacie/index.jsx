@@ -22,9 +22,6 @@ import Lightbox from './Lightbox.jsx'
 const META = routaPodlaCesty('/realizacie')
 const BASE = import.meta.env.BASE_URL
 
-/** Koľko služieb má v galérii aspoň jednu fotku (fakt do hlavičky, počítaný z dát). */
-const POCET_SLUZIEB = new Set(GALERIA.map((r) => r.sluzba)).size
-
 /**
  * Koľko dlaždíc má mriežka pod 640 px pred rozkliknutím.
  *
@@ -162,7 +159,6 @@ export default function Realizacie() {
       meta={META}
       stitok="Realizácie"
       nadpis="Fotografie realizovaných prvkov"
-      fakty={[`${GALERIA.length} fotografií`, `${POCET_SLUZIEB} služieb`, 'Exteriér a interiér']}
       vyzva={{
         stitok: 'Zadanie',
         nadpis: 'Pošlite zadanie k prvku z galérie',

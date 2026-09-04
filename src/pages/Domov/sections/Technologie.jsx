@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { motion, useMotionTemplate, useScroll, useTransform } from 'motion/react'
 import { MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
-import { Reveal } from '../../../components/primitives/index.js'
+import { Krajnica, Reveal } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { srcSetPre } from '../../../lib/obrazky.js'
 import { FIRMA } from '../../../content/firma.js'
@@ -189,6 +189,7 @@ function Karta({ krok, index, pocet, priebeh, reduced }) {
 
 export default function Technologie() {
   const reduced = useReducedMotion()
+  const sekciaRef = useRef(null)
   const stohRef = useRef(null)
   // Rozsah je prísne rastúci a v [0,1] — `useTransform` s klesajúcim alebo
   // rovným rozsahom hodí vo WAAPI chybu offsetov a zhasne celú stránku
@@ -200,10 +201,16 @@ export default function Technologie() {
 
   return (
     <section
+      ref={sekciaRef}
       id="technologie"
       data-pasmo="tmava"
-      className="bg-[var(--color-surface-2)] py-[var(--section-padding-y)] text-[var(--color-bg)]"
+      className="relative bg-[var(--color-surface-2)] py-[var(--section-padding-y)] text-[var(--color-bg)]"
     >
+      {/* Značenie v oboch okrajoch pásma. Sekcia je `relative`, ale zámerne
+          NIE `overflow-hidden`: skrytý pretok by z nej urobil scroll kontajner
+          a zabil `sticky` na kartách. Pásy sú aj tak celé vnútri okna. */}
+      <Krajnica cielRef={sekciaRef} />
+
       <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding-x)]">
         <Reveal>
           <MonoStitok tmava>Technológie</MonoStitok>

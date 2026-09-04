@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "project": {
+    "name": "cestne-prvky",
+    "productType": null,
+    "stack": [
+      "react",
+      "shadcn",
+      "tailwind-v4",
+      "vite"
+    ]
+  },
+  "sources": {
+    "tokens": [],
+    "components": [
+      "src/components/ui"
+    ],
+    "assets": [
+      "public/assets"
+    ],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "unknown",
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "unknown"
+  },
+  "components": {
+    "installed": [
+      "accordion",
+      "alert",
+      "alert-dialog",
+      "avatar",
+      "badge",
+      "breadcrumb",
+      "button",
+      "card",
+      "carousel",
+      "checkbox",
+      "command",
+      "dialog",
+      "drawer",
+      "dropdown-menu",
+      "form",
+      "input",
+      "label",
+      "navigation-menu",
+      "popover",
+      "progress",
+      "scroll-area",
+      "select",
+      "separator",
+      "sheet",
+      "skeleton",
+      "switch",
+      "table",
+      "tabs",
+      "textarea",
+      "tooltip"
+    ],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": [
+    {
+      "date": "2026-08-28",
+      "scope": "/o-firme",
+      "decision": "Subpage sections live in pages/<Page>/sections/, one band = one question; facts render as a hairline data sheet (mono label + display value), never as a grid of four counting-up big numbers.",
+      "motion": "Scroll-entry photo wipe (clip-path inset bottom -> 0) with per-column parallax, chained 110ms apart; reuses the house wipe from ObrazokSmerovy. No second sticky-scrub per page."
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "components.installed",
+      "source": "src/components/ui"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:shadcn",
+      "source": "components.json"
+    },
+    {
+      "fact": "project.stack:tailwind-v4",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:vite",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-08-28T16:56:42.627Z"
+}
