@@ -7,8 +7,7 @@ import Technologie from './sections/Technologie.jsx'
 import Pristup from './sections/Pristup.jsx'
 import Legislativa from './sections/Legislativa.jsx'
 import Materialy from './sections/Materialy.jsx'
-import Aktuality from './sections/Aktuality.jsx'
-import PasVideo from './PasVideo.jsx'
+import HlavickaVideo from './HlavickaVideo.jsx'
 
 const META = routaPodlaCesty('/o-firme')
 
@@ -28,16 +27,29 @@ const META = routaPodlaCesty('/o-firme')
  *  1. `Profil` — kto sme a čo osádzame (biela)
  *  2. `Technologie` — čím pracujeme, triptych s doloženými zábermi (tmavá)
  *  3. `Pristup` — čo z toho plynie, štyri tvrdenia a najsilnejší údaj (biela)
- *  4. `PasVideo` — celoplošný pás s videom, nádych medzi dvomi svetlými pásmami
- *  5. `Legislativa` — podľa čoho navrhujeme a kam po konzultáciu (biela)
- *  6. `Materialy` — z čoho staviame, materiálový list (tmavá)
- *  7. `Aktuality` — jediná položka z pôvodného webu (biela, malé odsadenie)
- *  8. `PasVyzvy` zo šablóny — obhliadka (svetlá, pred tmavou pätičkou)
+ *  4. `Legislativa` — podľa čoho navrhujeme a kam po konzultáciu (biela)
+ *  5. `Materialy` — z čoho staviame, materiálový list (tmavá)
+ *  6. `PasVyzvy` zo šablóny — obhliadka (svetlá, pred tmavou pätičkou)
  *
- * Rytmus: biela → tmavá → biela → [predel] → biela → tmavá → biela → biela.
- * Nikdy dve tmavé za sebou a posledné pásmo je svetlé (STANDARDY B5).
- * `PasVideo` je opticky tmavý, preto stojí medzi dvomi svetlými a nikdy
- * tesne pod tmavým pásmom.
+ * Rytmus: biela → tmavá → biela → biela → tmavá → biela. Nikdy dve tmavé za
+ * sebou a posledné pásmo je svetlé (STANDARDY B5).
+ *
+ * ## Video je pozadie hlavičky, nie pásmo uprostred (4. 9. 2026)
+ *
+ * Záber so strojom, ktorý nanáša vodorovné značenie, bol celoplošný pás medzi
+ * „Prístupom“ a „Legislatívou“. Nemal väzbu na text nad ním ani pod ním a
+ * pôsobil, akoby ho tam niekto hodil náhodne (výtka Petra). Ide preto hore
+ * ako pozadie hlavičky (`HlavickaVideo`), kde nahradil abstraktný
+ * `ZnacenieMotiv`: to isté video tam robí tú istú prácu — hovorí, čo firma
+ * robí — ale hneď pod titulom a bez rezu v strede stránky.
+ *
+ * ## Novinky odišli na vlastnú podstránku (4. 9. 2026)
+ *
+ * Siedme pásmo bol výpis jediného článku (`Aktuality`). Na stránku, ktorá
+ * odpovedá na otázku „kto ste a ako pracujete“, výpis článkov nepatrí a nikto
+ * ho tam nehľadal — pôvodný web mal `Novinky` ako samostatnú položku v menu.
+ * Obsah je odvtedy na `/novinky` (`src/pages/Novinky/`), dáta ostali na tom
+ * istom mieste (`FIRMA.aktuality`).
  *
  * ## Jedna mriežka na celú stránku
  *
@@ -66,6 +78,8 @@ export default function OFirme() {
   return (
     <Podstranka
       meta={META}
+      /* Pozadie hlavičky: záber značkovacieho stroja namiesto značkovacieho motívu. */
+      pozadie={<HlavickaVideo />}
       stitok="O firme"
       nadpis="Dopravné stavby od roku 2012"
       /* Výzva — text prvého kroku z `PROCES`, akcie sú obhliadka a galéria. */
@@ -88,10 +102,8 @@ export default function OFirme() {
       <Profil />
       <Technologie />
       <Pristup />
-      <PasVideo />
       <Legislativa />
       <Materialy />
-      <Aktuality />
     </Podstranka>
   )
 }

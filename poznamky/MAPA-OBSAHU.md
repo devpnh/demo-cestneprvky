@@ -27,9 +27,9 @@ rozpísané na vety a položky. Tabuľka má **75 riadkov** a **každý má rozh
 | 022 | `Žilina, Slovensko` | `/kontakt` · NAP + pätička → `global.json` → `nap.city`, `nap.country`. |
 | 023 | `E-mail: info@cestneprvky.sk` | `/kontakt` · NAP + pätička + `mailto:` → `global.json` → `nap.email`. |
 | 024 | `Telefón: +421 911 87 87 89` | `/kontakt` · NAP + pätička + `tel:` v hlavičke → `global.json` → `nap.phone`. |
-| 025 | `NOVINKY` | `/o-firme` · sekcia Aktuality → `firma.js` → `FIRMA.aktuality`. |
+| 025 | `NOVINKY` | `/novinky` · vlastná podstránka a 5. položka menu, ako na pôvodnom webe → `firma.js` → `FIRMA.aktuality`. |
 | 026 | `Recent Posts` | **Vypustené** — anglický nadpis widgetu zo šablóny MaisonCo, duplikuje `NOVINKY`. |
-| 027 | `Žilinská župa buduje bezpečnostné ostrovčeky, odborníci to vítajú` | `/o-firme` · Aktuality → `firma.js` → `FIRMA.aktuality[0].titulok`, `rok: 2021`. Telo článku nemáme, nevymýšľame ho. `url: null` (viď poznámku pod tabuľkou). |
+| 027 | `Žilinská župa buduje bezpečnostné ostrovčeky, odborníci to vítajú` | `/novinky` · výpis → `firma.js` → `FIRMA.aktuality[0].titulok`, `rok: 2021`. Telo článku nemáme, nevymýšľame ho. `url: null` (viď poznámku pod tabuľkou). |
 | 028 | `NAPÍŠTE NÁM` | `/kontakt` · formulár → existujúci `ZadanieForm`; nadpis v hlase klienta, tlačidlo nikdy „Odoslať". |
 
 **Poznámka k 027:** presnú URL článku podklady neobsahujú. `pipeline/structure.json`

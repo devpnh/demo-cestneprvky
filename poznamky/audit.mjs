@@ -322,11 +322,11 @@ skontroluj('S1', '—', () => {
 skontroluj('S2', '—', () => {
   if (!OBSAH) return { ok: false, text: 'routy sa nedali načítať', detail: obsahChyba }
   const chybajuce = SLUGY.filter((s) => !VSETKY_CESTY.includes(`/sluzby/${s}`))
-  const ok = VSETKY_CESTY.length === 14 && chybajuce.length === 0
+  const ok = VSETKY_CESTY.length === 15 && chybajuce.length === 0
   return {
     ok,
     text: `VSETKY_CESTY = ${VSETKY_CESTY.length} ciest, všetkých ${SLUGY.length} slugov má cestu`,
-    detail: `ciest ${VSETKY_CESTY.length} (má byť 14), slugov ${SLUGY.length}, bez cesty: ${chybajuce.join(', ') || '—'}`,
+    detail: `ciest ${VSETKY_CESTY.length} (má byť 15), slugov ${SLUGY.length}, bez cesty: ${chybajuce.join(', ') || '—'}`,
   }
 })
 
@@ -740,7 +740,7 @@ for (const cesta of CESTY) {
   skontroluj('NAVv5', cesta, () => {
     const { m } = M(cesta, '1440')
     if (!m.nav) return { ok: false, text: 'navigácia sa nenašla', detail: 'v <header> nie je <nav>' }
-    const pocetOk = m.nav.length === 4
+    const pocetOk = m.nav.length === 5
     const aktivne = m.nav.filter((a) => a.current === 'page')
     const jeSluzba = cesta === '/sluzby' || cesta.startsWith('/sluzby/')
     const ocakavanaAktivna = VSETKY_CESTY.includes(cesta) && cesta !== '/'
@@ -773,8 +773,8 @@ for (const cesta of CESTY) {
     }
     return {
       ok: pocetOk && aktivnaOk && zlyOdkaz.length === 0,
-      text: `hlavná navigácia 4 položky (${m.nav.map((a) => a.text).join(', ')}), aria-current sedí, pätička bez mŕtveho odkazu (${(m.patickaOdkazy || []).length} odkazov)`,
-      detail: `položiek ${m.nav.length} (má byť 4); ${aktivnaDetail}; mŕtve odkazy ${zlyOdkaz.length}: ${skratka(zlyOdkaz, 3)}`,
+      text: `hlavná navigácia 5 položiek (${m.nav.map((a) => a.text).join(', ')}), aria-current sedí, pätička bez mŕtveho odkazu (${(m.patickaOdkazy || []).length} odkazov)`,
+      detail: `položiek ${m.nav.length} (má byť 5); ${aktivnaDetail}; mŕtve odkazy ${zlyOdkaz.length}: ${skratka(zlyOdkaz, 3)}`,
     }
   })
 
@@ -1362,10 +1362,10 @@ process.exit(chyb ? 1 : 0)
  *   F1d  public    Každý `src` v src/content existuje a jeho skutočné rozmery sa zhodujú s `w`/`h` v dátach (rozdiel = budúci CLS).
  *   F1e  public    Žiadny súbor v public/assets nie je väčší než 250 kB; hero.mp4 a poster.jpg v limite.
  *   S1   dist      dist/404.html existuje a je bajt na bajt zhodné s dist/index.html (SPA fallback pre Pages).
- *   S2   content   VSETKY_CESTY má práve 14 ciest a každý slug zo SLUGY má svoju cestu.
+ *   S2   content   VSETKY_CESTY má práve 15 ciest a každý slug zo SLUGY má svoju cestu.
  *   S3   src       Žiadny súbor v src/pages ani src/components neimportuje zo src/sections (mŕtvy kód).
  *
- * NA KAŽDEJ CESTE (14 ciest z VSETKY_CESTY + CESTA_404_TEST; viewporty 1440×900, 768×1024, 390×844)
+ * NA KAŽDEJ CESTE (15 ciest z VSETKY_CESTY + CESTA_404_TEST; viewporty 1440×900, 768×1024, 390×844)
  *   G0    Nula `pageerror` a nula `console.error` na všetkých troch viewportoch.
  *   F4    `noindex`, `lang="sk"`, presne 1× `<h1>`, title ≤ 70, description ≤ 160 a neprázdna, každý `<img>` má neprázdny `alt`; jediná výnimka je vedome dekoratívna fotka pod `aria-hidden="true"` alebo `role="presentation"`, tá musí mať `alt=""`.
  *   F5    Každý `<img>` má atribúty `width` aj `height`; každý `<img>` mimo prvej obrazovky má `loading="lazy"`.

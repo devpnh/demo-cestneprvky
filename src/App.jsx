@@ -21,6 +21,7 @@ import Sluzby from './pages/Sluzby/index.jsx'
 import SluzbaDetail from './pages/Sluzby/Detail.jsx'
 import Realizacie from './pages/Realizacie/index.jsx'
 import OFirme from './pages/OFirme/index.jsx'
+import Novinky from './pages/Novinky/index.jsx'
 import Kontakt from './pages/Kontakt/index.jsx'
 import NotFound from './pages/NotFound.jsx'
 
@@ -51,6 +52,7 @@ function PrechodRoutov() {
         <Route path="/sluzby/:slug" element={<SluzbaDetail />} />
         <Route path="/realizacie" element={<Realizacie />} />
         <Route path="/o-firme" element={<OFirme />} />
+        <Route path="/novinky" element={<Novinky />} />
         <Route path="/kontakt" element={<Kontakt />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

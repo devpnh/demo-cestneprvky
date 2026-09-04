@@ -1,8 +1,10 @@
 /**
  * Mapa routov nového viacstránkového webu.
  *
- * Hlavná navigácia má maximálne 5 položiek (`vNavigacii: true`); Domov je
- * dostupný cez logo, CTA „Dohodnúť obhliadku a cenu“ otvára `ObhliadkaDialog`.
+ * Hlavná navigácia má maximálne 5 položiek (`vNavigacii: true`) a je plná:
+ * Služby, Realizácie, O firme, Novinky, Kontakt. Poradie je z pôvodného webu,
+ * kde Novinky stáli tiež tesne pred Kontaktom. Domov je dostupný cez logo,
+ * CTA „Dohodnúť obhliadku a cenu“ otvára `ObhliadkaDialog`.
  * `title` je do 70 znakov, `description` do 160 znakov (STANDARDY F4).
  * Stránky služieb dedia SEO z `SLUZBY[].seo`, aby texty žili na jednom mieste.
  */
@@ -47,6 +49,15 @@ export const ROUTY = sadzbaHlboko([
     title: 'O firme | Cestné prvky s.r.o., od roku 2012',
     description:
       'Cestné prvky s.r.o. zo Žiliny osádza prvky pozemných komunikácií od roku 2012. Prístup, technológie ColdPlastic a DEBUZ® a súlad s vyhláškami.',
+  },
+  {
+    path: '/novinky',
+    id: 'novinky',
+    label: 'Novinky',
+    vNavigacii: true,
+    title: 'Novinky | Cestné prvky s.r.o.',
+    description:
+      'Čo sa u nás udialo a kde o nás písali. Bezpečnostné ostrovčeky v Žilinskom kraji a služby, ktorými ich staviame.',
   },
   {
     path: '/kontakt',

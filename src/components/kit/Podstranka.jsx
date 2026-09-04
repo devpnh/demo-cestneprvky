@@ -14,6 +14,10 @@ import PasVyzvy from './PasVyzvy.jsx'
  * tmavé za sebou). Keďže `PasVyzvy` je tmavý, POSLEDNÉ pásmo v `children`
  * musí byť svetlé — to je jediné pravidlo, ktoré šablóna kladie navonok.
  *
+ * `pozadie` je nepovinné pozadie hlavičky; bez neho tam beží značkovací
+ * motív. Stránka ho posiela vtedy, keď má vlastný záber, ktorý o nej hovorí
+ * viac než abstraktné pruhy — vrstva si potom nesie aj svoj scrim.
+ *
  * `perex` a `fakty` sú nepovinné a hlavička bez nich stojí. Perex NEDEDÍ
  * `meta.description`: popis pre vyhľadávače je písaný pre výsledok hľadania
  * („Pozrite si rozsah prác…“, „Filtrujte podľa prvku a miesta.“) a nad
@@ -31,6 +35,7 @@ export default function Podstranka({
   perex,
   fakty = null,
   akcie = null,
+  pozadie = null,
   vyzva = null,
   children,
 }) {
@@ -44,6 +49,7 @@ export default function Podstranka({
         perex={perex}
         fakty={fakty}
         akcie={akcie}
+        pozadie={pozadie}
       />
 
       {children}

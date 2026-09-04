@@ -23,6 +23,20 @@ import { sadzba } from '../../lib/sadzba.js'
  * Farebná plocha ostáva tmavá; červená je len na eyebrow, linke a v jednej
  * čiare motívu, takže akcent drží pod 5 % viewportu (STANDARDY B3).
  *
+ * Stránka smie motív nahradiť vlastným pozadím (`pozadie`) — napríklad
+ * záberom alebo videom. Vlastné pozadie si nesie svoj scrim samo, lebo
+ * hlavička je stále tmavé pásmo s bielym textom a kontrast 4,5:1 musí platiť
+ * aj nad najsvetlejším pixelom záberu. Motív a záber sa nekombinujú: dve
+ * dekoratívne vrstvy pod jedným titulom sú o jednu viac.
+ *
+ * Nad záberom je **eyebrow biely, nie červený** — presne ako v hero Domova.
+ * `--color-accent-svetly` má nad plochou `--color-surface-2` 5,17:1, ale nad
+ * scrimom, cez ktorý presvitá biela čiara značenia, spadol na 390 px na
+ * 4,22:1 (namerané auditom B7, 4. 9. 2026), a 12 px text potrebuje 4,5:1.
+ * Scrim by musel byť taký hustý, že by zo záberu ostala tmavá plocha.
+ * Značková farba preto ostáva na akcentovej linke pod titulom, kde je to
+ * plocha, nie 12 px písmo.
+ *
  * Hlavička webu je nad týmto pásmom priehľadná s bielym textom — rieši to
  * `Header` podľa prvého `data-pasmo` v `<main>`. Preto si horné odsadenie
  * pod fixnú lištu drží toto pásmo samo.
@@ -34,13 +48,26 @@ import { sadzba } from '../../lib/sadzba.js'
  * (22ch): najdlhší názov služby má 51 znakov a pri 16ch a `--text-6xl` sa lámal
  * na štyri riadky, ktoré sa do pevnej výšky nezmestili.
  */
-export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fakty = null, akcie = null }) {
+export default function StranHlavicka({
+  stitok,
+  drobky = null,
+  nadpis,
+  perex,
+  fakty = null,
+  akcie = null,
+  pozadie = null,
+}) {
+  // Nad záberom je drobný text biely; nad plochou tmavého pásma značkovo červený.
+  const triedaStitku = pozadie
+    ? 'text-[rgba(255,255,255,0.86)]'
+    : 'text-[var(--color-accent-svetly)]'
+
   return (
     <section
       data-pasmo="tmava"
       className="relative isolate flex h-[var(--hlavicka-vyska)] items-end overflow-hidden bg-[var(--color-surface-2)] pb-[var(--section-padding-y-sm)] pt-[calc(72px+var(--section-padding-y-sm))]"
     >
-      <ZnacenieMotiv />
+      {pozadie ?? <ZnacenieMotiv />}
 
       <div className="relative w-full">
         <div className="mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)]">
@@ -48,7 +75,7 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
             {drobky ? (
               <nav
                 aria-label="Drobková navigácia"
-                className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-[var(--color-accent-svetly)]"
+                className={`font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.2em] ${triedaStitku}`}
               >
                 {drobky.map((d, i) => (
                   <span key={d.to || d.label}>
@@ -73,7 +100,9 @@ export default function StranHlavicka({ stitok, drobky = null, nadpis, perex, fa
                 ))}
               </nav>
             ) : stitok ? (
-              <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.2em] text-[var(--color-accent-svetly)]">
+              <p
+                className={`font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.2em] ${triedaStitku}`}
+              >
                 {sadzba(stitok)}
               </p>
             ) : null}

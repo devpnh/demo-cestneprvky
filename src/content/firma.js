@@ -119,16 +119,23 @@ export const FIRMA = sadzbaHlboko({
   ],
 
   /**
-   * Jediná položka Aktualít z pôvodného webu. Máme len titulok a rok.
+   * Jediná položka Noviniek z pôvodného webu. Máme len titulok a rok.
    * Presnú URL článku podklady neobsahujú (`pipeline/facts.json` ani
    * `structure.json` ju nemajú, na pôvodnom webe existuje len výpis
    * https://www.cestneprvky.sk/novinky/), preto `url: null`. Telo nevymýšľame.
+   *
+   * `sluzba` je NÁŠ krížový odkaz, nie tvrdenie o článku: titulok hovorí
+   * o bezpečnostných ostrovčekoch a `lepene-obrubniky` je jediná služba,
+   * ktorá ostrovčeky vyslovene rieši („Lepené ostrovčeky“, „dobudovanie
+   * cestných ostrovčekov“). Stránka `/novinky` z toho stavia pásmo
+   * súvisiacej služby; bez `sluzba` sa to pásmo nevykreslí.
    */
   aktuality: [
     {
       titulok: 'Žilinská župa buduje bezpečnostné ostrovčeky, odborníci to vítajú',
       rok: 2021,
       url: null,
+      sluzba: 'lepene-obrubniky',
       poznamka: '[DOPLNÍ KLIENT: odkaz na pôvodný článok a názov média, ktoré ho vydalo.]',
     },
   ],
