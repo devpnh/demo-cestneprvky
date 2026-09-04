@@ -65,7 +65,7 @@ export default function RealizacieVyber() {
         }
       />
 
-      <Stagger className="mt-14 grid grid-cols-1 gap-8 lg:mt-20 lg:grid-cols-12">
+      <Stagger className="mt-14 grid grid-cols-1 gap-6 sm:gap-8 lg:mt-20 lg:grid-cols-12">
         {VEDUCI ? (
           <StaggerItem className="lg:col-span-7">
             <Fotka
@@ -98,7 +98,7 @@ export default function RealizacieVyber() {
           </StaggerItem>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:col-span-5 lg:row-span-2 lg:row-start-1 lg:grid-cols-1">
+        <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:col-span-5 lg:row-span-2 lg:row-start-1 lg:grid-cols-1">
           {VEDLAJSIE.map((r) => (
             <StaggerItem key={r.id}>
               <Fotka

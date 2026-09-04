@@ -26,7 +26,7 @@ export default function Zaznam({ clanok, odkaz = null }) {
         <MonoStitok className="lg:col-span-2 lg:pt-[0.55rem]">{String(clanok.rok)}</MonoStitok>
 
         <div className="lg:col-span-10">
-          <h3 className="max-w-[26ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-medium leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
+          <h3 className="max-w-[26ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-medium sm:text-[length:var(--text-3xl)] leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
             {clanok.url ? (
               <a href={clanok.url} target="_blank" rel="noopener noreferrer" className="group">
                 {titulok}

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
 import { Sekcia, MonoStitok, Tlacidlo } from '../../../components/kit/index.js'
 import { Reveal, Stagger, StaggerItem, TextRotate } from '../../../components/primitives/index.js'
 import { useReducedMotion } from '../../../lib/useReducedMotion.js'
 import { SKUPINY, SLUZBY, sluzbyPodlaSkupiny } from '../../../content/sluzby.js'
 import KruhovyObjazd from '../../Sluzby/KruhovyObjazd.jsx'
 import { altFotky } from '../../Sluzby/fotky.js'
+import { RiadokSluzby } from '../../../components/kit/index.js'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -238,33 +237,7 @@ export default function SluzbyPrehlad() {
               <Stagger as="ul" className="mt-4 border-t border-[var(--color-border)]">
                 {sluzbyPodlaSkupiny(skupina.id).map((s) => (
                   <StaggerItem as="li" key={s.slug}>
-                    <Link
-                      to={`/sluzby/${s.slug}`}
-                      className="group flex items-center gap-5 border-b border-[var(--color-border)] py-4 transition-colors duration-[var(--duration-hover)] hover:border-[var(--color-accent)]"
-                    >
-                      <img
-                        src={`${BASE}assets/${s.dlazdica.src}`}
-                        width={s.dlazdica.w}
-                        height={s.dlazdica.h}
-                        alt={altFotky(s.dlazdica)}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-[64px] w-[96px] shrink-0 object-cover"
-                        style={{ borderRadius: 'var(--radius-sm)' }}
-                      />
-                      {/* Aj tu bez perexu, rovnako ako na desktope: Domov
-                          službu pomenúva, text stojí na jej stránke. Zoznam
-                          sa tým na 390 px skrátil o vyše tisíc pixelov. */}
-                      <div className="flex min-w-0 flex-1 items-center">
-                        <h3 className="font-[family-name:var(--font-display)] text-[length:var(--text-xl)] font-semibold leading-[1.15] tracking-[var(--tracking-tight)] text-[var(--color-text)]">
-                          {s.nazov}
-                        </h3>
-                      </div>
-                      <ArrowRight
-                        className="h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform duration-[var(--duration-hover)] group-hover:translate-x-[2px]"
-                        aria-hidden="true"
-                      />
-                    </Link>
+                    <RiadokSluzby sluzba={s} alt={altFotky(s.dlazdica)} />
                   </StaggerItem>
                 ))}
               </Stagger>

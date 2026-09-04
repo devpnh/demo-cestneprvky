@@ -1,4 +1,4 @@
-import { Sekcia, Tlacidlo } from '../../../components/kit/index.js'
+import { PasKariet, Sekcia, Tlacidlo } from '../../../components/kit/index.js'
 import { Reveal } from '../../../components/primitives/index.js'
 import { FIRMA } from '../../../content/firma.js'
 import HlavickaPasma from '../HlavickaPasma.jsx'
@@ -55,12 +55,15 @@ export default function Technologie() {
         sirkaNadpisu="max-w-[12ch]"
       />
 
-      <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3">
+      <PasKariet
+        triedaMriezky="sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-12 lg:grid-cols-3"
+        className="mt-14 lg:mt-20"
+      >
         {TECHNOLOGIE.map((t, i) => (
           /* `flex h-full flex-col` + `mt-auto` na popisku: mená postupov majú
              dva aj tri riadky a bez toho by mono riadky pod nimi stáli
              v troch rôznych výškach. Takto sedia na jednej účiarie. */
-          <div key={t.nazov} className="flex h-full flex-col">
+          <div key={t.nazov} className="flex h-full w-[78vw] shrink-0 snap-start flex-col sm:w-auto sm:shrink">
             <FotkaVyter
               src={t.foto.src}
               w={t.foto.w}
@@ -85,7 +88,7 @@ export default function Technologie() {
             </div>
           </div>
         ))}
-      </div>
+      </PasKariet>
 
       <Reveal className="mt-16 lg:mt-20">
         <Tlacidlo variant="tichy" tmava to="/realizacie">

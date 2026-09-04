@@ -850,3 +850,89 @@ monitory). `alt` popisuje, čo je na zábere, a netvrdí, že je to realizácia
 klienta — v katalógu `REALIZACIE` tento súbor nie je.
 
 Audit celého webu **254/254 OK, 0 ❌**.
+
+## 2026-09-04 · Mobilné kolo podľa `PROMPT-v6-mobil.md`
+
+**Zadanie Petra:** „sprav celu stranku mobilne optimalizovanu, footer nech sa
+zmesti na jednu stranku, cela stranka na mobile vyzera jak scroll velkych
+fotiek po jednej ktore su obrovske, rozpolozenie tych sluzieb a obrazkov
+vymysliet na ten mobil, uistit sa ci sa fotky a videa spravne prehravaju."
+
+Merané na 390 x 844, `deviceScaleFactor` 2, po dorolovaní celej stránky.
+Desktop 1440 kontrolovaný pixel-diffom voči záberom pred prvou zmenou.
+
+| Kontrola | pred | po |
+|---|---|---|
+| pätička | 1 399 px (1,66 obr.) | **715 px (0,85 obr.)** |
+| `/` | 13,1 obr. | **11,0** |
+| `/o-firme` | 11,8 obr. | **9,3** |
+| `/realizacie` | 10,1 obr. | **5,0** |
+| `/sluzby` | 9,6 obr. | **4,3** |
+| detail služby | 8,4 / 5,9 obr. | **6,0 / 3,6** |
+| `/kontakt`, `/novinky` | 5,2 / 3,5 obr. | **4,2 / 2,4** |
+| sekcie nad 1 700 px | 10 | **3** |
+| fotky nad 60 svh | 5 | **1** (hero Domova, povolená výnimka) |
+| predimenzované fotky | 9 → 24 (po zoznamoch) | **0** |
+| `<img>` bez `width`/`height` | 0 | 0 |
+| nenačítané fotky | 0 | 0 |
+| vodorovné pretečenie | 0 | 0 |
+
+**Iterácia 1 — pätička.** Zoznam deviatich služieb (~400 px v jednom stĺpci)
+je v DOM až od 640 px; na telefóne je `Služby` položkou navigácie hneď nad tým
+a výpis je jeden tap ďaleko. Meraná aj alternatíva „dva stĺpce mien“: ušetrila
+127 px, skrytie 400 px, a pod 844 px sa dalo dostať len s ním. Navigácia a NAP
+sú na mobile dvojstĺpcové, odsadenia mobilné. NAP sa neobetoval (A4).
+
+**Iterácia 2 — služby.** Nový `kit/RiadokSluzby.jsx`: miniatúra 96 x 64, krátke
+meno, jedna veta, šípka, výška riadku 97–101 px. `KartaSluzby` sa pod 640 px
+nerendruje ako karta, ale ako tento riadok — prepína to hook `useSirsieAko`,
+nie `sm:hidden`, lebo dva markupy nad sebou by telefón obidva stiahol aj
+s fotkami. Domov, `/sluzby` aj „Súvisiace služby“ majú odteraz ten istý útvar.
+Mriežka nebola alternatíva: mená v polovičnej šírke majú štyri riadky.
+
+**Iterácia 3 — triptychy.** Nový `kit/PasKariet.jsx`: pod 640 px vodorovný pás
+so `scroll-snap`, od 640 px pôvodná mriežka. Karta 78 vw, `touch-action: pan-y`,
+bleed cez záporné okraje. **Nález:** bez `scroll-padding-inline` zarovná
+`snap-start` prvú kartu na hranu okna a nie na os kontajnera — pás sa sám
+odroluje o šírku odsadenia (namerané: karta na x = 0 namiesto x = 20).
+Sticky stoh na Domove ostal (je to jediný „wow“ stránky, E1), len karta má na
+mobile 52 svh namiesto 62 svh, takže je pod hranicou 60 svh.
+
+**Iterácia 4 — galérie.** `/realizacie` má na telefóne dva stĺpce namiesto
+jedného (6 075 px → 2 611 px za sekciu), zoznam miest tiež. Na Domove stoja
+dve štvorcové fotky vedľa seba namiesto pod sebou.
+
+**Iterácia 5 — médiá.** Nový priečinok `public/assets/240/` (deväť dlaždíc
+služieb, spolu 148 kB) a `srcSetPre(..., s240)`; miniatúra 96 px už neťahá
+originál 600 px. `SIZES_MRIEZKA` opravené z `100vw` na `50vw` pod 1024 px —
+po prechode na dva stĺpce by inak pýtalo dvojnásobne veľký zdroj (najčastejšia
+chyba pri `srcset`). **Videá overené, nie predpokladané:** na 1440 px majú obe
+`readyState` 4, `paused: false`, `currentTime` 3,2 s a `muted`/`loop`/
+`playsInline`/`poster` sú nastavené; na 390 px sa `<video>` nemontuje (C5)
+a poster je načítaný obrázok (960 px zdroj do 390 px slotu), nie čierna plocha.
+**Rozhodnutie o videu na mobile:** hero má 2 614 kB a značenie 2 758 kB, teda
+obe nad rozpočtom 1,5 MB, a C5 v `STANDARDY.md` hovorí „video len ≥ 1024 px“.
+Poster ostáva; keď vznikne kratšia slučka pod 1,5 MB, dá sa to prehodnotiť.
+
+**Iterácia 6 — typografia a rytmus.** Telo textu na mobile nikde pod 16 px
+(perex v riadku služby a veta v pätičke boli 14 px), žiadny nadpis nad tri
+riadky na 390 px (meno postupu v stohu malo päť, titulok novinky štyri).
+`--section-padding-y` je pod 640 px 64 px namiesto 80 px a
+`--hlavicka-vyska` na telefóne 28 rem namiesto 34 rem — hlavička podstránky
+zaberala 64 % obrazovky; najdlhší titul má aj tak štyri riadky a vzduch pod
+lištou.
+
+**Čo ostalo nad 1 700 px a prečo** (3 sekcie z 25): sticky stoh na Domove
+2 008 px — kratší by zabil scrub, ktorý je jediným pohybovým prvkom stránky;
+galéria realizácií 2 611 px — je to dvanásť dlaždíc v dvoch stĺpcoch, filtre
+a mapa miest, ďalšie skracovanie by znamenalo schovať obsah za tap; formulár
+na `/kontakt` 1 845 px — päť polí so 16 px písmom sa kratšie neurobí (D3).
+Cieľ „≤ 9 obrazoviek“ na Domove sa nedosiahol (11,0): zvyšná výška sú textové
+pásma, nie fotky, a ich skracovanie je rozhodnutie o obsahu, nie o rozložení.
+
+**Desktop is sacred (D4).** Pixel-diff 1440 px, 8 strán, pred vs. po: sedem
+strán bajt na bajt zhodných, Domov 95 225 px (0,76 %) — to je šum animovaného
+`GradientMesh` v pätičke, overený dvomi zábermi toho istého buildu. Zmeny sú
+všetky v `sm:`/`max-width: 639px` vetvách.
+
+Audit celého webu po zmenách: **269/269 OK, 0 ❌** (17 ciest).

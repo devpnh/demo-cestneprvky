@@ -3,16 +3,23 @@ const BASE = import.meta.env.BASE_URL
 /**
  * Jedno pravidlo pre responzívne fotografie.
  *
- * V `public/assets/480/` a `public/assets/960/` sú zmenšené varianty s tými
- * istými názvami súborov (generované, needitujú sa ručne). Bez nich sťahovala
+ * V `public/assets/240/`, `480/` a `960/` sú zmenšené varianty s tými istými
+ * názvami súborov (generované, needitujú sa ručne). Bez nich sťahovala
  * galéria na mobile fotky v 1 200 až 1 600 px do 350 px slotu: 1,67 MB na
  * stránku a LCP 5,2 s, hoci LCP prvkom je nadpis — obrázky mu brali pásmo.
  *
- * Variant sa ponúka len vtedy, keď je originál naozaj väčší; menšie fotky
- * (600×390 dlaždice z pôvodného webu) žiadny zmenšený súbor nemajú.
+ * Priečinok `240/` pribudol 4. 9. 2026 pre **miniatúry v zoznamoch služieb**:
+ * riadok má obrázok 96 px široký, takže aj na displeji s trojnásobnou hustotou
+ * stačí 288 px. Dovtedy tam išiel originál 600 px — deväť takých fotiek je
+ * pol megabajtu za miniatúry, ktoré majú spolu 148 kB.
+ *
+ * Variant sa ponúka len vtedy, keď je originál naozaj väčší; `240/` majú len
+ * tie fotky, ktoré v miniatúre naozaj stoja (deväť dlaždíc služieb), preto je
+ * za samostatným prepínačom.
  */
-export function srcSetPre(src, w, maxSirka = Infinity) {
+export function srcSetPre(src, w, maxSirka = Infinity, s240 = false) {
   return [
+    s240 && w > 240 ? `${BASE}assets/240/${src} 240w` : null,
     w > 480 ? `${BASE}assets/480/${src} 480w` : null,
     w > 960 && maxSirka >= 960 ? `${BASE}assets/960/${src} 960w` : null,
     w <= maxSirka ? `${BASE}assets/${src} ${w}w` : null,
@@ -30,8 +37,16 @@ export function srcSetPre(src, w, maxSirka = Infinity) {
  */
 export const MAX_MRIEZKA = 960
 
-/** Obrázok zaberá celú šírku stĺpca; stĺpce sú 1 / 2 / 3 podľa šírky okna. */
-export const SIZES_MRIEZKA = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+/**
+ * Obrázok zaberá celú šírku stĺpca; stĺpce sú 2 / 2 / 3 podľa šírky okna.
+ * Od 4. 9. 2026 je mriežka realizácií dvojstĺpcová aj na telefóne, takže
+ * `100vw` by pýtalo dvojnásobne veľký zdroj, než sa vykreslí — a nesúlad
+ * `sizes` s rozložením je najčastejšia chyba pri `srcset`.
+ */
+export const SIZES_MRIEZKA = '(min-width: 1024px) 33vw, 50vw'
+
+/** Miniatúra v riadku zoznamu služieb je vždy 96 px široká. */
+export const SIZES_MINIATURA = '96px'
 
 /** Lightbox zobrazuje fotku cez celé okno. */
 export const SIZES_PLNA = '100vw'

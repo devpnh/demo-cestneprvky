@@ -43,11 +43,17 @@ const dalsieFotografie = (n) => {
 }
 
 /**
- * Pravda o tom, či mriežka beží v jednom stĺpci (`grid-cols-1` do 639 px).
- * Dlaždice sa pod týmto bodom naozaj nemontujú, nie sú len skryté — inak by
- * sa fotky stiahli a stránka by ostala rovnako vysoká.
+ * Je pohľad úzky (do 639 px)? Rozhoduje o tom, či sa mriežka skráti na prvú
+ * dávku. Dlaždice nad ňou sa naozaj nemontujú, nie sú len skryté — inak by sa
+ * fotky stiahli a stránka by ostala rovnako vysoká.
+ *
+ * Do 4. 9. 2026 bola mriežka na telefóne **jednostĺpcová** a dvanásť dlaždíc
+ * 4:3 pod sebou merilo 6 075 px, teda 7,2 obrazovky jednej sekcie. Odvtedy sú
+ * na telefóne **dva stĺpce**: galéria je register, po ktorom sa oko preberá,
+ * detail ukazuje lightbox v plnom rozlíšení. Batchovanie ostáva — dvanásť
+ * dlaždíc v dvoch stĺpcoch je šesť riadkov a to je akurát.
  */
-function useJedenStlpec() {
+function useUzkyPohlad() {
   const [jeden, setJeden] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches,
   )
@@ -75,7 +81,7 @@ export default function Realizacie() {
   const dlazdice = useRef(new Map())
   const vratFokus = useRef(null)
 
-  const jedenStlpec = useJedenStlpec()
+  const uzkyPohlad = useUzkyPohlad()
   const [rozbalene, setRozbalene] = useState(false)
   const fokusPoRozbaleni = useRef(null)
 
@@ -103,7 +109,7 @@ export default function Realizacie() {
   // nerozbalí. `viditelne` je vždy PREFIX `filtrovane`, takže index dlaždice
   // je zároveň indexom do plného zoznamu — lightbox aj šípky v ňom prechádzajú
   // celú filtrovanú sadu, nielen prvú dávku.
-  const skratene = jedenStlpec && !rozbalene && filtrovane.length > PRVA_DAVKA
+  const skratene = uzkyPohlad && !rozbalene && filtrovane.length > PRVA_DAVKA
   const viditelne = skratene ? filtrovane.slice(0, PRVA_DAVKA) : filtrovane
 
   // Zmena filtra mení poradie aj obsah zoznamu, takže index otvoreného náhľadu
@@ -226,7 +232,7 @@ export default function Realizacie() {
            * ostáva k dispozícii na kliknutie — lightbox ho ukazuje
            * neorezaný a v plnom rozlíšení, mriežka je len register.
            */
-          <Stagger krok={45} className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          <Stagger krok={45} className="mt-10 grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3">
             {viditelne.map((r, i) => (
               <StaggerItem as="figure" key={r.id} className="min-w-0">
                 <button
@@ -255,7 +261,7 @@ export default function Realizacie() {
                 </button>
                 {/* Pevná výška popisku drží spodné hrany riadka na jednej linke
                     aj pri jedno- a dvojriadkovom názve prvku. */}
-                <figcaption className="mt-4 flex min-h-[3.5rem] flex-col border-t border-[var(--color-border)] pt-3">
+                <figcaption className="mt-3 flex min-h-[3rem] flex-col border-t border-[var(--color-border)] pt-3 sm:mt-4 sm:min-h-[3.5rem]">
                   <span className="line-clamp-1 font-[family-name:var(--font-body)] text-[length:var(--text-base)] font-medium leading-[var(--leading-normal)] text-[var(--color-text)]">
                     {r.prvok}
                   </span>

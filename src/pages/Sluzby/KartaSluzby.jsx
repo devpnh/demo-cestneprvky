@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { Fotka } from '../../components/kit/index.js'
+import { Fotka, RiadokSluzby } from '../../components/kit/index.js'
+import { useSirsieAko } from '../../lib/useSirsieAko.js'
 import { altFotky } from './fotky.js'
 
 /**
@@ -23,17 +24,30 @@ import { altFotky } from './fotky.js'
  *   (to je presne tvar, po ktorom stránka pôsobí ako vygenerovaná).
  * - `ram` — pôvodná orámovaná karta.
  *
+ * **Pod 640 px žiadna z týchto polôh neplatí a karta je `RiadokSluzby`** —
+ * miniatúra, meno, jedna veta, šípka. Karta má na telefóne fotku vysokú
+ * 233 px a s textom vyjde na ~600 px; deväť takých je 5 700 px scrollu, teda
+ * presne ten „scroll obrovských fotiek po jednej“, ktorý Peter vytkol
+ * (4. 9. 2026). Útvar je ten istý ako v zozname služieb na Domove, aby sa
+ * čitateľ učil jeden tvar, nie tri.
+ *
+ * Prepína sa to hookom, nie triedou `sm:hidden`: dva markupy nad sebou by
+ * telefón obidva stiahol aj s fotkami.
+ *
  * Celá karta je jeden `<Link>`: odkaz „Detail služby“ je preto `<span>`, nie
  * druhý odkaz — vnorený odkaz je neplatné HTML a čítačka by ho ohlásila
  * dvakrát. Hover prekreslí vlasovú linku do akcentu a posunie šípku o 2 px;
  * nič sa nezväčšuje a nikde nie je tieň (STANDARDY B2).
  */
 export default function KartaSluzby({ sluzba, variant = 'ram' }) {
+  const siroke = useSirsieAko(640)
   const d = sluzba.dlazdica
   const nosna = variant === 'nosna'
   const strucna = variant === 'strucna'
   const holy = variant === 'holy'
   const riadok = variant === 'riadok'
+
+  if (!siroke) return <RiadokSluzby sluzba={sluzba} alt={altFotky(d)} perex />
 
   if (riadok) {
     return (

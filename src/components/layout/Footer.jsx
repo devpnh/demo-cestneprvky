@@ -43,6 +43,23 @@ const ADRESA = 'Borová 3295/36, 010 01 Žilina, Slovensko'
  * pokračovanie predchádzajúceho tmavého bloku. Kontrola B5 to meria vrátane
  * pätičky.
  *
+ * ## Na telefóne sa pätička musí zmestiť na jednu obrazovku (4. 9. 2026)
+ *
+ * Na 390 x 844 merala 1 399 px, teda 1,66 obrazovky, a stála tak na každej
+ * z ôsmich strán. Najväčší blok bol **zoznam deviatich služieb** (~400 px
+ * v jednom stĺpci); ten je odteraz v DOM až od 640 px, kde už stojí v dvoch
+ * stĺpcoch a miesto na neho je. Na telefóne sa tým nič nestráca: `Služby` sú
+ * položkou hlavnej navigácie hneď nad tým a výpis všetkých deviatich je na
+ * `/sluzby` jeden tap ďaleko. Merané aj s alternatívou (dva stĺpce mien na
+ * mobile): tá ušetrila 127 px, skrytie 400 px, a pod 844 px sa dalo dostať
+ * len s ňou.
+ *
+ * Zvyšok je zhustenie bez straty obsahu: hlavná navigácia je na mobile
+ * v dvoch stĺpcoch (5 položiek = 3 riadky namiesto piatich), NAP takisto
+ * (adresa cez obe bunky, e-mail a telefón vedľa seba) a odsadenia sú
+ * mobilné, nie desktopové. **NAP sa nikdy neobetuje** — je to jediný kontakt
+ * na konci stránky (A4) a tapovacie výšky ostávajú 44 px (D2).
+ *
  * Nad stĺpcami nie je žiadna deliaca čiara (pokyn Petra, 27. 8. 2026):
  * pätičku od pásma nad ňou oddeľuje zmena farby plochy, a to je dosť —
  * červená prerušovaná čiara cez celú šírku k tomu pridávala druhý,
@@ -54,8 +71,8 @@ export default function Footer() {
       <GradientMesh />
       <ZnacenieMotiv krytie={0.85} />
 
-      <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-[var(--section-padding-y-sm)]">
-        <Stagger className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+      <div className="relative mx-auto max-w-[var(--container-max)] px-[var(--container-padding-x)] py-10 sm:py-[var(--section-padding-y-sm)]">
+        <Stagger className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-12 lg:gap-12">
           <StaggerItem className="lg:col-span-4">
             <img
               src={`${import.meta.env.BASE_URL}assets/92-logo-cestne-prvky-clean.png`}
@@ -65,7 +82,7 @@ export default function Footer() {
               loading="lazy"
               className="h-12 w-auto"
             />
-            <p className="mt-5 max-w-[40ch] font-[family-name:var(--font-body)] text-[length:var(--text-sm)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-70">
+            <p className="mt-5 max-w-[40ch] font-[family-name:var(--font-body)] text-[length:var(--text-base)] leading-[var(--leading-normal)] text-[var(--color-bg)] opacity-70 sm:text-[length:var(--text-sm)]">
               Značenie pre nevidiacich a slabozrakých, vodorovné dopravné značenie, lepené obrubníky a ďalšie prvky
               pozemných komunikácií.
             </p>
@@ -75,7 +92,7 @@ export default function Footer() {
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Navigácia
             </p>
-            <ul className="mt-3 flex flex-col">
+            <ul className="mt-3 grid grid-cols-2 sm:grid-cols-1">
               {NAV.map((item) => (
                 <li key={item.path}>
                   <Link
@@ -89,7 +106,7 @@ export default function Footer() {
             </ul>
           </StaggerItem>
 
-          <StaggerItem as="nav" aria-label="Služby" className="lg:col-span-5">
+          <StaggerItem as="nav" aria-label="Služby" className="hidden sm:block lg:col-span-5">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Služby
             </p>
@@ -108,8 +125,11 @@ export default function Footer() {
           </StaggerItem>
         </Stagger>
 
-        <Reveal className="mt-10 grid grid-cols-1 gap-6 border-t pt-8 sm:grid-cols-3" style={JEMNA_LINKA}>
-          <div>
+        <Reveal
+          className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t pt-7 sm:mt-10 sm:grid-cols-3 sm:gap-6 sm:pt-8"
+          style={JEMNA_LINKA}
+        >
+          <div className="col-span-2 sm:col-span-1">
             <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
               Adresa
             </p>
@@ -141,7 +161,7 @@ export default function Footer() {
           </div>
         </Reveal>
 
-        <div className="mt-8 border-t pt-6" style={JEMNA_LINKA}>
+        <div className="mt-7 border-t pt-5 sm:mt-8 sm:pt-6" style={JEMNA_LINKA}>
           <p className="font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)] opacity-60">
             Cestné prvky s.r.o., Žilina, od roku 2012
           </p>

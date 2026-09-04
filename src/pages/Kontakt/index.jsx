@@ -41,6 +41,13 @@ const MAPY_URL =
  * kontaktu nepatrí. Bez neho sa ľavý stĺpec zmestí k formuláru namiesto toho,
  * aby ho prerástol o dve tretiny obrazovky.
  *
+ * **Základné imanie, deň zápisu a konateľ odišli úplne** (pokyn Petra,
+ * 4. 9. 2026) — aj z dát, nie len z tohto zoznamu. Imanie sa na faktúru
+ * neuvádza a 5 000 EUR je zákonné minimum, takže ako jediné číslo v bloku
+ * hovorilo o firme presne to, čo hovoriť nemá; deň zápisu duplikoval „od roku
+ * 2012“ z pätičky a hlavičiek; meno konateľa je osobný údaj a kontakt je na
+ * firmu, nie na človeka. Zostávajú štyri riadky, ktoré naozaj idú na faktúru.
+ *
  * `REGISTER` je doslovný odpis z registra a cez `sadzbaHlboko` neprešiel,
  * preto ho tu ženieme cez `sadzba()`: „vložka č. 57757/L“ by inak nechala
  * skratku na konci riadka.
@@ -49,10 +56,7 @@ const REGISTROVE_UDAJE = [
   { label: 'Obchodné meno', hodnota: REGISTER.obchodneMeno },
   { label: 'IČO', hodnota: REGISTER.ico },
   { label: 'Právna forma', hodnota: REGISTER.pravnaForma },
-  { label: 'Základné imanie', hodnota: REGISTER.zakladneImanie },
   { label: 'Zápis', hodnota: REGISTER.zapis },
-  { label: 'Deň zápisu', hodnota: REGISTER.denZapisu },
-  { label: 'Konateľ', hodnota: REGISTER.konatel },
 ].map(({ label, hodnota }) => ({ label, hodnota: sadzba(hodnota) }))
 
 const SPOJENIE = [

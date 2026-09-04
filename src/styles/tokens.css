@@ -46,8 +46,14 @@
      majú všetky rovnaké pásmo bez ohľadu na dĺžku titulu (Peter, 28. 8.
      2026). Hodnota je pevná, nie clamp: dve podstránky vedľa seba v jednom
      okne musia mať hlavičku na milimeter rovnakú. Kroky sú tri, lebo na
-     390 px sa titul láme na viac riadkov než na 1440 px. */
-  --hlavicka-vyska: 34rem;
+     390 px sa titul láme na viac riadkov než na 1440 px.
+
+     Na telefóne je to 28 rem, nie 34: pri 544 px zaberala hlavička 64 %
+     obrazovky a obsah pod ňou sa začínal až pod druhým palcom. Najdlhší
+     titul („Odstránenie starého vodorovného dopravného značenia“) má na
+     390 px štyri riadky a aj s nimi ostáva pod fixnou lištou vzduch
+     (namerané 4. 9. 2026). Od 768 px sa nič nemení (D4). */
+  --hlavicka-vyska: 28rem;
 
   /* Radius — ostrý základ */
   --radius-sm: 2px;
@@ -91,6 +97,17 @@ h3 {
 ::selection {
   background-color: var(--color-accent);
   color: var(--color-on-accent);
+}
+
+/* Odsadenia pásiem na telefóne. Na 390 px dáva `clamp(5rem, 9vw, 8.5rem)`
+   spodnú hranicu 80 px, takže sedem pásiem Domova nesie 1 120 px samého
+   vzduchu. Na mobile je to 64 px a 40 px: rytmus ostáva, stránka je o dve
+   tretiny obrazovky kratšia. Od 640 px platia pôvodné hodnoty (D4). */
+@media (max-width: 639px) {
+  :root {
+    --section-padding-y: 4rem;
+    --section-padding-y-sm: 2.5rem;
+  }
 }
 
 /* Kroky výšky hlavičky podstránky. Breakpointy sú `md` a `lg` Tailwindu,

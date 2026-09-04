@@ -199,22 +199,27 @@ export const CISLA_FIRMY = [
  * Dátum narodenia konateľa register zverejňuje, na web ale nepatrí — je to
  * osobný údaj, ktorý na obchodnú prezentáciu nie je potrebný.
  *
+ * Meno konateľa tu z toho istého dôvodu tiež nie je (pokyn Petra,
+ * 4. 9. 2026): kontakt je na firmu, nie na človeka, a kto s kým hovorí, sa
+ * dohodne pri obhliadke. `konanie` je preto veta o funkcii, nie o osobe.
+ *
  * `obchodneMeno` je presné znenie z registra (s čiarkou pred `s.r.o.`).
  * Značka na webe píše „Cestné prvky s.r.o.“ bez čiarky; register sa preto
  * používa iba tam, kde ide o fakturačný údaj.
  *
  * DIČ ani IČ DPH tu nie sú: Obchodný register ani RPO ich nezverejňujú
  * a Finstat je za Cloudflare. Zostávajú na klientovi.
+ *
+ * Základné imanie (5 000 EUR) tu bolo do 4. 9. 2026 a odišlo na pokyn
+ * Petra — na faktúru sa neuvádza a je to zákonné minimum, takže o firme
+ * nehovorí nič, čo by mala hovoriť.
  */
 export const REGISTER = {
   obchodneMeno: 'Cestné prvky, s.r.o.',
   ico: '46 875 891',
   pravnaForma: 'Spoločnosť s ručením obmedzeným',
   zapis: 'Okresný súd Žilina, oddiel Sro, vložka č. 57757/L',
-  denZapisu: '10. 11. 2012',
-  konatel: 'Ján Lešňovský',
   konanie: 'V mene spoločnosti koná konateľ samostatne.',
-  zakladneImanie: '5 000 EUR',
 }
 
 // Dočasný alias, kým stránky prejdú z `partner` na `konzultacie`.

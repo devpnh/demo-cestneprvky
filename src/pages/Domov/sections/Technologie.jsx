@@ -139,7 +139,10 @@ function Karta({ krok, index, pocet, priebeh, reduced }) {
           aria-hidden="true"
           className="mb-6 h-[2px] w-14 bg-[var(--color-accent)] sm:w-20"
         />
-        <h3 className="max-w-[18ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-3xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)] lg:text-[length:var(--text-4xl)]">
+        {/* Na 390 px má najdlhšie meno postupu pri `text-3xl` päť riadkov;
+            pravidlo mobilného kola sú najviac tri (4. 9. 2026). Od 640 px
+            sa nič nemení. */}
+        <h3 className="max-w-[18ch] text-balance font-[family-name:var(--font-display)] text-[length:var(--text-2xl)] font-semibold leading-[var(--leading-tight)] tracking-[var(--tracking-tight)] text-[var(--color-bg)] sm:text-[length:var(--text-3xl)] lg:text-[length:var(--text-4xl)]">
           {krok.nazov}
         </h3>
         <p className="mt-4 font-[family-name:var(--font-mono)] text-[length:var(--text-xs)] uppercase tracking-[0.08em] text-[var(--color-bg)]">
@@ -149,8 +152,13 @@ function Karta({ krok, index, pocet, priebeh, reduced }) {
     </>
   )
 
+  // Na telefóne je karta nižšia než 60 svh (pravidlo mobilného kola,
+  // 4. 9. 2026): pri 62 svh mala 523 px, teda takmer celú obrazovku, a stoh
+  // troch kariet sa čítal ako tri celoobrazovkové fotky za sebou. Pri 52 svh
+  // (439 px) ostáva nad kartou vidieť, že je to stoh, a scrub má stále celý
+  // ťah prsta na krok. Od 640 px sa nič nemení (D4).
   const triedaKarty =
-    'relative h-[62svh] min-h-[380px] w-full overflow-hidden bg-[var(--color-accent-2)] lg:h-[70svh]'
+    'relative h-[52svh] min-h-[340px] w-full overflow-hidden bg-[var(--color-accent-2)] sm:h-[62svh] sm:min-h-[380px] lg:h-[70svh]'
 
   // Pri reduced-motion sa `sticky` ani scrub nemontuje: karty sú obyčajný
   // stĺpec. Rovnaké markup, rovnaký obsah — len sa neskladajú.

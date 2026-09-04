@@ -43,7 +43,7 @@ export default function MapaRealizacii() {
 
         {/* Dva stĺpce aj na `lg`: pätnásť položiek pod sebou meria vyše 700 px,
             teda dvojnásobok mapy, a ľavý stĺpec by pod ňou zíval prázdny. */}
-        <ul className="grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2 lg:col-span-5">
+        <ul className="grid grid-cols-2 gap-x-6 gap-y-1 sm:gap-x-8 lg:col-span-5">
           {MIESTA_REALIZACII.map((m) => (
             <li
               key={m}
